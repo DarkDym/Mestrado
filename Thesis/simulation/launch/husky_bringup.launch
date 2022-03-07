@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="model" default="husky"/>
+    <arg name="init_pose" default="-x 0.00 -y 0.00 -Y 0.0"/>
+    <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
+    <arg name="realsense_enabled" default="$(optenv HUSKY_REALSENSE_ENABLED true)"/>
+    <arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS)"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro $(find husky_description)/urdf/husky.urdf.xacro robot_namespace:=$(arg model) tf_prefix:=$(arg model)_tf laser_enabled:=$(arg laser_enabled) realsense_enabled:=$(arg realsense_enabled) urdf_extras:=$(arg urdf_extras)"/>
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param /$(arg model)/robot_description -model $(arg model) $(arg init_pose)" output="screen"/>
+
+
+    <rosparam file="$(find thesis_simulation)/config/control.yaml" command="load"/>
+    <rosparam param="husky_velocity_controller/base_frame_id" subst_value="True">$(arg model)_tf/base_link</rosparam>
+    <!-- <param name="/$(arg model)/controller_spawner/husky_velocity_controller/base_frame_id" value="$(arg model)_tf/base_link"/> -->
+    <!-- <param name="husky_velocity_controller/base_frame_id" value="$(arg model)_tf/base_link"/> -->
+
+    <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="true" output="screen" args="husky_joint_publisher husky_velocity_controller">
+        <!-- <param name="tf_prefix" value="$(arg model)_tf"/> -->
+        <param name="base_frame_id" value="$(arg model)_tf/base_link"/>
+    </node>
+
+    <rosparam param="wheel_radius_multiplier" ns="husky_velocity_controller" subst_value="True">
+        $(optenv HUSKY_WHEEL_MULTIPLIER 1.0)
+    </rosparam>
+
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" output="screen">
+        <rosparam command="load" file="$(find thesis_simulation)/config/localization.yaml"/>
+        <!-- <param name="base_link_frame" value="$(arg model)_tf/base_link"/> -->
+        <!-- <rosparam param="base_link_frame" subst_value="True">$(arg model)_tf/base_link</rosparam> -->
+        <!-- <rosparam param="odom_frame" subst_value="True">$(arg model)_tf/odom</rosparam> -->
+    </node>
+    <!-- <param name="$(arg model)/ekf_localization/base_link_frame" value="$(arg model)_tf/base_link"/> -->
+    <!-- <param name="$(arg model)/ekf_localization/odom_frame" value="$(arg model)_tf/odom"/> -->
+    
+    
+      <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
+        <param name="link_name" value="$(arg model)_tf/base_link" />
+      </node>
+    
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+    
+      <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
+        <rosparam command="load" file="$(find husky_control)/config/twist_mux.yaml" />
+        <remap from="cmd_vel_out" to="husky_velocity_controller/cmd_vel"/>
+      </node>
+
+      <!-- <node pkg="fake_localization" type="fake_localization" name="fake_localization">
+        <param name="odom_frame_id" value="$(arg model)_tf/odom" />
+        <param name="delta_x" value="0" />
+        <param name="delta_y" value="0" />
+        <param name="delta_yaw" value="0" />
+        <param name="base_frame_id" value="$(arg model)_tf/base_link" />
+      </node> -->
+    
+    <!-- <node pkg="gmapping" type="slam_gmapping" name="gmapping" /> -->
+
+    <!-- <include file="$(find husky_gazebo)/launch/realsense.launch"/>
+    <param name="target_frame" value="$(arg model)_tf/base_link"/> -->
+
+    <!-- <remap from="/scan" to="/model/scan"/> -->
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/odom 100"/> -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 /base_link /$(arg model)_tf/base_link 100"/> -->
+
+    <!-- <remap from="base_link" to="$(arg model)_tf/base_link"/> -->
+    <remap from="odom" to="$(arg model)_tf/odom"/>
+
+    <include file="$(find thesis_simulation)/launch/move_base.launch" >
+        <arg name="model" value="$(arg model)"/>
+    </include>
+
+    <include file="$(find thesis_simulation)/launch/amcl.launch">
+        <arg name="model" value="$(arg model)"/>
+    </include>
+
+</launch>

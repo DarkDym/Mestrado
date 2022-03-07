@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/empty_world.world"/> -->
+    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse.world"/> -->
+    <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/>
+    <arg name="run_rviz" default="true"/>
+    <arg name="debug" default="false"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="verbose" default="false"/>
+    <arg name="extra_gazebo_args" default=""/>
+
+    <node if="$(arg run_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find thesis_simulation)/config/husky.rviz" required="true"/>
+
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find thesis_simulation)/worlds/tecnopucSim.yaml"/>
+
+    <group>
+        <include file="$(find gazebo_ros)/launch/empty_world.launch">
+            <arg name="world_name" value="$(arg world_path)" unless="$(eval world_path == 'empty')" />
+            <arg name="debug" value="$(arg debug)"/>
+            <arg name="gui" value="$(arg gui)"/>
+            <arg name="headless" value="$(arg headless)"/>
+            <arg name="paused" value="$(arg paused)"/>
+            <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+            <arg name="verbose" value="$(arg verbose)"/>
+            <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
+        </include>
+    </group>
+
+</launch>
