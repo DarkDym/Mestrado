@@ -22,6 +22,8 @@
         <include file="$(find thesis_simulation)/launch/husky_bringup.launch">
             <arg name="model" value="$(arg robot1_name)"/>
             <arg name="init_pose" value="-x -7.00 -y 0.00 -Y 0.0"/>
+            <arg name="ipx" value="-7.00"/>
+            <arg name="ipy" value="0.00"/>
         </include>
     </group>
 
@@ -30,7 +32,9 @@
         <param name="tf_prefix" value="$(arg robot2_name)_tf"/>    
         <include file="$(find thesis_simulation)/launch/husky_bringup.launch">
             <arg name="model" value="$(arg robot2_name)"/>
-            <arg name="init_pose" value="-x -0.00 -y 0.00 -Y 0.0"/>
+            <arg name="init_pose" value="-x 7.00 -y 0.00 -Y 0.0"/>
+            <arg name="ipx" value="7.00"/>
+            <arg name="ipy" value="0.00"/>
         </include>
     </group>
     
