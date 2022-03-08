@@ -3,6 +3,7 @@
 
     <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse.world"/> -->
     <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/>
+    <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
     <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
     <arg name="realsense_enabled" default="$(optenv HUSKY_REALSENSE_ENABLED false)"/>
@@ -14,6 +15,7 @@
         <arg name="world_path" value="$(arg world_path)"/>
         <arg name="run_rviz" value="$(arg run_rviz)"/>
         <arg name="verbose" value="true"/>
+        <arg name="navigating" value="$(arg navigating)"/>
     </include>
 
     <arg name="robot1_name" value="husky1"/>
@@ -24,6 +26,7 @@
             <arg name="init_pose" value="-x -7.00 -y 0.00 -Y 0.0"/>
             <arg name="ipx" value="-7.00"/>
             <arg name="ipy" value="0.00"/>
+            <arg name="navigating" value="$(arg navigating)"/>
         </include>
     </group>
 
@@ -35,6 +38,7 @@
             <arg name="init_pose" value="-x 7.00 -y 0.00 -Y 0.0"/>
             <arg name="ipx" value="7.00"/>
             <arg name="ipy" value="0.00"/>
+            <arg name="navigating" value="$(arg navigating)"/>
         </include>
     </group>
     

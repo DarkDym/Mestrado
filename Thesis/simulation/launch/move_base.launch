@@ -4,6 +4,7 @@
 
   <arg name="no_static_map" default="false"/>
   <arg name="model" default="husky"/>
+  <arg name="navigating" default="true"/>
 
   <arg name="base_global_planner" default="navfn/NavfnROS"/>
   <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
@@ -47,15 +48,23 @@
     <rosparam file="$(find thesis_simulation)/config/costmap_global_laser.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)"/>
       <param name="global_costmap/width" value="100.0" if="$(arg no_static_map)"/>
       <param name="global_costmap/height" value="100.0" if="$(arg no_static_map)"/>
-      <!-- <rosparam param="/move_base/global_costmap/global_frame" subst_value="True">$(arg model)_tf/odom</rosparam> -->
+      <!-- <rosparam param="global_costmap/global_frame" subst_value="True">$(arg model)_tf/odom</rosparam> -->
+      <!-- <rosparam param="global_costmap/global_frame" value="$(arg model)_tf/odom"/> -->
       <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
     <!-- </rosparam> -->
 
-    <remap from="map" to="/map"/>
+      <remap from="map" to="/map" if="$(arg navigating)"/>
+      <remap from="scan" to="scan" if="$(arg navigating)"/>
+      <remap from="odom" to="odometry/filtered" if="$(arg navigating)"/>
+
+      <remap from="map" to="map" unless="$(arg navigating)"/>  
+      <remap from="scan" to="scan" unless="$(arg navigating)"/>
+      <remap from="odom" to="odometry/filtered" unless="$(arg navigating)"/> 
+    
     <!-- <remap from="move_base_simple/goal" to="move_base/goal"/> -->
     <!-- <remap from="odom" to="$(arg model)_tf/odom"/> -->
     <!-- <remap from="base_link" to="$(arg model)_tf/base_link"/> -->
-    <remap from="scan" to="/scan"/> 
+    
   </node>
 
 </launch>
