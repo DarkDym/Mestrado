@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse.world"/> -->
+    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse_cells.world"/> -->
     <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/>
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>

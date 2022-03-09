@@ -116,10 +116,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <!-- Base footprint is on the ground under the robot -->
   <link name="base_footprint"/>
 
-  <joint name="base_footprint_joint" type="fixed">
+  <!-- <joint name="base_footprint_joint" type="fixed">
     <origin xyz="0 0 ${wheel_vertical_offset - wheel_radius}" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="base_footprint" />
+  </joint> -->
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 ${wheel_vertical_offset + wheel_radius}" rpy="0 0 0" />
+    <parent link="base_footprint" />
+    <child link="base_link" />
   </joint>
 
   <!-- Inertial link stores the robot's inertial information -->
@@ -275,6 +281,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
       <drift>0.0001 0.0001 0.0001</drift>
     </plugin>
   </gazebo>
+
+  <gazebo>
+		<plugin filename="libgazebo_ros_p3d.so" name="gazebo_ros_p3d">
+			<bodyName>base_footprint</bodyName>
+			<topicName>/ground_truth_odom</topicName>
+			<alwaysOn>true</alwaysOn>
+			<updateRate>100.0</updateRate>
+		</plugin>
+	</gazebo>
 
   <!-- Optional custom includes. -->
   <xacro:include filename="$(arg urdf_extras)" />
