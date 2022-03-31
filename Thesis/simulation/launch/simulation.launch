@@ -17,7 +17,7 @@
     <node if="$(arg run_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find thesis_simulation)/config/husky.rviz" required="true"/>
 
     <group if="$(arg navigating)">
-        <node pkg="map_server" type="map_server" name="map_server" args="$(find thesis_simulation)/worlds/tecnopucSim.yaml"/>    
+        <node pkg="map_server" type="map_server" name="map_server" args="$(find thesis_simulation)/worlds/warehouse_cells_joystick.yaml"/>    
     </group>
 
     <group>

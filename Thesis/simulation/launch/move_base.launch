@@ -20,11 +20,12 @@
 
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find thesis_simulation)/config/costmap_common.yaml" command="load" ns="global_costmap"/>
-      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
+      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      
     <!-- </rosparam> -->
 
     <rosparam file="$(find thesis_simulation)/config/costmap_common.yaml" command="load" ns="local_costmap"/>
-      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
+      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
       <!-- <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/base_link</rosparam> -->
     <!-- </rosparam> -->
 
@@ -40,7 +41,7 @@
 
     <!-- static global costmap, static map provides size -->
     <rosparam file="$(find thesis_simulation)/config/costmap_global_static.yaml" command="load" ns="global_costmap" unless="$(arg no_static_map)"/>
-      <param name="global_costmap/global_frame" value="map"/>
+      <param name="global_costmap/global_frame" value="$(arg model)_tf/map"/>
       <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
     <!-- </rosparam> -->
     

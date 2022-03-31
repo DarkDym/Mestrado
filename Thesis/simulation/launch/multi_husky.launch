@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse_cells.world"/> -->
-    <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/>
+    <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse_cells.world"/>
+    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/> -->
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
     <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
@@ -30,7 +30,7 @@
         </include>
     </group>
 
-    <arg name="robot2_name" value="husky2"/>
+    <!-- <arg name="robot2_name" value="husky2"/>
     <group ns="$(arg robot2_name)">
         <param name="tf_prefix" value="$(arg robot2_name)_tf"/>    
         <include file="$(find thesis_simulation)/launch/husky_bringup.launch">
@@ -40,7 +40,7 @@
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
         </include>
-    </group>
+    </group> -->
     
 
 </launch>

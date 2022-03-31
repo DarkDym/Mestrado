@@ -8,10 +8,10 @@
         <param name="robot_namespace" value="$(arg model)"/>
         <param name="robot_map_updates_topic" value="map_updates"/>
         <param name="merged_map_topic" value="/map"/>
-        <param name="world_frame" value="world"/>
+        <param name="world_frame" value="map"/>
         <param name="known_init_poses" value="false"/>
         <param name="merging_rate" value="0.0083333333"/>
-        <param name="discovery_rate" value="0.0083333333"/>
+        <param name="discovery_rate" value="0,0017"/>
         <param name="estimation_rate" value="0.1"/>
         <param name="estimation_confidence" value="1.0"/>
       </node>

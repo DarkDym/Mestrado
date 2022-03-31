@@ -352,27 +352,6 @@
             </friction>
           </surface>
         </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
         <collision name='box_pallet1'>
           <pose>-1.09806 6.31883 0.61958 0 -0 0</pose>
           <geometry>
@@ -1525,27 +1504,6 @@
           <geometry>
             <box>
               <size>2.14726 1.79432 2.08514</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -2730,27 +2688,6 @@
             </friction>
           </surface>
         </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
         <collision name='box_pallet1'>
           <pose>-1.09806 6.31883 0.61958 0 -0 0</pose>
           <geometry>
@@ -3903,27 +3840,6 @@
           <geometry>
             <box>
               <size>2.14726 1.79432 2.08514</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -5108,27 +5024,6 @@
             </friction>
           </surface>
         </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
         <collision name='box_pallet1'>
           <pose>-1.09806 6.31883 0.61958 0 -0 0</pose>
           <geometry>
@@ -6281,27 +6176,6 @@
           <geometry>
             <box>
               <size>2.14726 1.79432 2.08514</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <collision name='empty_pallet1'>
-          <pose>-5.29667 1.91644 0.1636 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>2.14726 1.79349 0.3272</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
