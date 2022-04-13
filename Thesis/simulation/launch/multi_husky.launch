@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse_cells.world"/>
+    <arg name="world_path" default="$(find thesis_simulation)/worlds/large_warehouse.world"/>
+    <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/warehouse_cells.world"/> -->
     <!-- <arg name="world_path" default="$(find thesis_simulation)/worlds/tecnopucSim.world"/> -->
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
@@ -23,7 +24,7 @@
         <param name="tf_prefix" value="$(arg robot1_name)_tf"/>    
         <include file="$(find thesis_simulation)/launch/husky_bringup.launch">
             <arg name="model" value="$(arg robot1_name)"/>
-            <arg name="init_pose" value="-x -7.00 -y 0.00 -Y 0.0"/>
+            <arg name="init_pose" value="-x 0.00 -y 0.00 -Y 0.0"/>
             <arg name="ipx" value="-7.00"/>
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
@@ -35,12 +36,12 @@
         <param name="tf_prefix" value="$(arg robot2_name)_tf"/>    
         <include file="$(find thesis_simulation)/launch/husky_bringup.launch">
             <arg name="model" value="$(arg robot2_name)"/>
-            <arg name="init_pose" value="-x 7.00 -y 0.00 -Y 0.0"/>
+            <arg name="init_pose" value="-x 0.00 -y 8.00 -Y 0.0"/>
             <arg name="ipx" value="7.00"/>
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
         </include>
-    </group> -->
-    
+    </group>
+     -->
 
 </launch>

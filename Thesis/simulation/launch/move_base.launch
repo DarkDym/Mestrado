@@ -21,12 +21,17 @@
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find thesis_simulation)/config/costmap_common.yaml" command="load" ns="global_costmap"/>
       <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      <param name="global_costmap/obstacles_camera/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points"/>
+      <param name="global_costmap/obstacles_camera/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points"/>
+      <param name="global_costmap/obstacles_laser/laser/topic" value="/$(arg model)/scan"/>
       
     <!-- </rosparam> -->
 
-    <rosparam file="$(find thesis_simulation)/config/costmap_common.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find thesis_simulation)/config/costmap_common_local.yaml" command="load" ns="local_costmap"/>
       <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
-      <!-- <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/base_link</rosparam> -->
+      <param name="local_costmap/obstacles_camera/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points"/>
+      <param name="local_costmap/obstacles_camera/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points"/>
+      <param name="local_costmap/obstacles_laser/laser/topic" value="/$(arg model)/scan"/>
     <!-- </rosparam> -->
 
     <!-- local costmap, needs size -->
@@ -56,10 +61,12 @@
 
       <remap from="map" to="/map" if="$(arg navigating)"/>
       <remap from="scan" to="scan" if="$(arg navigating)"/>
+      <!-- <remap from="camera" to="realsense/depth/color/points" if="$(arg navigating)"/> -->
       <remap from="odom" to="odometry/filtered" if="$(arg navigating)"/>
 
       <remap from="map" to="map" unless="$(arg navigating)"/>  
       <remap from="scan" to="scan" unless="$(arg navigating)"/>
+      <!-- <remap from="camera" to="realsense/depth/color/points" unless="$(arg navigating)"/> -->
       <remap from="odom" to="odometry/filtered" unless="$(arg navigating)"/> 
     
     <!-- <remap from="move_base_simple/goal" to="move_base/goal"/> -->
