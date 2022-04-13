@@ -267,7 +267,7 @@ tf2_ros
 tf2_sensor_msgs
 tf_conversions
 theora_image_transport
-thesis_simulation
+dissertation_simulation
 topic_tools
 track_odometry
 trajectory_msgs

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(thesis_simulation)
+project(dissertation_simulation)
 
 find_package(catkin REQUIRED
     gazebo_ros
