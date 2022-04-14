@@ -104,9 +104,7 @@
   
     <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/> -->
 
-    <!-- <include file="$(find dissertation_simulation)/launch/map_merge.launch" unless="$(arg navigating)">
-      <arg name="model" value="$(arg model)"/>
-    </include> -->
+    
 
     <include file="$(find dissertation_simulation)/launch/continuous_detection.launch">
       <arg name="model" value="$(arg model)"/>

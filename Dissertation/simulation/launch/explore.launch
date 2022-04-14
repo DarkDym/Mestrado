@@ -3,7 +3,7 @@
 
     <arg name="model" default="husky"/>
     
-    <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+    <node pkg="explore_lite" type="explore" respawn="false" name="explore">
         <param name="robot_base_frame" value="base_footprint"/>
         <param name="costmap_topic" value="/$(arg model)/map"/>
         <!-- <param name="costmap_updates_topic" value="/$(arg model)/move_base/global_costmap/costmap_updates"/> -->

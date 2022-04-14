@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="world_path" default="$(find dissertation_simulation)/worlds/large_warehouse.world"/>
-    <!-- <arg name="world_path" default="$(find dissertation_simulation)/worlds/warehouse_cells.world"/> -->
+    <!-- <arg name="world_path" default="$(find dissertation_simulation)/worlds/large_warehouse.world"/> -->
+    <arg name="world_path" default="$(find dissertation_simulation)/worlds"/>
     <!-- <arg name="world_path" default="$(find dissertation_simulation)/worlds/tecnopucSim.world"/> -->
+    <arg name="world_name" default="empty_world"/>
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
     <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
@@ -13,10 +14,14 @@
     <!-- <param name="robot_description" command="$(find xacro)/xacro $(find husky_description)/urdf/husky.urdf.xacro laser_enabled:=$(arg laser_enabled) realsense_enabled:=$(arg realsense_enabled) urdf_extras:=$(arg urdf_extras)"/> -->
 
     <include file="$(find dissertation_simulation)/launch/simulation.launch">
-        <arg name="world_path" value="$(arg world_path)"/>
+        <arg name="world_path" value="$(arg world_path)/$(arg world_name).world"/>
         <arg name="run_rviz" value="$(arg run_rviz)"/>
         <arg name="verbose" value="true"/>
         <arg name="navigating" value="$(arg navigating)"/>
+    </include>
+
+    <include file="$(find dissertation_simulation)/launch/map_merge.launch" unless="$(arg navigating)">
+      <arg name="model" value="husky"/>
     </include>
 
     <arg name="robot1_name" value="husky1"/>
@@ -31,17 +36,17 @@
         </include>
     </group>
 
-    <!-- <arg name="robot2_name" value="husky2"/>
+    <arg name="robot2_name" value="husky2"/>
     <group ns="$(arg robot2_name)">
         <param name="tf_prefix" value="$(arg robot2_name)_tf"/>    
         <include file="$(find dissertation_simulation)/launch/husky_bringup.launch">
             <arg name="model" value="$(arg robot2_name)"/>
-            <arg name="init_pose" value="-x 0.00 -y 8.00 -Y 0.0"/>
+            <arg name="init_pose" value="-x 20.00 -y -15.00 -Y 0.0"/>
             <arg name="ipx" value="7.00"/>
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
         </include>
     </group>
-     -->
+    
 
 </launch>

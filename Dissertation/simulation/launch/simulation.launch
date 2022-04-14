@@ -10,7 +10,7 @@
     <arg name="headless" default="false"/>
     <arg name="paused" default="false"/>
     <arg name="use_sim_time" default="true"/>
-    <arg name="verbose" default="false"/>
+    <arg name="verbose" default="true"/>
     <arg name="extra_gazebo_args" default=""/>
     <arg name="navigating" default="true"/>
 
