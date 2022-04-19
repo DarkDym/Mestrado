@@ -58,7 +58,7 @@
     <!-- </rosparam> -->
     
     <!-- global costmap with laser, for odom_navigation_demo -->
-    <rosparam file="$(find dissertation_simulation)/config/gloabal_costmap.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)"/>
+    <rosparam file="$(find dissertation_simulation)/config/global_costmap.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)"/>
       <param name="global_costmap/width" value="100.0" if="$(arg no_static_map)"/>
       <param name="global_costmap/height" value="100.0" if="$(arg no_static_map)"/>
       <!-- <rosparam param="global_costmap/global_frame" subst_value="True">$(arg model)_tf/odom</rosparam> -->
