@@ -5,6 +5,7 @@ plugins:
   - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
   - {name: inflation,                 type: "costmap_2d::InflationLayer"}
   - {name: obstacles_camera,          type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+  # - {name: obstacles_camera,          type: "costmap_2d::VoxelLayer"}
   
 
 # obstacles_camera:

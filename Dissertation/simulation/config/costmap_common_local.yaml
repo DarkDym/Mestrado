@@ -11,15 +11,10 @@ resolution: 0.05
 obstacle_range: 5.5
 raytrace_range: 6.0
 
-# plugins:
-#   - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
-#   - {name: obstacles_camera,          type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
-#   - {name: inflation,                 type: "costmap_2d::InflationLayer"}
-
 obstacles_camera:
     enabled: true
     voxel_decay: 1.5
-    decay_model: -1
+    decay_model: 0
     voxel_size: 0.1
     track_unknown_space: true
     max_obstacle_height: 3.0

@@ -5,4 +5,5 @@ track_unknown_space: true
 plugins:
   - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
   - {name: obstacles_camera,          type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+  # - {name: obstacles_camera,          type: "costmap_2d::VoxelLayer"}
   - {name: inflation,                 type: "costmap_2d::InflationLayer"}
