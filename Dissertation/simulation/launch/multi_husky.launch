@@ -33,6 +33,7 @@
             <arg name="ipx" value="-7.00"/>
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
+            <arg name="id_cont" value="0"/>
         </include>
     </group>
 
@@ -45,6 +46,7 @@
             <arg name="ipx" value="7.00"/>
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
+            <arg name="id_cont" value="1"/>
         </include>
     </group>
     

@@ -62,6 +62,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 
   <xacro:arg name="robot_namespace" default="$(optenv ROBOT_NAMESPACE /)" />
   <xacro:arg name="tf_prefix" default="$(arg robot_namespace)_tf" />
+  <xacro:arg name="id_cont" default="0"/>
   <xacro:arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS empty.urdf)" />
   <xacro:arg name="cpr_urdf_extras" default="$(optenv CPR_URDF_EXTRAS empty.urdf)" />
 
@@ -233,6 +234,29 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     </joint>
     <xacro:intel_realsense_mount prefix="camera" topic="realsense" parent_link="realsense_mountpoint"/>
   </xacro:if>
+
+  <joint name="tag_joint" type="fixed">
+    <origin xyz="0 0 -0.2" rpy="$(arg realsense_rpy)" />
+    <parent link="$(arg realsense_mount)"/>
+    <child link="tag_link" />
+  </joint>
+  <link name="tag_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.32 0.32"/>
+      </geometry>
+      <material name="tag_3611_0000$(arg id_cont)"/>
+        <!-- <script>
+          <uri>file:/home/phi/alleff_ws/src/Mestrado/Dissertation/simulation/xacro/tag.material</uri>
+          <name>tag_3611_00000</name>
+        </script>
+      </material> -->
+    </visual>
+  </link> 
+  <gazebo reference="tag_link">
+    <material>tag_3611_0000$(arg id_cont)</material>
+  </gazebo> 
 
   <!--
     Add the 3d laser to the sensor arch if needed
