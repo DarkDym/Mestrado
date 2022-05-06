@@ -1,7 +1,7 @@
 global_frame: map
 robot_base_frame: base_footprint
 
-footprint: [[-0.5, -0.33], [-0.5, 0.33], [0.5, 0.33], [0.5, -0.33]]
+footprint: [[-0.5, -0.30], [-0.5, 0.30], [0.5, 0.30], [0.5, -0.30]]
 footprint_padding: 0.01
 
 obstacle_range: 5.5
@@ -10,7 +10,7 @@ raytrace_range: 6.0
 inflater_layer:
   enabled: true
   inflate_unknow: true
-  inflation_radius: 0.05
+  inflation_radius: 0.40
   cost_scaling_factor: 0.5
   layer: combined_layer
 

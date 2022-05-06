@@ -1,3 +1,12 @@
 # ignore all logs
 *.log
 .vscode/**
+Dissertation/.vscode/settings.json
+.gitignore
+Dissertation/.vscode/c_cpp_properties.json
+Dissertation/.vscode/browse.vc.db-wal
+Dissertation/.vscode/browse.vc.db-shm
+Dissertation/.vscode/browse.vc.db
+Dissertation/simulation/.vscode/settings.json
+Dissertation/simulation/.vscode/c_cpp_properties.json
+Dissertation/simulation/.vscode/browse.vc.db

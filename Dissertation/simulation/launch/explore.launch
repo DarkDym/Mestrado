@@ -5,8 +5,8 @@
     
     <node pkg="explore_lite" type="explore" respawn="false" name="explore">
         <param name="robot_base_frame" value="base_footprint"/>
-        <param name="costmap_topic" value="/$(arg model)/map"/>
-        <!-- <param name="costmap_updates_topic" value="/$(arg model)/move_base/global_costmap/costmap_updates"/> -->
+        <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
+        <param name="costmap_updates_topic" value="costmap_updates"/>
         <param name="visualize" value="true"/>
         <param name="planner_frequency" value="0.33"/>
         <param name="progress_timeout" value="30.0"/>

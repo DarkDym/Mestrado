@@ -47,13 +47,15 @@
       <!-- <rosparam param="local_costmap/width" subst_value="true">30.0</rosparam> -->
       <!-- <param name="local_costmap/height" value="15.0"/> -->
       <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/odom</rosparam>
+      
       <!-- <param name="local_costmap/global_frame" value="$(arg model)_tf/odom"/> -->
       <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
     <!-- </rosparam> -->
 
     <!-- static global costmap, static map provides size -->
     <rosparam file="$(find dissertation_simulation)/config/global_costmap.yaml" command="load" ns="global_costmap" unless="$(arg no_static_map)"/>
-      <param name="global_costmap/global_frame" value="$(arg model)_tf/map"/>
+      <!-- <param name="global_costmap/global_frame" value="$(arg model)_tf/map"/> -->
+      <rosparam param="global_costmap/global_frame" subst_value="true">$(arg model)_tf/map</rosparam>
       <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
     <!-- </rosparam> -->
     
@@ -73,6 +75,7 @@
       <param name="global_costmap/voxel_layer/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
       <param name="global_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
       <remap from="odom" to="odometry/filtered" if="$(arg navigating)"/>
+      <param name="local_costmap/obstacle_layer/camera_sensor/topic" value="/$(arg model)/realsense/depth/color/points"/>
 
       <remap from="map" to="map" unless="$(arg navigating)"/>  
       <remap from="scan" to="scan" unless="$(arg navigating)"/>
@@ -83,7 +86,7 @@
       <param name="global_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" unless="$(arg navigating)"/>
       <remap from="odom" to="odometry/filtered" unless="$(arg navigating)"/> 
     
-    <!-- <remap from="move_base_simple/goal" to="move_base/goal"/> -->
+    <!-- <remap from="move_base/local_costmap/costmap_updates" to="costmap_updates"/> -->
     <!-- <remap from="odom" to="$(arg model)_tf/odom"/> -->
     <!-- <remap from="base_link" to="$(arg model)_tf/base_link"/> -->
     
