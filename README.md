@@ -7,3 +7,4 @@ Repository for archives and links to master research.
 - [Dataset-of-Gazebo-Worlds-Models-and-Maps](https://github.com/mlherd/Dataset-of-Gazebo-Worlds-Models-and-Maps) |  
 - [ROBOTICS EVALUATION TOOLKITS](https://github.com/wh200720041/warehouse_simulation_toolkit) | 
 - [Gazebo models and worlds collection](https://github.com/chaolmu/gazebo_models_worlds_collection) | 
+- [AprilTag Imgs](https://github.com/AprilRobotics/apriltag-imgs) | Repositório com todas as famílias de tags já geradas
