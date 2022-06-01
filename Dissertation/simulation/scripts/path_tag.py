@@ -1,12 +1,18 @@
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
+from move_base_msgs.msg import MoveBaseAction
+import actionlib
+
+ROBOT_NAMESPACE = "/husky1"
 
 class TagRead:
-    def __init__(self,robot_namespace):
+    def __init__(self):
         print("#####################################INITIALIZE SCRIPT#####################################")
-        rospy.init_node("istener_tag", anonymous=True)
-        rospy.Subscriber(str(robot_namespace)+"/tag_detections", AprilTagDetectionArray, self.tag_callback)
-        rospy.spin()
+        
+        self.movebase_client = actionlib.SimpleActionClient(ROBOT_NAMESPACE+"/move_base",MoveBaseAction)
+
+        rospy.Subscriber(ROBOT_NAMESPACE+"/tag_detections", AprilTagDetectionArray, self.tag_callback)
+        # rospy.spin()
         
     
     def tag_callback(self,tag_msg):
@@ -14,4 +20,7 @@ class TagRead:
         print(tag_msg.detections[0].id[0])
 
 if __name__ == '__main__':
-    tg_read = TagRead("/husky1")
+    
+    rospy.init_node("listener_tag")
+
+    tg_read = TagRead()

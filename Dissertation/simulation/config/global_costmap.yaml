@@ -5,9 +5,9 @@
   static_layer:
     map_topic: map
     subscribe_to_updates: true
-    lethal_cost_threshold: 60
+    lethal_cost_threshold: 80
   inflater_layer:
-    inflation_radius: 0.40
+    inflation_radius: 0.60
     cost_scaling_factor: 0.5
 
   plugins:

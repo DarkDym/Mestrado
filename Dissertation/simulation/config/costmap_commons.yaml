@@ -6,11 +6,12 @@ footprint_padding: 0.01
 
 obstacle_range: 5.5
 raytrace_range: 6.0
+always_send_full_costmap: true
 
 inflater_layer:
   enabled: true
   inflate_unknow: true
-  inflation_radius: 0.40
+  inflation_radius: 0.60
   cost_scaling_factor: 0.5
   layer: combined_layer
 

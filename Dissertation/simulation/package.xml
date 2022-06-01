@@ -6,11 +6,26 @@
     <maintainer email="alleffdymytry@gmail.com">Alleff Dymytry</maintainer>
     <license>TODO</license>
     <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>roscpp</build_depend>
+    <build_depend>rospy</build_depend>
+    <build_depend>apriltag_ros</build_depend>
+    <build_depend>el</build_depend>
+
 
     <depend>gazebo_ros</depend>
     <depend>gazebo_ros_control</depend>
     <depend>controller_manager</depend>
     <depend>velocity_controller</depend>
+
+    <build_export_depend>roscpp</build_export_depend>
+    <build_export_depend>rospy</build_export_depend>
+    <build_export_depend>apriltag_ros</build_export_depend>
+    <build_export_depend>el</build_export_depend>
+    <exec_depend>roscpp</exec_depend>
+    <exec_depend>rospy</exec_depend>
+    <exec_depend>apriltag_ros</exec_depend>
+    <exec_depend>el</exec_depend>
+
 
     <export>
         <gazebo_ros gazebo_model_path="${prefix}/models/"/>

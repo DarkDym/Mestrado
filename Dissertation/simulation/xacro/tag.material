@@ -11,3 +11,17 @@ material tag_3611_00000{
         }   
     }
 }
+
+material tag_3611_00001{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture tag36_11_00001_4ks.png
+                scale 1 1
+            }
+        }   
+    }
+}
