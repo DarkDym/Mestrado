@@ -8,6 +8,7 @@
 
   <arg name="base_global_planner" default="navfn/NavfnROS"/>
   <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
+  <arg name="odom_frame_id" default="$(arg model)_tf/odom"/>
   <!-- <arg name="base_local_planner" default="base_local_planner/TrajectoryPlannerROS"/> -->
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -46,7 +47,9 @@
       <!-- <param name="local_costmap/width" value="15.0"/> -->
       <!-- <rosparam param="local_costmap/width" subst_value="true">30.0</rosparam> -->
       <!-- <param name="local_costmap/height" value="15.0"/> -->
-      <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/odom</rosparam>
+      <!-- <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/odom</rosparam> -->
+      <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
+      <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
       
       <!-- <param name="local_costmap/global_frame" value="$(arg model)_tf/odom"/> -->
       <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
