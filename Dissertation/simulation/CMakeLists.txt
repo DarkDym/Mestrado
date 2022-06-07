@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(dissertation_simulation)
 
-set(CMAKE_MODULE_PATH /home/phi/m_explore_ws/src/m-explore/map_merge)
-
 find_package(catkin REQUIRED
     gazebo_ros
     gazebo_ros_control
@@ -11,9 +9,13 @@ find_package(catkin REQUIRED
     roscpp
     rospy
     apriltag_ros
+    mmm
+    el
 )
 
-find_package(mmm COMPONENTS)
+# set(CMAKE_PREFIX_PATH "/home/phi/m_explore_ws/devel/")
+# find_package(mmm REQUIRED)
+# find_package(el REQUIRED)
 
 catkin_package(
 	CATKIN_DEPENDS 
@@ -27,10 +29,6 @@ catkin_package(
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
-)
-
-include_directories(
-  /home/phi/m_explore_ws/devel
 )
 
 add_executable(tag_listener scripts/path_fromtag.cpp)

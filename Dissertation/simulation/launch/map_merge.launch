@@ -3,7 +3,7 @@
 
     <arg name="model" default="husky"/>
 
-    <node pkg="mmm" type="map_merge" respawn="false" name="map_merge" output="screen">
+    <node pkg="mmm" type="mmm" respawn="false" name="map_merge" output="screen">
         <param name="robot_map_topic" value="map"/>
         <param name="robot_namespace" value="$(arg model)"/>
         <!-- <param name="robot_map_updates_topic" value="/move_base/local_costmap/costmap_updates"/> -->
