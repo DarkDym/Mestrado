@@ -46,7 +46,7 @@
 
         </rosparam>
         <remap from="scan" to="scan"/>
-        <remap from="map" to="map"/>
+        <!-- <remap from="map" to="map"/> -->
         <param name="odom_frame" value="$(arg model)_tf/odom"/>
         <!-- <param name="base_frame" value="$(arg model)_tf/base_link"/> -->
         <param name="base_frame" value="$(arg model)_tf/base_footprint"/>

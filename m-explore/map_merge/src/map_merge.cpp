@@ -71,6 +71,7 @@ MapMerge::MapMerge() : subscriptions_size_(0)
   std::stringstream robot_model_stream;
   private_nh.getParam("robot_namespace",robot_model);
   ROS_DEBUG("ROBOT_NAMESPACE IN MAP MERGE: %s", robot_model.c_str());
+  ROS_DEBUG("ESTOU AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
 
   trigger_stop_subscriber_ = node_.subscribe<std_msgs::Int8>("/trigger_stop",1000,&MapMerge::trigger_callback,this);
 
@@ -102,6 +103,7 @@ void MapMerge::topicSubscribing()
     }
 
     robot_name = robotNameFromTopic(topic.name);
+    ROS_DEBUG("NOME DO ROBO QUE O MERGE ACHOU: %s", robot_name.c_str());
     if (robots_.count(robot_name)) {
       // we already know this robot
       continue;
@@ -330,6 +332,8 @@ bool MapMerge::isRobotMapTopic(const ros::master::TopicInfo& topic)
   /* we don't want to subcribe on published merged map */
   bool is_our_topic = merged_map_publisher_.getTopic() == topic.name;
 
+  // ROS_DEBUG("is_occupancy_grid: %d | is_our_topic: %d | contains_robot_namespace: %d | is_map_topic: %d", is_occupancy_grid,is_our_topic,contains_robot_namespace,is_map_topic);
+
   return is_occupancy_grid && !is_our_topic && contains_robot_namespace &&
          is_map_topic;
 }
@@ -370,9 +374,9 @@ void MapMerge::executemapMerging()
     //COLOCAR A VERIFICAÇÂO DO TÓPICO TRIGGER_STOP
     //SÓ É REALIZADO O MAPMERING SE O TÓPICO DO TRIGGER_STOP
     //ESTIVER ATIVO
-    if (trigger_flag.data == 1){
+    // if (trigger_flag.data == 1){
       mapMerging();
-    }
+    // }
     r.sleep();
   }
 }

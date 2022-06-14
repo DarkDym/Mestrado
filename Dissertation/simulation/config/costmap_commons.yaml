@@ -12,7 +12,7 @@ inflater_layer:
   enabled: true
   inflate_unknow: true
   inflation_radius: 0.40
-  cost_scaling_factor: 0.5
+  cost_scaling_factor: 0.3
   layer: combined_layer
 
 obstacles_layer:

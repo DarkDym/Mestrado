@@ -14,7 +14,7 @@
         <param name="orientation_scale" value="0.0"/>
         <param name="gain_scale" value="1.0"/>
         <param name="transform_tolerance" value="0.3"/>
-        <param name="min_frontier_size" value="0.75"/>
+        <param name="min_frontier_size" value="0.55"/>
         <param name="robot_namespace" value="$(arg model)"/>
         <!-- <remap from="move_base" to="/$(arg model)/move_base"/> -->
     </node>
