@@ -38,6 +38,7 @@
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
             <arg name="id_cont" value="0"/>
+            <arg name="port" value="3128"/>
         </include>
     </group>
 
@@ -55,6 +56,7 @@
             <arg name="ipy" value="0.00"/>
             <arg name="navigating" value="$(arg navigating)"/>
             <arg name="id_cont" value="1"/>
+            <arg name="port" value="3128"/>
         </include>
     </group>
     

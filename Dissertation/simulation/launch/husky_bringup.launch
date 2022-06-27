@@ -11,6 +11,7 @@
     <arg name="ipy" default="0.00"/>
     <arg name="navigating" default="true"/>
     <arg name="id_cont" default="0"/>
+    <arg name="port" default="1"/>
 
     <param name="robot_description" command="$(find xacro)/xacro $(find dissertation_simulation)/xacro/husky.urdf.xacro robot_namespace:=$(arg model) tf_prefix:=$(arg model)_tf id_cont:=$(arg id_cont) laser_enabled:=$(arg laser_enabled) realsense_enabled:=$(arg realsense_enabled) urdf_extras:=$(arg urdf_extras)"/>
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param /$(arg model)/robot_description -model $(arg model) $(arg init_pose)" output="screen"/>
@@ -110,5 +111,7 @@
     <include file="$(find dissertation_simulation)/launch/continuous_detection.launch">
       <arg name="model" value="$(arg model)"/>
     </include>
+
+    <node pkg="dissertation_simulation" type="client_move" name="client_move" args="$(arg port)"/>
 
 </launch>

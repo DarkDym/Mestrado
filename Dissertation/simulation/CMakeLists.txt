@@ -34,6 +34,11 @@ include_directories(
 add_executable(tag_listener scripts/path_fromtag.cpp)
 target_link_libraries(tag_listener ${catkin_LIBRARIES} )
 
+add_executable(map_server scripts/map_server_teste.cpp)
+target_link_libraries(map_server ${catkin_LIBRARIES})
+
+add_executable(client_move scripts/client_move.cpp)
+target_link_libraries(client_move ${catkin_LIBRARIES})
 
 # install roslaunch files
 install(DIRECTORY launch/
