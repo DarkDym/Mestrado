@@ -3,6 +3,6 @@
 #include "nav_msgs/OccupancyGrid.h"
 
 
-int main{
+int main(){
     return 0;
 }

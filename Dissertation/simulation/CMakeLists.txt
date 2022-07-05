@@ -40,6 +40,9 @@ target_link_libraries(map_server ${catkin_LIBRARIES})
 add_executable(client_move scripts/client_move.cpp)
 target_link_libraries(client_move ${catkin_LIBRARIES})
 
+add_executable(grid_map scripts/grid_map.cpp)
+target_link_libraries(grid_map ${catkin_LIBRARIES})
+
 # install roslaunch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
