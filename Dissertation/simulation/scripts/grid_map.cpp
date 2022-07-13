@@ -26,12 +26,13 @@ class GridMap{
 
 float robot_pose[3];
 vector<float> laser_reads;
+sensor_msgs::LaserScan laser_reads_;
 float map_resolution = 0.05;
-float map_origin_x = 500.00;
-float map_origin_y = 500.00;
-int map_height = 1000;
-int map_width = 1000;
-float map_grid[1000][1000];
+float map_origin_x = -100.00;
+float map_origin_y = -100.00;
+int map_height = 4000;
+int map_width = 4000;
+float map_grid[4000][4000];
 float angle_increase = 0.00436;
 
 nav_msgs::OccupancyGrid create_map(){
@@ -41,12 +42,12 @@ nav_msgs::OccupancyGrid create_map(){
     map.header.seq = 1;
     map.info.resolution = 0.05;
     geometry_msgs::Pose origin;
-    origin.position.x = -500;
-    origin.position.y = -500;
+    origin.position.x = -100.00;
+    origin.position.y = -100.00;
     origin.position.z = 0;
     map.info.origin = origin;
-    map.info.height = 1000;
-    map.info.width = 1000;
+    map.info.height = 4000;
+    map.info.width = 4000;
     std::vector<int8_t> m(map_height*map_width,-1);  
     cout << "REACH UNTIL HERE" << endl;
     copy(m.begin(), m.end(), back_inserter(map.data));
@@ -73,13 +74,7 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
 }
 
 void laserscan_callback(const sensor_msgs::LaserScan::ConstPtr& laserscan_msg){
-    for(int x = 0; x < laserscan_msg->ranges.size(); x++){
-        laser_reads.emplace_back(laserscan_msg->ranges[x]);
-        // cout << "LASER_READS: " << laser_reads[x] << " HUSKY_SCAN: " << laserscan_msg->ranges[x] << endl;
-        // if(laserscan_msg->ranges[x] == INFINITY){
-        //     cout << "TA FAZENDO O CALLBACK." << endl;
-        // }
-    }
+    laser_reads_ = *laserscan_msg;
 }
 
 void odom_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
@@ -92,7 +87,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
     q.w() = odom_msg->pose.pose.orientation.w;
     auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
     robot_pose[2] = euler[2];
-    cout << "YAW: " << euler[2] << endl;
+    // cout << "YAW: " << euler[2] << endl;
 }
 
 void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg){
@@ -109,11 +104,52 @@ void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amc
 }
 
 std::tuple<float,float> getLaserPosition(int index){
-    if (laser_reads[index] == INFINITY) return std::make_tuple(0,0);
+    if (laser_reads_.ranges[index] == INFINITY) return std::make_tuple(0,0);
 
-    float laser_x = (cos((index*angle_increase)+robot_pose[2])*laser_reads[index]);
-    float laser_y = (sin((index*angle_increase)+robot_pose[2])*laser_reads[index]);
+    float laser_x = (cos((index*angle_increase)+robot_pose[2])*laser_reads_.ranges[index]);
+    float laser_y = (sin((index*angle_increase)+robot_pose[2])*laser_reads_.ranges[index]);
     return std::make_tuple(laser_x,laser_y);
+}
+
+void himm_inc(float grid_map[][4000], int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_cell_y){
+    int delta_x, delta_y, precision, precision2, xy2, x, y, xf;
+    delta_x = laser_cell_x - robot_cell_x;
+    delta_y = laser_cell_y - robot_cell_y;
+    precision = 2 * delta_y - delta_x;
+    precision2 = 2 * delta_y;
+    xy2 = 2 * (delta_y - delta_x);
+
+    if (robot_cell_x > laser_cell_x) {
+        x = laser_cell_x;
+        y = laser_cell_y;
+        xf = robot_cell_x;
+    } else {
+        x = robot_cell_x;
+        y = robot_cell_y;
+        xf = laser_cell_x;
+    }
+
+    while(x < xf){
+        x++;
+        if (precision < 0) {
+            precision += precision2;
+        } else {
+            y++;
+            precision += xy2;
+        }
+        if (grid_map[x][y] < 0) {
+            grid_map[x][y] = 0;
+        } else {
+            grid_map[x][y] -= 7;
+        }
+        
+    }
+    if (grid_map[xf][y] > 100) {
+        grid_map[xf][y] = 100;
+    } else {
+        grid_map[xf][y] += 21;
+    }
+
 }
 
 nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
@@ -121,20 +157,78 @@ nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
     int cell_x, cell_y, laser_cell_x, laser_cell_y;
     float odom_laser_x, odom_laser_y;
     std::tie(cell_x, cell_y) = odom2cell(robot_pose[0],robot_pose[1]);
-    cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
-    if (cell_x >= 0 && cell_x < map_width && cell_y >= 0 && cell_y < map_height) {
-        map_grid[cell_x][cell_y] = 100;
+    // cout << "ROBOT_POSE_X: " << robot_pose[0] << " ROBOT_POSE_Y: " << robot_pose[1] << endl;
+    // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
+    int radius = 3;
+    for (int xi = cell_x - radius; xi < cell_x + radius; xi ++) {
+        for (int yi = cell_y - radius; yi < cell_y + radius; yi ++) {
+            if ((xi >= 0 && xi < map_width) && (yi >= 0 && yi < map_height)) {
+                map_grid[xi][yi] = 100;
+            }     
+        }
+    }
+    // if ((cell_x >= 0 && cell_x < map_width) && (cell_y >= 0 && cell_y < map_height)) {
+    //     map_grid[cell_x][cell_y] = 100;
+    // }
+    
+    cout << "QUANTIDADE DE LASERS: " << laser_reads_.ranges.size() << endl;
+    if (laser_reads_.ranges.size() > 0) {
+        // for (int i = 0; i < laser_reads_.ranges.size(); i++) {
+        //     std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(i);
+        //     cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+        //     std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+        //     cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+        //     if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+        //         // map_grid[laser_cell_x][laser_cell_y] = 100;
+        //         himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+        //     }
+        // }
+        std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(0);
+            cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+                // map_grid[laser_cell_x][laser_cell_y] = 100;
+                himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+            }
+
+            std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(180);
+            cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+                // map_grid[laser_cell_x][laser_cell_y] = 100;
+                himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+            }
+
+            std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(360);
+            cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+                // map_grid[laser_cell_x][laser_cell_y] = 100;
+                himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+            }
+
+            std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(540);
+            cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+                // map_grid[laser_cell_x][laser_cell_y] = 100;
+                himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+            }
+
+            std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(719);
+            cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
+                // map_grid[laser_cell_x][laser_cell_y] = 100;
+                himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
+            }
     }
     
-    // for (int i = 0; i < laser_reads.size(); i++) {
-    //     std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(i);
-    //     cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
-    //     std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
-    //     cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
-    //     if ((laser_cell_x >= 0 && laser_cell_y >= 0) && (laser_cell_x <= map_width && laser_cell_y <= map_height)) {
-    //         map_grid[laser_cell_x][laser_cell_y] = 100;
-    //     }
-    // }
     
     for(int x = 0; x < map_width; x++){
         int multi = x * map_width;
@@ -160,18 +254,20 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "occupancy_grid");
     ros::NodeHandle node;
 
-    nav_msgs::OccupancyGrid map = create_map();  
+    nav_msgs::OccupancyGrid map = create_map();
+    nav_msgs::OccupancyGrid map_out;
 
     ros::Subscriber laser_sub = node.subscribe<sensor_msgs::LaserScan>("/husky1/scan",10,laserscan_callback);
-    ros::Subscriber odom_sub = node.subscribe("/husky1/amcl_pose",1000,amcl_callback);
+    // ros::Subscriber odom_sub = node.subscribe("/husky1/amcl_pose",1000,amcl_callback);
+    ros::Subscriber odom_sub = node.subscribe("/husky1/odometry/filtered",1000,odom_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_out",10);
     
     // map_pub.publish(map);
     ros::Rate rate(10);
     while(ros::ok()){
-        map = update_map(map);
-        map_pub.publish(map);
+        map_out = update_map(map);
+        map_pub.publish(map_out);
         ros::spinOnce();
         rate.sleep();
     }

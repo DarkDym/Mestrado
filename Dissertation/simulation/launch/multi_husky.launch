@@ -42,7 +42,7 @@
         </include>
     </group>
 
-    <arg name="robot2_name" value="husky2"/>
+    <!-- <arg name="robot2_name" value="husky2"/>
     <group ns="$(arg robot2_name)">
         <param name="tf_prefix" value="$(arg robot2_name)_tf"/>    
         <param name="/$(arg robot2_name)/map_merge/init_pose_x" value="5.00"/>
@@ -59,6 +59,6 @@
             <arg name="port" value="3128"/>
         </include>
     </group>
-    
+     -->
 
 </launch>
