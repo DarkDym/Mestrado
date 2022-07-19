@@ -11,6 +11,8 @@ find_package(catkin REQUIRED
     apriltag_ros
     mmm
     el
+    darknet_ros
+    darknet_ros_msgs
 )
 
 # set(CMAKE_PREFIX_PATH "/home/phi/m_explore_ws/devel/")
@@ -24,6 +26,8 @@ catkin_package(
         apriltag_ros
         mmm
         el
+        darknet_ros
+        darknet_ros_msgs
 )
 
 include_directories(
@@ -42,6 +46,12 @@ target_link_libraries(client_move ${catkin_LIBRARIES})
 
 add_executable(grid_map scripts/grid_map.cpp)
 target_link_libraries(grid_map ${catkin_LIBRARIES})
+
+add_executable(patrol_move scripts/patrol.cpp)
+target_link_libraries(patrol_move ${catkin_LIBRARIES})
+
+add_executable(semantic scripts/semantic.cpp)
+target_link_libraries(semantic ${catkin_LIBRARIES})
 
 # install roslaunch files
 install(DIRECTORY launch/

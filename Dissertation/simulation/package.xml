@@ -11,6 +11,8 @@
     <build_depend>apriltag_ros</build_depend>
     <build_depend>el</build_depend>
     <build_depend>mmm</build_depend>
+    <build_depend>darknet_ros</build_depend>
+    <build_depend>darknet_ros_msgs</build_depend>
 
 
     <depend>gazebo_ros</depend>
@@ -23,11 +25,15 @@
     <build_export_depend>apriltag_ros</build_export_depend>
     <build_export_depend>el</build_export_depend>
     <build_export_depend>mmm</build_export_depend>
+    <build_export_depend>darknet_ros</build_export_depend>
+    <build_export_depend>darknet_ros_msgs</build_export_depend>
     <exec_depend>roscpp</exec_depend>
     <exec_depend>rospy</exec_depend>
     <exec_depend>apriltag_ros</exec_depend>
     <exec_depend>el</exec_depend>
     <exec_depend>mmm</exec_depend>
+    <exec_depend>darknet_ros</exec_depend>
+    <exec_depend>darknet_ros_msgs</exec_depend>
 
 
     <export>
