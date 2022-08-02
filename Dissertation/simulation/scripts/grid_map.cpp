@@ -220,10 +220,10 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
 }
 
 nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
-    cout << "ENTERING MAP UPDATE" << endl;
+    // cout << "ENTERING MAP UPDATE" << endl;
     int cell_x, cell_y, laser_cell_x, laser_cell_y;
     float odom_laser_x, odom_laser_y;
-    cout << "MAP INFO [" << map.info.width << "][" << map.info.height << "]" << endl;
+    // cout << "MAP INFO [" << map.info.width << "][" << map.info.height << "]" << endl;
     // int map_grid_[map.info.width][map.info.height];
     int map_width2 = map.info.width;
     int map_height2 = map.info.height;
@@ -238,8 +238,8 @@ nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
     // }
 
     std::tie(cell_x, cell_y) = odom2cell(robot_pose[0],robot_pose[1]);
-    cout << "ROBOT_POSE_X: " << robot_pose[0] << " ROBOT_POSE_Y: " << robot_pose[1] << endl;
-    cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
+    // cout << "ROBOT_POSE_X: " << robot_pose[0] << " ROBOT_POSE_Y: " << robot_pose[1] << endl;
+    // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
     
 
     // float robot_rad = remainder(robot_pose[2],2.0*M_PI);
@@ -288,8 +288,8 @@ nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
             // if (laser_reads_.ranges[0] != INFINITY) {
             //     laser_x = (cos(robot_rad)*laser_reads_.ranges[0]);int height, int width, " << odom_laser_y+robot_pose[1] << endl;
             std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
-            cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
-            cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
+            // cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
+            // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
             
             if ((laser_cell_x >= 0 && laser_cell_x < map_width2) && (laser_cell_y >= 0 && laser_cell_y < map_height2)) {
                 // cout << "ENTREI AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
@@ -360,9 +360,10 @@ int main(int argc, char **argv){
                 ros::spinOnce();
                 rate.sleep();
             } else{
-                cout << "LENGTH OF MAP: " << map_out_.info.height << endl;
+                // cout << "LENGTH OF MAP: " << map_out_.info.height << endl;
                 map_out = update_map(map_out_);
                 map_pub.publish(map_out);
+                cout << "MAP PUBLISHED!" << endl;
                 ros::spinOnce();
                 rate.sleep();
             }
