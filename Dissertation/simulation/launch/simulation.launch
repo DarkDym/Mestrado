@@ -30,6 +30,7 @@
             <arg name="use_sim_time" value="$(arg use_sim_time)"/>
             <arg name="verbose" value="$(arg verbose)"/>
             <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
+            <!-- <arg name="server_required" value="false"/> -->
         </include>
     </group>
 
