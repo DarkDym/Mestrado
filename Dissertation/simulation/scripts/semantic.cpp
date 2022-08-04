@@ -25,6 +25,7 @@ using namespace Eigen;
 
 nav_msgs::OccupancyGrid grid_map_;
 cv_bridge::CvImageConstPtr cv_ptr_;
+cv_bridge::CvImagePtr img_out_;
 // sensor_msgs::CameraInfo camera_info_;
 float cx,cy,fx,fy;
 
@@ -36,7 +37,7 @@ const float map_origin_y = -100.00;
 
 const int SUITCASE_VALUE = 240;
 const int PERSON_VALUE = 160;
-const float HFOV_RAD = 1.21;
+const float HFOV_RAD = 1.5184351666666667;
 const int IMG_WIDTH = 640;
 const int IMG_HEIGTH = 480;
 
@@ -49,6 +50,7 @@ int map_[4000][4000];
 bool setup_map = true;
 
 void init_map(){
+    
     for (int x = 0; x < 4000; x++) {
         for (int y = 0; y < 4000; y++) {
             map_[x][y] = -1;
@@ -84,8 +86,6 @@ int matrix2vectorIndex(int cell_x, int cell_y){
 
 std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConstPtr cv_ptr_in){
     float depth;
-    // int cont = 0;
-    // float acumulator = 0;
     cv_bridge::CvImageConstPtr cv_ptr_aux = cv_ptr_in;
     if (cv_ptr_aux){
         cout << "RECEBI OS VALORES: " << x_i <<  " " << x_f << " " << y_i << " " << y_f << endl;
@@ -95,8 +95,6 @@ std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_br
                 // cout << "NORMALIZANDO PIXEL NO EIXO Y: " << 480-y << " | VALOR DO DEPTH COM Y NORMALIZADO: " << cv_ptr_aux->image.at<float>(x,480-y) << endl;  
                 depth = cv_ptr_aux->image.at<float>(x,480-y);
                 if (!isnan(depth)) {
-                    // acumulator += depth;
-                    // cont++;
                     cout << "RETORNANDO O VALOR DA TELA" << endl;
                     return std::make_tuple(x,480-y);
                 } 
@@ -108,18 +106,29 @@ std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_br
 }
 
 float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConstPtr cv_ptr_in){
-    float depth;
+    float depth = 0;
     int cont = 0;
     float acumulator = 0;
     vector<float> depth_vec;
+    int mean = 0;
     cv_bridge::CvImageConstPtr cv_ptr_aux = cv_ptr_in;
+    
+    // img_out_ = cv_bridge::toCvCopy(cv_ptr_aux->toImageMsg(), sensor_msgs::image_encodings::TYPE_32FC1);
+    // img_out_->image.resize(cv_ptr_aux->image.rows,cv_ptr_aux->image.cols);
+    // for (int i = 0; i < cv_ptr_aux->image.rows; i++) {
+    //     for (int j = 0; j < cv_ptr_aux->image.cols; j++) {
+    //         img_out_->image.at<float>(i,j) = cv_ptr_aux->image.at<float>(i,j);
+    //     }
+    // }
+
     if (cv_ptr_aux){
         cout << "RECEBI OS VALORES: " << x_i <<  " " << x_f << " " << y_i << " " << y_f << endl;
         for (int x = x_i; x < x_f; x++) {
-            for (int y = y_i; y < y_f; y++) { 
-                depth = cv_ptr_aux->image.at<float>(x,480-y);
-                depth_vec.emplace_back(depth);
+            for (int y = y_i; y < y_f; y++) {
+                img_out_->image.at<float>(y,x) = 0;
+                depth = cv_ptr_aux->image.at<float>(y,x);                
                 if (!isnan(depth)) {
+                    depth_vec.emplace_back(depth);
                     acumulator += depth;
                     cont++;
                 } 
@@ -127,27 +136,36 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
         }
     }
 
-    sort(depth_vec.begin(),depth_vec.end());
+    cout << "CHEGUEI ATÉ AQUI, VOU VERIFICAR SE O DEPTH_VEC TEM ALGO!" << endl;
 
-    if (depth_vec.size() % 2 == 0) {
-        cout << "PAR" << endl;
-        cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
-        cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
-        int mean = depth_vec.size()/2;
-        cout << "MEDIANA: " << (depth_vec.at(mean+1) + depth_vec.at(mean))/2 << endl;
-    }else {
-        cout << "IMPAR" << endl; 
-        cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
-        cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
-        int mean = depth_vec.size()/2;
-        cout << "MEDIANA: " << depth_vec.at(mean+1) << endl;
+    if (!depth_vec.empty()) {
+        sort(depth_vec.begin(),depth_vec.end());
+        cout << "SO PARA TESTE: PRIMEIRO ELEMENTO DO VETOR: " << depth_vec.at(0) << endl;
+        if (depth_vec.size() % 2 == 0) {
+            // cout << "PAR" << endl;
+            // cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
+            // cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
+            mean = depth_vec.size()/2;
+            cout << "PAR | MEDIANA: " << (depth_vec.at(mean+1) + depth_vec.at(mean))/2 << endl;
+        }else {
+            // cout << "IMPAR" << endl; 
+            // cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
+            // cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
+            mean = depth_vec.size()/2;
+            cout << "IMPAR | MEDIANA: " << depth_vec.at(mean) << endl;
+        }
     }
 
     if (cont != 0){
         cout << "MEAN DEPTH VALUE: " << acumulator/cont << endl;
-        return acumulator/cont;
+        if (depth_vec.size() % 2 == 0) {
+            return  (depth_vec.at(mean+1) + depth_vec.at(mean))/2;
+        } else {
+            return depth_vec.at(mean+1);
+        }
     } else {
-        return -1;
+        cout << "NENHUM DOS PONTOS RECEBIDOS POSSUI UM DEPTH VALIDO!!!!!!!!!!!!!!!!!!" << endl;
+        return 0;
     }
     
 }
@@ -199,11 +217,8 @@ void map_update(float pos_x, float pos_y, int cell_value){
     // int map_data[width*heigth];
 
     // for (int x = 0; x < width*heigth; x++) {
-    //     map_data[x] = grid_map.data[x];
-    // }
-
+    //     map_data[x] = grid_map.data[x];cv_ptr_inado no map_out
     /*
-        Ajustar este ponto para que o objeto detectado seja colocado no map_out
         Necessário fazer o cálculo da posição do objeto a partir da posição do robô 
         e colocar isso no mapa;
     */
@@ -220,22 +235,41 @@ void map_update(float pos_x, float pos_y, int cell_value){
 
 void check_object_position(int depth, int object_pos_x, int cell_value){
     float odom_x, odom_y;
-    // odom_x = object_pos_x;
-    // odom_y = object_pos_y;
+
     double f = (IMG_WIDTH / 2.0) / tan(HFOV_RAD / 2.0);
     double object_angle = atan(object_pos_x / f);
-    // float object_angle = atan(object_pos_x/depth);
-    cout << "CENTER ANGLE:" << atan((int)(IMG_WIDTH/2) / f) << endl;
+    double center_angle = atan((int)(IMG_WIDTH/2) / f);
+    double correction = 0;
     if (cell_value == PERSON_VALUE) {
         cout << "PERSON ANGLE : " << object_angle << endl;
+        if (object_pos_x >= 320) {
+            correction = object_angle - center_angle;
+            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
+            cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
+        } else {
+            correction = center_angle - object_angle;
+            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
+            cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
+        }
     } else {
         cout << "SUITCASE ANGLE : " << object_angle << endl;
+        if (object_pos_x >= 320) {
+            correction = object_angle - center_angle;
+            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
+            cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
+        } else {
+            correction = center_angle - object_angle;
+            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
+            cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
+        }
     }
-    
-    odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+object_angle) * depth;
-    odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+object_angle) * depth;
-    // copy_map();
-    // int index = object_pos_x + test_depth_img.width * object_pos_y;    
+
+    cout << "ODOM_X: " << odom_x << " ODOM_Y: " << odom_y << endl;
+
     map_update(odom_x,odom_y, cell_value);
 }
 
@@ -254,53 +288,59 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
             cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
             object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
             object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;           
-            cout << "CALCULADO" << endl;
+            // cout << "CALCULADO" << endl;
             if (object_pos_x < 640 && object_pos_y < 480) {
-                cout << "POSICAO DO OBJETO DENTRO DO FRAME!!!" << endl;
+                // cout << "POSICAO DO OBJETO DENTRO DO FRAME!!!" << endl;
                 if (grid_map_.info.height > 0) {
                     if (cv_ptr_){
-                        cout << "VOU CALCULAR O DEPTH" << endl;
-                        tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        // cout << "VOU CALCULAR O DEPTH" << endl;
+                        // tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/4;
+                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/4;
+                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
                         float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
-                        if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
-                            cout << "SUITCASE MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
-                            float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
+                        // if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
+                            // cout << "SUITCASE MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
+                            // float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
                             float x_o = meanDepth * ((object_pos_x - cx)/fx);
                             float y_o = meanDepth * ((object_pos_y - cy)/fy);
-                            cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
+                            // cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
                             if (!isnan(x_o)  && !isnan(y_o)) {
                                 cout << "POSICAO SUITCASE: [" << meanDepth << " , " << x_o << "]" << endl;
-                                cout << "POSICAO SUITCASE EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
+                                // cout << "POSICAO SUITCASE EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
                                 check_object_position(meanDepth,object_pos_x, SUITCASE_VALUE);
                             }
-                        }
+                        // }
                     }
                 }
             }
-            cout << "FINALIZEI A SUITCASE" << endl;
+            // cout << "FINALIZEI A SUITCASE" << endl;
         } else if (msg->bounding_boxes[x].Class == "person") {
             cout << "PERSON | PROBABILITY: " << msg->bounding_boxes[x].probability << endl;
-            cout << " X_MIN: " << msg->bounding_boxes[x].xmin << " X_MAX: " << msg->bounding_boxes[x].xmax << " X_MED: " << (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2 << endl;
-            cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
+            // cout << " X_MIN: " << msg->bounding_boxes[x].xmin << " X_MAX: " << msg->bounding_boxes[x].xmax << " X_MED: " << (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2 << endl;
+            // cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
             object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
             object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;
             if (object_pos_x < 640 && object_pos_y < 480) {
                 if (grid_map_.info.height > 0) {
                     if (cv_ptr_){
-                        tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        // tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/4;
+                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/4;
+                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
                         float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
-                        if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
-                            cout << "PERSON MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
-                            float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
+                        // if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
+                            // cout << "PERSON MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
+                            // float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
                             float x_o = meanDepth * ((object_pos_x - cx)/fx);
                             float y_o = meanDepth * ((object_pos_y - cy)/fy);
-                            cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
+                            // cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
                             if (!isnan(x_o)  && !isnan(y_o)) {
                                 cout << "POSICAO PERSON: [" << meanDepth << " , " << x_o << "]" << endl;
-                                cout << "POSICAO PERSON EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
+                                // cout << "POSICAO PERSON EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
                                 check_object_position(meanDepth,object_pos_x, PERSON_VALUE);
                             }
-                        }
+                        // }
                     }
                 }
             }
@@ -346,8 +386,10 @@ void depth_img_callback(const sensor_msgs::Image::ConstPtr& depth_msg){
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
-    //   cv_ptr = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
-      cv_ptr = cv_bridge::toCvShare(depth_msg);
+      cv_ptr = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
+      img_out_ = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
+      cout << "SIZE IMG_OUT_: " << img_out_->image.size() << endl;
+    //   cv_ptr = cv_bridge::toCvShare(depth_msg);
     }
     catch (cv_bridge::Exception& e)
     {
@@ -369,7 +411,7 @@ void caminfo_callback(const sensor_msgs::CameraInfoConstPtr& caminfo_msg){
     cy = caminfo_msg->K[5];
     fx = caminfo_msg->K[0];
     fy = caminfo_msg->K[4];
-    cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
+    // cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
 }
 
 
@@ -388,6 +430,7 @@ int main(int argc, char **argv){
     ros::Subscriber cam_info_sub = node.subscribe("/husky1/realsense/color/camera_info", 1, caminfo_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_out_s",10);
+    ros::Publisher img_out = node.advertise<sensor_msgs::Image>("/img_out",10);
 
     ros::Rate rate(10);
 
@@ -397,6 +440,11 @@ int main(int argc, char **argv){
                 grid_update();
                 map_pub.publish(grid_map_);
                 can_publish = false;
+                img_out_->header.frame_id = cv_ptr_->header.frame_id;
+                img_out_->header.seq = cv_ptr_->header.seq;
+                img_out_->header.stamp = cv_ptr_->header.stamp;
+                img_out_->encoding = cv_ptr_->encoding;
+                img_out.publish(img_out_->toImageMsg());
             }
         }
             ros::spinOnce();

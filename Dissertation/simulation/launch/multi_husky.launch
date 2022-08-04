@@ -8,7 +8,7 @@
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
     <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
-    <arg name="realsense_enabled" default="$(optenv HUSKY_REALSENSE_ENABLED false)"/>
+    <arg name="realsense_enabled" default="$(optenv HUSKY_REALSENSE_ENABLED true)"/>
     <arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS)"/>
 
     <!-- <param name="robot_description" command="$(find xacro)/xacro $(find husky_description)/urdf/husky.urdf.xacro laser_enabled:=$(arg laser_enabled) realsense_enabled:=$(arg realsense_enabled) urdf_extras:=$(arg urdf_extras)"/> -->
