@@ -28,6 +28,7 @@ cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
 // sensor_msgs::CameraInfo camera_info_;
 float cx,cy,fx,fy;
+int IMG_WIDTH, IMG_HEIGTH;
 
 const int map_width = 4000;
 const int map_height = 4000;
@@ -38,10 +39,8 @@ const float map_origin_y = -100.00;
 const int SUITCASE_VALUE = 240;
 const int PERSON_VALUE = 160;
 const float HFOV_RAD = 1.5184351666666667;
-const int IMG_WIDTH = 640;
-const int IMG_HEIGTH = 480;
-
 const float focal_point = 337.2084410968044;
+const float CROP_SCALE = 4;
 
 float ROBOT_POSE_[3];
 bool can_publish = false;
@@ -93,10 +92,10 @@ std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_br
             for (int y = y_i; y < y_f; y++) {
                 // cout << "VALOR DOS INDICES: [" << x << " , " << y << "] : " << endl; //<< cv_ptr_aux->image.at<float>(x,y) << endl;
                 // cout << "NORMALIZANDO PIXEL NO EIXO Y: " << 480-y << " | VALOR DO DEPTH COM Y NORMALIZADO: " << cv_ptr_aux->image.at<float>(x,480-y) << endl;  
-                depth = cv_ptr_aux->image.at<float>(x,480-y);
+                depth = cv_ptr_aux->image.at<float>(y,x);
                 if (!isnan(depth)) {
                     cout << "RETORNANDO O VALOR DA TELA" << endl;
-                    return std::make_tuple(x,480-y);
+                    return std::make_tuple(y,x);
                 } 
             }
         }
@@ -113,13 +112,6 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
     int mean = 0;
     cv_bridge::CvImageConstPtr cv_ptr_aux = cv_ptr_in;
     
-    // img_out_ = cv_bridge::toCvCopy(cv_ptr_aux->toImageMsg(), sensor_msgs::image_encodings::TYPE_32FC1);
-    // img_out_->image.resize(cv_ptr_aux->image.rows,cv_ptr_aux->image.cols);
-    // for (int i = 0; i < cv_ptr_aux->image.rows; i++) {
-    //     for (int j = 0; j < cv_ptr_aux->image.cols; j++) {
-    //         img_out_->image.at<float>(i,j) = cv_ptr_aux->image.at<float>(i,j);
-    //     }
-    // }
 
     if (cv_ptr_aux){
         cout << "RECEBI OS VALORES: " << x_i <<  " " << x_f << " " << y_i << " " << y_f << endl;
@@ -191,8 +183,6 @@ void map_update(float pos_x, float pos_y, int cell_value){
     tie(cell_x, cell_y) = odom2cell(pos_x, pos_y);
     int index;
 
-    // cout << "CHEGUEI ATE AQUI!!!!" << endl;
-
     int radius = 1;
     for (int y = cell_y - radius; y < cell_y + radius; y++) {
         for (int x = cell_x - radius; x < cell_x + radius; x++) {
@@ -233,39 +223,61 @@ void map_update(float pos_x, float pos_y, int cell_value){
 
 }
 
-void check_object_position(int depth, int object_pos_x, int cell_value){
+void check_object_position(float depth, int object_pos_x, int cell_value){
     float odom_x, odom_y;
 
     double f = (IMG_WIDTH / 2.0) / tan(HFOV_RAD / 2.0);
     double object_angle = atan(object_pos_x / f);
     double center_angle = atan((int)(IMG_WIDTH/2) / f);
+    double max_angle_img = HFOV_RAD;//atan(IMG_WIDTH / f);
+    double phi_world = (M_PI - max_angle_img)/2;
     double correction = 0;
+    cout << "MAX ANGLE IN WIDTH: " << max_angle_img << " | DESLOCAMENTO DO ANGULO EM RELACAO AO MUNDO: " << phi_world << endl;
+    cout << "SUBTRACAO DO MUNDO: " << (-M_PI/2)+phi_world << endl;
+    correction = max_angle_img - object_angle;
+
     if (cell_value == PERSON_VALUE) {
         cout << "PERSON ANGLE : " << object_angle << endl;
-        if (object_pos_x >= 320) {
-            correction = object_angle - center_angle;
-            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
-            cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
-        } else {
-            correction = center_angle - object_angle;
-            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
-            cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
-        }
+        cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
+        double ang = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
+        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << endl;
+        
+        // if (object_pos_x >= 320) {
+            // correction = object_angle - center_angle;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-object_angle) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-object_angle) * depth;
+            // cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
+        // } else {
+            // correction = center_angle - object_angle;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
+            odom_x = ROBOT_POSE_[0] + cos(ang) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ang) * depth;
+            cout << "COS(ANG): " << cos(ang) << " | DEPTH: " << depth << " | MULT: " << cos(ang) * depth << endl;
+            // cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
+        // }
     } else {
         cout << "SUITCASE ANGLE : " << object_angle << endl;
-        if (object_pos_x >= 320) {
-            correction = object_angle - center_angle;
-            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
-            cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
-        } else {
-            correction = center_angle - object_angle;
-            odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
-            cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
-        }
+        cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
+        double ang = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
+        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << endl;
+        // if (object_pos_x >= 320) {
+            // correction = object_angle - center_angle;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-correction) * depth;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-object_angle) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]-object_angle) * depth;
+            // cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
+        // } else {
+            // correction = center_angle - object_angle;
+            // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
+            odom_x = ROBOT_POSE_[0] + cos(ang) * depth;
+            odom_y = ROBOT_POSE_[1] + sin(ang) * depth;
+            // cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
+        // }
     }
 
     cout << "ODOM_X: " << odom_x << " ODOM_Y: " << odom_y << endl;
@@ -288,17 +300,15 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
             cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
             object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
             object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;           
-            // cout << "CALCULADO" << endl;
-            if (object_pos_x < 640 && object_pos_y < 480) {
-                // cout << "POSICAO DO OBJETO DENTRO DO FRAME!!!" << endl;
+            if (object_pos_x < IMG_WIDTH && object_pos_y < IMG_HEIGTH) {
                 if (grid_map_.info.height > 0) {
                     if (cv_ptr_){
                         // cout << "VOU CALCULAR O DEPTH" << endl;
                         // tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
-                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/4;
-                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/4;
-                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
-                        float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/CROP_SCALE;
+                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/CROP_SCALE;
+                        float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
+                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
                         // if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
                             // cout << "SUITCASE MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
                             // float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
@@ -314,21 +324,20 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
                     }
                 }
             }
-            // cout << "FINALIZEI A SUITCASE" << endl;
         } else if (msg->bounding_boxes[x].Class == "person") {
             cout << "PERSON | PROBABILITY: " << msg->bounding_boxes[x].probability << endl;
             // cout << " X_MIN: " << msg->bounding_boxes[x].xmin << " X_MAX: " << msg->bounding_boxes[x].xmax << " X_MED: " << (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2 << endl;
             // cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
             object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
             object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;
-            if (object_pos_x < 640 && object_pos_y < 480) {
+            if (object_pos_x < IMG_WIDTH && object_pos_y < IMG_HEIGTH) {
                 if (grid_map_.info.height > 0) {
                     if (cv_ptr_){
                         // tie(screen_position_depth_x,screen_position_depth_y) = findSomeDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
-                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/4;
-                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/4;
-                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
-                        float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
+                        int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/CROP_SCALE;
+                        int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/CROP_SCALE;
+                        float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
+                        // float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax,cv_ptr_);
                         // if (screen_position_depth_x != -1 && screen_position_depth_y != -1) {
                             // cout << "PERSON MEAN DEPTH VALUE AT (" << screen_position_depth_x << " , " << screen_position_depth_y << "): " << cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y) << endl;
                             // float depth = cv_ptr_->image.at<float>(screen_position_depth_x,screen_position_depth_y);
@@ -388,20 +397,12 @@ void depth_img_callback(const sensor_msgs::Image::ConstPtr& depth_msg){
     {
       cv_ptr = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
       img_out_ = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
-      cout << "SIZE IMG_OUT_: " << img_out_->image.size() << endl;
-    //   cv_ptr = cv_bridge::toCvShare(depth_msg);
     }
     catch (cv_bridge::Exception& e)
     {
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-
-    // ROS_INFO("Applying mask to depth image");
-    // cv::Mat m = cv::Mat::zeros(cv_ptr->image.size(), CV_32FC1);
-    // cv::Mat m = cv::Mat(cv_ptr->image.size(), cv_ptr->image.type());
-    // cout << "TAMANHO: " << cv_ptr->image.size() << endl; 
-    // cout << "TESTE: " << cv_ptr->image.at<float>(302,248) << endl;
     cv_ptr_ = cv_ptr;
 }
 
@@ -411,6 +412,8 @@ void caminfo_callback(const sensor_msgs::CameraInfoConstPtr& caminfo_msg){
     cy = caminfo_msg->K[5];
     fx = caminfo_msg->K[0];
     fy = caminfo_msg->K[4];
+    IMG_WIDTH = caminfo_msg->width;
+    IMG_HEIGTH = caminfo_msg->height;
     // cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
 }
 
