@@ -15,7 +15,7 @@
 #include "geometry_msgs/Pose.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
-
+#include <tf2_ros/transform_listener.h>
 
 using namespace std;
 using namespace Eigen;
@@ -38,6 +38,7 @@ float angle_increase = 0.00436;
 nav_msgs::OccupancyGrid map_out_;
 vector<vector<int>> tst;
 
+
 nav_msgs::OccupancyGrid create_map(){
     cout << "CREATING MAP" << endl;
     nav_msgs::OccupancyGrid map = nav_msgs::OccupancyGrid();
@@ -51,8 +52,7 @@ nav_msgs::OccupancyGrid create_map(){
     map.info.origin = origin;
     map.info.height = 4000;
     map.info.width = 4000;
-    std::vector<int8_t> m(map_height*map_width,-1);  
-    cout << "REACH UNTIL HERE" << endl;
+    std::vector<int8_t> m(map_height*map_width,-1);
     copy(m.begin(), m.end(), back_inserter(map.data));
     cout << "ALL MAP IS UNKNOW" << endl;
 
@@ -108,7 +108,6 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
     q.w() = odom_msg->pose.pose.orientation.w;
     auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
     robot_pose[2] = euler[2];
-    // cout << "YAW: " << euler[2] << endl;
 }
 
 void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg){
@@ -119,13 +118,8 @@ void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amc
     q.y() = amcl_msg->pose.pose.orientation.y;
     q.z() = amcl_msg->pose.pose.orientation.z;
     q.w() = amcl_msg->pose.pose.orientation.w;
-    cout << "X: " << amcl_msg->pose.pose.orientation.x;
-    cout << " Y: " << amcl_msg->pose.pose.orientation.y;
-    cout << " Z: " << amcl_msg->pose.pose.orientation.z;
-    cout << " W: " << amcl_msg->pose.pose.orientation.w;
     auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
     robot_pose[2] = euler[2];
-    cout << " YAW: " << euler[2] << endl;
 }
 
 std::tuple<float,float> getLaserPosition(int index){
@@ -207,7 +201,6 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
         }
     }
 
-    
     if (!inf){
         grid_map[laser_cell_x][laser_cell_y] += 21;
         if (grid_map[laser_cell_x][laser_cell_y] > 100) {
@@ -215,6 +208,22 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
                 grid_map[laser_cell_x][laser_cell_y] = 100;
             }
         }
+    }
+    
+}
+
+void basefootprintToLaserTF(){
+    tf2_ros::Buffer tBuffer;
+    geometry_msgs::TransformStamped tStamped;
+
+    try {
+        tStamped = tBuffer.lookupTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time(0));
+        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<ROBOT POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        cout << "X: " << robot_pose[0] << " Y: " << robot_pose[1] << endl;
+        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        cout << "X: " << tStamped.transform.translation.x << " Y: " << tStamped.transform.translation.y << " Z: " << tStamped.transform.translation.z << endl;
+    }catch(tf2::TransformException &ex){
+        ROS_WARN("%s",ex.what());
     }
     
 }
@@ -337,11 +346,9 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "occupancy_grid");
     ros::NodeHandle node;
 
-    // nav_msgs::OccupancyGrid map = create_map();
     nav_msgs::OccupancyGrid map_out;
 
     ros::Subscriber laser_sub = node.subscribe<sensor_msgs::LaserScan>("/husky1/scan",10,laserscan_callback);
-    // ros::Subscriber odom_sub = node.subscribe("/husky1/amcl_pose",1000,amcl_callback);
     ros::Subscriber odom_sub = node.subscribe("/husky1/odometry/filtered",1000,odom_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_out",10);
@@ -349,7 +356,6 @@ int main(int argc, char **argv){
     ros::Subscriber grid_map = node.subscribe("/map",1,grid_map_callback);
 
     bool setup = true;
-    // map_pub.publish(map);
     ros::Rate rate(10);
     while(ros::ok()){
          
@@ -360,10 +366,8 @@ int main(int argc, char **argv){
                 ros::spinOnce();
                 rate.sleep();
             } else{
-                // cout << "LENGTH OF MAP: " << map_out_.info.height << endl;
                 map_out = update_map(map_out_);
                 map_pub.publish(map_out);
-                cout << "MAP PUBLISHED!" << endl;
                 ros::spinOnce();
                 rate.sleep();
             }

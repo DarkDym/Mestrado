@@ -26,7 +26,6 @@ using namespace Eigen;
 nav_msgs::OccupancyGrid grid_map_;
 cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
-// sensor_msgs::CameraInfo camera_info_;
 float cx,cy,fx,fy;
 int IMG_WIDTH, IMG_HEIGTH;
 
@@ -39,7 +38,6 @@ const float map_origin_y = -100.00;
 const int SUITCASE_VALUE = 240;
 const int PERSON_VALUE = 160;
 const float HFOV_RAD = 1.5184351666666667;
-const float focal_point = 337.2084410968044;
 const float CROP_SCALE = 4;
 
 float ROBOT_POSE_[3];
@@ -87,20 +85,15 @@ std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_br
     float depth;
     cv_bridge::CvImageConstPtr cv_ptr_aux = cv_ptr_in;
     if (cv_ptr_aux){
-        cout << "RECEBI OS VALORES: " << x_i <<  " " << x_f << " " << y_i << " " << y_f << endl;
         for (int x = x_i; x < x_f; x++) {
-            for (int y = y_i; y < y_f; y++) {
-                // cout << "VALOR DOS INDICES: [" << x << " , " << y << "] : " << endl; //<< cv_ptr_aux->image.at<float>(x,y) << endl;
-                // cout << "NORMALIZANDO PIXEL NO EIXO Y: " << 480-y << " | VALOR DO DEPTH COM Y NORMALIZADO: " << cv_ptr_aux->image.at<float>(x,480-y) << endl;  
+            for (int y = y_i; y < y_f; y++) { 
                 depth = cv_ptr_aux->image.at<float>(y,x);
                 if (!isnan(depth)) {
-                    cout << "RETORNANDO O VALOR DA TELA" << endl;
                     return std::make_tuple(y,x);
                 } 
             }
         }
     }
-    cout << "NAO FOI POSSIVEL ACHAR UM DEPTH COM OS VALORES RECEBIDOS" << endl;
     return std::make_tuple(-1,-1);
 }
 
@@ -114,7 +107,6 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
     
 
     if (cv_ptr_aux){
-        cout << "RECEBI OS VALORES: " << x_i <<  " " << x_f << " " << y_i << " " << y_f << endl;
         for (int x = x_i; x < x_f; x++) {
             for (int y = y_i; y < y_f; y++) {
                 img_out_->image.at<float>(y,x) = 0;
@@ -128,35 +120,24 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
         }
     }
 
-    cout << "CHEGUEI ATÉ AQUI, VOU VERIFICAR SE O DEPTH_VEC TEM ALGO!" << endl;
-
     if (!depth_vec.empty()) {
         sort(depth_vec.begin(),depth_vec.end());
-        cout << "SO PARA TESTE: PRIMEIRO ELEMENTO DO VETOR: " << depth_vec.at(0) << endl;
         if (depth_vec.size() % 2 == 0) {
-            // cout << "PAR" << endl;
-            // cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
-            // cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
             mean = depth_vec.size()/2;
             cout << "PAR | MEDIANA: " << (depth_vec.at(mean+1) + depth_vec.at(mean))/2 << endl;
         }else {
-            // cout << "IMPAR" << endl; 
-            // cout << "TAMANHO DO VECTOR: " << depth_vec.size() << endl;
-            // cout << "METADE DO VECTOR: " << (int)(depth_vec.size()/2) << endl;
             mean = depth_vec.size()/2;
             cout << "IMPAR | MEDIANA: " << depth_vec.at(mean) << endl;
         }
     }
 
     if (cont != 0){
-        cout << "MEAN DEPTH VALUE: " << acumulator/cont << endl;
         if (depth_vec.size() % 2 == 0) {
             return  (depth_vec.at(mean+1) + depth_vec.at(mean))/2;
         } else {
             return depth_vec.at(mean+1);
         }
     } else {
-        cout << "NENHUM DOS PONTOS RECEBIDOS POSSUI UM DEPTH VALIDO!!!!!!!!!!!!!!!!!!" << endl;
         return 0;
     }
     
@@ -187,40 +168,12 @@ void map_update(float pos_x, float pos_y, int cell_value){
     for (int y = cell_y - radius; y < cell_y + radius; y++) {
         for (int x = cell_x - radius; x < cell_x + radius; x++) {
             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
-                // index = matrix2vectorIndex(x,y);
                 map_[x][y] = cell_value;
-                // grid_map_.data[index] = cell_value;
             }
         }
     }
 
     can_publish = true;
-    // for(int x = 0; x < map_width; x++){
-    //     int multi = x * map_width;
-    //     for(int y = 0; y < map_height; y++){
-    //         index = y + multi;
-    //         grid_map_.data[index] = map_[x][y];
-    //     }
-    // }
-    
-
-    // int map_data[width*heigth];
-
-    // for (int x = 0; x < width*heigth; x++) {
-    //     map_data[x] = grid_map.data[x];cv_ptr_inado no map_out
-    /*
-        Necessário fazer o cálculo da posição do objeto a partir da posição do robô 
-        e colocar isso no mapa;
-    */
-
-    // for(int x = 0; x < width; x++){
-    //     int multi = x * width;
-    //     for(int y = 0; y < height; y++){
-    //         int index = y + multi;
-    //         map.data[index] = map_grid[x][y];
-    //     }
-    // }
-
 }
 
 void check_object_position(float depth, int object_pos_x, int cell_value){
@@ -229,7 +182,7 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
     double f = (IMG_WIDTH / 2.0) / tan(HFOV_RAD / 2.0);
     double object_angle = atan(object_pos_x / f);
     double center_angle = atan((int)(IMG_WIDTH/2) / f);
-    double max_angle_img = HFOV_RAD;//atan(IMG_WIDTH / f);
+    double max_angle_img = HFOV_RAD;
     double phi_world = (M_PI - max_angle_img)/2;
     double correction = 0;
     cout << "MAX ANGLE IN WIDTH: " << max_angle_img << " | DESLOCAMENTO DO ANGULO EM RELACAO AO MUNDO: " << phi_world << endl;
@@ -407,14 +360,12 @@ void depth_img_callback(const sensor_msgs::Image::ConstPtr& depth_msg){
 }
 
 void caminfo_callback(const sensor_msgs::CameraInfoConstPtr& caminfo_msg){
-    // camera_info_ = caminfo_msg;
     cx = caminfo_msg->K[2];
     cy = caminfo_msg->K[5];
     fx = caminfo_msg->K[0];
     fy = caminfo_msg->K[4];
     IMG_WIDTH = caminfo_msg->width;
     IMG_HEIGTH = caminfo_msg->height;
-    // cout << "INTRINSICOS: CX: " << cx << " | CY: " << cy << " | FX: " << fx << " | FY: " << fy << endl;
 }
 
 

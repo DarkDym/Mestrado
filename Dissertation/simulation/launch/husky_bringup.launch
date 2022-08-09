@@ -18,14 +18,9 @@
 
 
     <rosparam file="$(find dissertation_simulation)/config/control.yaml" command="load"/>
-    <!-- <rosparam param="husky_velocity_controller/base_frame_id" subst_value="True">$(arg model)_tf/base_link</rosparam> -->
     <rosparam param="husky_velocity_controller/base_frame_id" subst_value="True">$(arg model)_tf/base_footprint</rosparam>
-    <!-- <param name="/$(arg model)/controller_spawner/husky_velocity_controller/base_frame_id" value="$(arg model)_tf/base_link"/> -->
-    <!-- <param name="husky_velocity_controller/base_frame_id" value="$(arg model)_tf/base_link"/> -->
 
     <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="true" output="screen" args="husky_joint_publisher husky_velocity_controller">
-        <!-- <param name="tf_prefix" value="$(arg model)_tf"/> -->
-        <!-- <param name="base_frame_id" value="$(arg model)_tf/base_link"/> -->
         <param name="base_frame_id" value="base_footprint"/>
     </node>
 
@@ -35,17 +30,11 @@
 
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" output="screen">
         <rosparam command="load" file="$(find dissertation_simulation)/config/localization.yaml"/>
-        <!-- <param name="map_frame" value="/$(arg model)/slam_map"/> -->
         <param name="base_link_frame" value="base_footprint"/>
-        <!-- <rosparam param="base_link_frame" subst_value="True">$(arg model)_tf/base_link</rosparam> -->
-        <!-- <rosparam param="odom_frame" subst_value="True">$(arg model)_tf/odom</rosparam> -->
     </node>
-    <!-- <param name="$(arg model)/ekf_localization/base_link_frame" value="$(arg model)_tf/base_link"/> -->
-    <!-- <param name="$(arg model)/ekf_localization/odom_frame" value="$(arg model)_tf/odom"/> -->
     
     
       <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
-        <!-- <param name="link_name" value="$(arg model)_tf/base_link" /> -->
         <param name="link_name" value="base_footprint" />
       </node>
     
@@ -70,17 +59,7 @@
       <arg name="model" value="$(arg model)"/>
     </include>
 
-    <!-- <include file="$(find husky_gazebo)/launch/realsense.launch"/>
-    <param name="target_frame" value="$(arg model)_tf/base_link"/> -->
-
-    <!-- <remap from="/scan" to="/model/scan"/> -->
-
-    <!-- <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/odom 100"/> -->
     <node pkg="tf" type="static_transform_publisher" name="map_model_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/map 100"/>
-    <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 /$(arg model)_tf/base_link /$(arg model)_tf/base_footprint 100"/> -->
-
-    <!-- <remap from="base_link" to="$(arg model)_tf/base_link"/> -->
-    <!-- <remap from="odom" to="$(arg model)_tf/odom"/> -->
 
     <include file="$(find dissertation_simulation)/launch/move_base.launch" >
         <arg name="model" value="$(arg model)"/>
@@ -105,8 +84,6 @@
     <node pkg="joy" type="joy_node" name="joy_node" />
   
     <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/> -->
-
-    
 
     <include file="$(find dissertation_simulation)/launch/continuous_detection.launch">
       <arg name="model" value="$(arg model)"/>
