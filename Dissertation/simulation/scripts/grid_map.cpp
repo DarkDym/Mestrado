@@ -15,7 +15,8 @@
 #include "geometry_msgs/Pose.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include <tf2_ros/transform_listener.h>
+// #include <tf2_ros/transform_listener.h>
+#include <tf/transform_listener.h>
 
 using namespace std;
 using namespace Eigen;
@@ -26,6 +27,7 @@ class GridMap{
 };
 
 float robot_pose[3];
+float laser_pose[2];
 vector<float> laser_reads;
 sensor_msgs::LaserScan laser_reads_;
 float map_resolution = 0.05;
@@ -213,16 +215,30 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
 }
 
 void basefootprintToLaserTF(){
-    tf2_ros::Buffer tBuffer;
-    geometry_msgs::TransformStamped tStamped;
+    // tf2_ros::Buffer tBuffer;
+    // tf2_ros::TransformListener tListener(tBuffer);
+    // geometry_msgs::TransformStamped tStamped;
+    tf::TransformListener tf_listerner;
+    tf::StampedTransform tf_trans;
 
     try {
-        tStamped = tBuffer.lookupTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time(0));
+        // if (tf_trans.canTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time::now())){
+        //     cout << "TEM TRANSFORMACAO!!!!!!!!!!!!!!!!!11" << endl;
+        // } else {
+        //     cout << "NAO TERMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
+        // }
+        tf_listerner.waitForTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),ros::Duration(3.0));
+        tf_listerner.lookupTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),tf_trans);
+        // tStamped = tBuffer.lookupTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time::now());
         cout << "<<<<<<<<<<<<<<<<<<<<<<<<<ROBOT POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
         cout << "X: " << robot_pose[0] << " Y: " << robot_pose[1] << endl;
         cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "X: " << tStamped.transform.translation.x << " Y: " << tStamped.transform.translation.y << " Z: " << tStamped.transform.translation.z << endl;
+        cout << "X: " << tf_trans.getOrigin().x() << " Y: " << tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
+        laser_pose[0] = tf_trans.getOrigin().x();
+        laser_pose[1] = tf_trans.getOrigin().y();
+        // cout << "X: " << tStamped.transform.translation.x << " Y: " << tStamped.transform.translation.y << " Z: " << tStamped.transform.translation.z << endl;
     }catch(tf2::TransformException &ex){
+    // }catch(tf::TransformException &ex){
         ROS_WARN("%s",ex.what());
     }
     
@@ -296,7 +312,8 @@ nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
             // robot_rad = remainder(robot_pose[2]+(720*angle_increase),2.0*M_PI);
             // if (laser_reads_.ranges[0] != INFINITY) {
             //     laser_x = (cos(robot_rad)*laser_reads_.ranges[0]);int height, int width, " << odom_laser_y+robot_pose[1] << endl;
-            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            // std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
+            std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+laser_pose[0],odom_laser_y+laser_pose[1]);
             // cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
             // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
             
@@ -361,11 +378,13 @@ int main(int argc, char **argv){
          
         if (map_out_.info.height > 0) {
             if (setup) {
+                basefootprintToLaserTF();
                 create_vector_map(map_out_.info.height, map_out_.info.width);
                 setup = false;
                 ros::spinOnce();
                 rate.sleep();
             } else{
+                basefootprintToLaserTF();
                 map_out = update_map(map_out_);
                 map_pub.publish(map_out);
                 ros::spinOnce();
