@@ -15,7 +15,6 @@
 #include "geometry_msgs/Pose.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
-// #include <tf2_ros/transform_listener.h>
 #include <tf/transform_listener.h>
 
 using namespace std;
@@ -40,6 +39,7 @@ float angle_increase = 0.00436;
 nav_msgs::OccupancyGrid map_out_;
 vector<vector<int>> tst;
 
+const float MAX_RANGE = 30.0;
 
 nav_msgs::OccupancyGrid create_map(){
     cout << "CREATING MAP" << endl;
@@ -125,11 +125,18 @@ void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amc
 }
 
 std::tuple<float,float> getLaserPosition(int index){
-    if (laser_reads_.ranges[index] == INFINITY) return std::make_tuple(0,0);
+    float robot_rad, laser_x, laser_y;
+    if (laser_reads_.ranges[index] == INFINITY){
+        robot_rad = remainder(robot_pose[2]+(((720-index)*angle_increase)-M_PI/2),2.0*M_PI);
+        laser_x = (cos(robot_rad)*MAX_RANGE);
+        laser_y = (sin(robot_rad)*MAX_RANGE);
 
-    float robot_rad = remainder(robot_pose[2]+(((720-index)*angle_increase)-M_PI/2),2.0*M_PI);
-    float laser_x = (cos(robot_rad)*laser_reads_.ranges[index]);
-    float laser_y = (sin(robot_rad)*laser_reads_.ranges[index]);
+        return std::make_tuple(laser_x,laser_y);
+    }
+
+    robot_rad = remainder(robot_pose[2]+(((720-index)*angle_increase)-M_PI/2),2.0*M_PI);
+    laser_x = (cos(robot_rad)*laser_reads_.ranges[index]);
+    laser_y = (sin(robot_rad)*laser_reads_.ranges[index]);
 
     return std::make_tuple(laser_x,laser_y);
 }
@@ -164,9 +171,6 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
 
         while(x != laser_cell_x){
 
-            if (delta_x < 0) {
-
-            }
             x += step_x;
             
             if (precision < 0) {
@@ -206,130 +210,52 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
     if (!inf){
         grid_map[laser_cell_x][laser_cell_y] += 21;
         if (grid_map[laser_cell_x][laser_cell_y] > 100) {
-            if (grid_map[laser_cell_x][laser_cell_y] != 230) {
+            // if (grid_map[laser_cell_x][laser_cell_y] != 230) {
                 grid_map[laser_cell_x][laser_cell_y] = 100;
-            }
+            // }
         }
     }
     
 }
 
 void basefootprintToLaserTF(){
-    // tf2_ros::Buffer tBuffer;
-    // tf2_ros::TransformListener tListener(tBuffer);
-    // geometry_msgs::TransformStamped tStamped;
     tf::TransformListener tf_listerner;
     tf::StampedTransform tf_trans;
 
     try {
-        // if (tf_trans.canTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time::now())){
-        //     cout << "TEM TRANSFORMACAO!!!!!!!!!!!!!!!!!11" << endl;
-        // } else {
-        //     cout << "NAO TERMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
-        // }
         tf_listerner.waitForTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),ros::Duration(3.0));
         tf_listerner.lookupTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),tf_trans);
-        // tStamped = tBuffer.lookupTransform("husky1_tf/base_laser","husky1_tf/base_footprint",ros::Time::now());
         cout << "<<<<<<<<<<<<<<<<<<<<<<<<<ROBOT POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
         cout << "X: " << robot_pose[0] << " Y: " << robot_pose[1] << endl;
         cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "X: " << tf_trans.getOrigin().x() << " Y: " << tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
-        laser_pose[0] = tf_trans.getOrigin().x();
-        laser_pose[1] = tf_trans.getOrigin().y();
-        // cout << "X: " << tStamped.transform.translation.x << " Y: " << tStamped.transform.translation.y << " Z: " << tStamped.transform.translation.z << endl;
+        cout << "X: " << robot_pose[0] + tf_trans.getOrigin().x() << " Y: " << robot_pose[1] + tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
+        laser_pose[0] = robot_pose[0] + tf_trans.getOrigin().x();
+        laser_pose[1] = robot_pose[1] + tf_trans.getOrigin().y();
     }catch(tf2::TransformException &ex){
-    // }catch(tf::TransformException &ex){
         ROS_WARN("%s",ex.what());
-    }
-    
+    } 
 }
 
 nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
-    // cout << "ENTERING MAP UPDATE" << endl;
+
     int cell_x, cell_y, laser_cell_x, laser_cell_y;
     float odom_laser_x, odom_laser_y;
-    // cout << "MAP INFO [" << map.info.width << "][" << map.info.height << "]" << endl;
-    // int map_grid_[map.info.width][map.info.height];
+
     int map_width2 = map.info.width;
     int map_height2 = map.info.height;
 
-    // vector<vector<int>> tst;
-    // for (int vy = 0; vy < map.info.height; vy++) {
-    //     vector<int> v_aux;
-    //     for (int vx = 0; vx < map.info.width; vx++) {
-    //         v_aux.push_back(-1);
-    //     }
-    //     tst.push_back(v_aux);
-    // }
-
-    std::tie(cell_x, cell_y) = odom2cell(robot_pose[0],robot_pose[1]);
-    // cout << "ROBOT_POSE_X: " << robot_pose[0] << " ROBOT_POSE_Y: " << robot_pose[1] << endl;
-    // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
-    
-
-    // float robot_rad = remainder(robot_pose[2],2.0*M_PI);
-    // float laser_x = (cos(-robot_rad)*5);
-    // float laser_y = (sin(-robot_rad)*5);
-    // std::tie(laser_cell_x,laser_cell_y) = odom2cell(laser_x+robot_pose[0],laser_y+robot_pose[1]);
-    // // radius = 1;
-    // for (int xi = laser_cell_x - radius; xi < laser_cell_x + radius; xi ++) {
-    //     for (int yi = laser_cell_y - radius; yi < laser_cell_y + radius; yi ++) {
-    //         if ((xi >= 0 && xi < map_width) && (yi >= 0 && yi < map_height)) {
-    //             map_grid[xi][yi] = 230;
-    //         }     
-    //     }
-    // }
-    // if ((cell_x >= 0 && cell_x < map_width) && (cell_y >= 0 && cell_y < map_height)) {
-    //     map_grid[cell_x][cell_y] = 100;
-    // }
-    
-    // cout << "QUANTIDADE DE LASERS: " << laser_reads_.ranges.size() << endl;
+    std::tie(cell_x, cell_y) = odom2cell(laser_pose[0],laser_pose[1]);
 
     if (laser_reads_.ranges.size() > 0) {
 
-        // int radius = 3;
-        // for (int yi = cell_y - radius; yi < cell_y + radius; yi ++) {
-        //     for (int xi = cell_x - radius; xi < cell_x + radius; xi ++) {
-        //         if ((xi >= 0 && xi < map_width2) && (yi >= 0 && yi < map_height2)) {
-        //             map_grid[xi][yi] = 100;
-        //             // tst[xi][yi] = 100;
-        //         }     
-        //     }
-        // }
-
-
         for (int i = 0; i < laser_reads_.ranges.size(); i++) {
             std::tie(odom_laser_x,odom_laser_y) = getLaserPosition(i);
-            // cout << "ODOM_LASER_X: " << odom_laser_x << " ODOM_LASER_Y: " << odom_laser_y << endl;
-        //     std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
-        //     cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
-        //     if ((laser_cell_x >= 0 && laser_cell_x < map_width) && (laser_cell_y >= 0 && laser_cell_y < map_height)) {
-        //         // map_grid[laser_cell_x][laser_cell_y] = 100;
-        //         himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y);
-        //     }
-        // }
-            // radius = 3;
-            // robot_rad = remainder(robot_pose[2]+(720*angle_increase),2.0*M_PI);
-            // if (laser_reads_.ranges[0] != INFINITY) {
-            //     laser_x = (cos(robot_rad)*laser_reads_.ranges[0]);int height, int width, " << odom_laser_y+robot_pose[1] << endl;
-            // std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+robot_pose[0],odom_laser_y+robot_pose[1]);
             std::tie(laser_cell_x,laser_cell_y) = odom2cell(odom_laser_x+laser_pose[0],odom_laser_y+laser_pose[1]);
-            // cout << "LASER_CELL_X: " << laser_cell_x << " LASER_CELL_Y: " << laser_cell_y << endl;
-            // cout << "CELL_X_ROBOT: " << cell_x << " CELL_Y_ROBOT: " << cell_y << endl;
-            
+
             if ((laser_cell_x >= 0 && laser_cell_x < map_width2) && (laser_cell_y >= 0 && laser_cell_y < map_height2)) {
-                // cout << "ENTREI AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                // map_grid[laser_cell_x][laser_cell_y] = 100;
                 bool flag_inf = false;
                 if (laser_reads_.ranges[i] != INFINITY){ 
                     himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y, flag_inf);
-                    // for (int xi = laser_cell_x - radius; xi < laser_cell_x + radius; xi ++) {
-                    //     for (int yi = laser_cell_y - radius; yi < laser_cell_y + radius; yi ++) {
-                    //         if ((xi >= 0 && xi < map_width) && (yi >= 0 && yi < map_height)) {
-                    //             map_grid[xi][yi] = 200;
-                    //         }
-                    //     }
-                    // }
                 }else{
                     flag_inf = true;
                     himm_inc(map_grid, cell_x, cell_y, laser_cell_x, laser_cell_y, flag_inf);

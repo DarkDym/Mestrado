@@ -7,6 +7,10 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include <tf/transform_listener.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 #include "ros/ros.h"
 #include "darknet_ros_msgs/BoundingBoxes.h"
@@ -15,6 +19,8 @@
 #include "nav_msgs/Odometry.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
+#include "sensor_msgs/PointCloud2.h"
+#include "sensor_msgs/point_cloud2_iterator.h"
 
 #include <librealsense2/rs.hpp>
 
@@ -22,6 +28,10 @@
 
 using namespace std;
 using namespace Eigen;
+
+typedef struct {
+    float x,y,z;
+} Point3D;
 
 nav_msgs::OccupancyGrid grid_map_;
 cv_bridge::CvImageConstPtr cv_ptr_;
@@ -44,7 +54,12 @@ float ROBOT_POSE_[3];
 bool can_publish = false;
 int map_[4000][4000];
 
+float camera_pose[2];
+
 bool setup_map = true;
+
+std::vector<sensor_msgs::PointCloud2> depthCloudVec_;
+sensor_msgs::PointCloud2 depthCloudROS;
 
 void init_map(){
     
@@ -176,6 +191,61 @@ void map_update(float pos_x, float pos_y, int cell_value){
     can_publish = true;
 }
 
+void basefootprintToCameraTF(){
+    tf::TransformListener tf_listerner;
+    tf::StampedTransform tf_trans;
+
+    try {
+        tf_listerner.waitForTransform("husky1_tf/base_footprint","husky1_tf/camera_realsense",ros::Time::now(),ros::Duration(3.0));
+        tf_listerner.lookupTransform("husky1_tf/base_footprint","husky1_tf/camera_realsense",ros::Time::now(),tf_trans);
+        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        cout << "X: " << tf_trans.getOrigin().x() << " Y: " << tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
+        camera_pose[0] = ROBOT_POSE_[0] + tf_trans.getOrigin().x();
+        camera_pose[1] = ROBOT_POSE_[1] + tf_trans.getOrigin().y();
+    }catch(tf2::TransformException &ex){
+        ROS_WARN("%s",ex.what());
+    } 
+}
+
+void cloudTransform(){
+    int depthPoints = depthCloudROS.height * depthCloudROS.width;
+    int p = 0;
+    geometry_msgs::TransformStamped transform;
+    sensor_msgs::PointCloud2 cloud_transform;
+    tf2_ros::Buffer* tf_buffer_ = new tf2_ros::Buffer;
+    tf2_ros::TransformListener* listener = new tf2_ros::TransformListener(*tf_buffer_);
+    std::vector<Point3D> depthCloud_;
+    depthCloud_.resize(depthPoints);
+    // depthCloudVec_.resize(1);
+
+    cout << "FRAME_ID DA POINT CLOUD: " << depthCloudROS.header.frame_id.c_str() << endl;
+
+    try{
+        transform = tf_buffer_->lookupTransform("map", "husky1_tf/camera_realsense_gazebo", ros::Time(0), ros::Duration(3.0));
+        tf2::doTransform(depthCloudROS, cloud_transform, transform);
+    } catch (tf2::TransformException& ex) {
+        ROS_WARN("%s", ex.what());
+        ROS_WARN("%s", depthCloudROS.header.frame_id.c_str());
+    }
+
+    sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_transform, "x");
+    sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_transform, "y");
+    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
+
+    cout << "CHEGUEI ATE AQUI!!!!!!!!!!!!!!!!!!!1111" << endl;
+
+    for (size_t i = 0; i < depthPoints; ++i, ++p, ++iter_x, ++iter_y, ++iter_z, ++iter_r, ++iter_g, ++iter_b) {
+        depthCloud_[p].x = *iter_x;
+        depthCloud_[p].y = *iter_y;
+        depthCloud_[p].z = *iter_z;
+    }
+
+    cout << "DEPTH CLOUD HEIGHT: " << depthCloudROS.height << " DEPTH CLOUD WIDTH: " << depthCloudROS.width << endl;
+}
+
 void check_object_position(float depth, int object_pos_x, int cell_value){
     float odom_x, odom_y;
 
@@ -186,6 +256,7 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
     double phi_world = (M_PI - max_angle_img)/2;
     double correction = 0;
     cout << "MAX ANGLE IN WIDTH: " << max_angle_img << " | DESLOCAMENTO DO ANGULO EM RELACAO AO MUNDO: " << phi_world << endl;
+    cout << "M_PI: " << M_PI << endl;
     cout << "SUBTRACAO DO MUNDO: " << (-M_PI/2)+phi_world << endl;
     correction = max_angle_img - object_angle;
 
@@ -206,9 +277,12 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
             // correction = center_angle - object_angle;
             // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
             // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
-            odom_x = ROBOT_POSE_[0] + cos(ang) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ang) * depth;
+            // odom_x = ROBOT_POSE_[0] + cos(ang) * depth;
+            // odom_y = ROBOT_POSE_[1] + sin(ang) * depth;
+            odom_x = camera_pose[0] + cos(ang) * depth;
+            odom_y = camera_pose[1] + sin(ang) * depth;
             cout << "COS(ANG): " << cos(ang) << " | DEPTH: " << depth << " | MULT: " << cos(ang) * depth << endl;
+            cout << "PERSON_ODOM_X: " << odom_x << " PERSON_ODOM_Y: " << odom_y << endl;
             // cout << "PIXEL : " << object_pos_x << "| PERSON ANGLE CORRECTED: " << correction << endl;
         // }
     } else {
@@ -227,8 +301,8 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
             // correction = center_angle - object_angle;
             // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]+correction) * depth;
             // odom_y = ROBOT_POSE_[1] + sin(ROBOT_POSE_[2]+correction) * depth;
-            odom_x = ROBOT_POSE_[0] + cos(ang) * depth;
-            odom_y = ROBOT_POSE_[1] + sin(ang) * depth;
+            odom_x = camera_pose[0] + cos(ang) * depth;
+            odom_y = camera_pose[1] + sin(ang) * depth;
             // cout << "PIXEL : " << object_pos_x << "| SUITCASE ANGLE CORRECTED: " << correction << endl;
         // }
     }
@@ -368,6 +442,15 @@ void caminfo_callback(const sensor_msgs::CameraInfoConstPtr& caminfo_msg){
     IMG_HEIGTH = caminfo_msg->height;
 }
 
+void point_cloud_callback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg){
+    depthCloudROS.header = cloud_msg->header;
+    depthCloudROS.height = cloud_msg->height;
+    depthCloudROS.width = cloud_msg->width;
+    depthCloudROS.row_step = cloud_msg->row_step;
+    depthCloudROS.point_step = cloud_msg->point_step;
+    depthCloudROS.fields = cloud_msg->fields;
+    depthCloudROS.data = cloud_msg->data;
+}
 
 
 int main(int argc, char **argv){
@@ -382,6 +465,7 @@ int main(int argc, char **argv){
     ros::Subscriber grid_map = node.subscribe("/map_out", 1, grid_callback);
     ros::Subscriber depth_img = node.subscribe("/husky1/realsense/depth/image_rect_raw", 1000, depth_img_callback);
     ros::Subscriber cam_info_sub = node.subscribe("/husky1/realsense/color/camera_info", 1, caminfo_callback);
+    ros::Subscriber point_cloud_sub = node.subscribe("/husky1/realsense/depth/color/points", 1, point_cloud_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_out_s",10);
     ros::Publisher img_out = node.advertise<sensor_msgs::Image>("/img_out",10);
@@ -391,7 +475,9 @@ int main(int argc, char **argv){
     while(ros::ok()){
         if (cv_ptr_){
             if (can_publish) {
+                basefootprintToCameraTF();
                 grid_update();
+                cloudTransform();
                 map_pub.publish(grid_map_);
                 can_publish = false;
                 img_out_->header.frame_id = cv_ptr_->header.frame_id;
