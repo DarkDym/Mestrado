@@ -36,6 +36,7 @@ typedef struct {
 nav_msgs::OccupancyGrid grid_map_;
 cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
+std::vector<Point3D> depthCloud_;
 float cx,cy,fx,fy;
 int IMG_WIDTH, IMG_HEIGTH;
 
@@ -92,8 +93,8 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
     return std::make_tuple(x,y);
 }
 
-int matrix2vectorIndex(int cell_x, int cell_y){
-    return cell_x + cell_y * map_width; 
+int matrix2vectorIndex(int cell_x, int cell_y, int map_width_){
+    return cell_x + cell_y * map_width_; 
 }
 
 std::tuple<int,int> findSomeDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConstPtr cv_ptr_in){
@@ -139,10 +140,10 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
         sort(depth_vec.begin(),depth_vec.end());
         if (depth_vec.size() % 2 == 0) {
             mean = depth_vec.size()/2;
-            cout << "PAR | MEDIANA: " << (depth_vec.at(mean+1) + depth_vec.at(mean))/2 << endl;
+            // cout << "PAR | MEDIANA: " << (depth_vec.at(mean+1) + depth_vec.at(mean))/2 << endl;
         }else {
             mean = depth_vec.size()/2;
-            cout << "IMPAR | MEDIANA: " << depth_vec.at(mean) << endl;
+            // cout << "IMPAR | MEDIANA: " << depth_vec.at(mean) << endl;
         }
     }
 
@@ -198,8 +199,8 @@ void basefootprintToCameraTF(){
     try {
         tf_listerner.waitForTransform("husky1_tf/base_footprint","husky1_tf/camera_realsense",ros::Time::now(),ros::Duration(3.0));
         tf_listerner.lookupTransform("husky1_tf/base_footprint","husky1_tf/camera_realsense",ros::Time::now(),tf_trans);
-        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "X: " << tf_trans.getOrigin().x() << " Y: " << tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
+        // cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        // cout << "X: " << tf_trans.getOrigin().x() << " Y: " << tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
         camera_pose[0] = ROBOT_POSE_[0] + tf_trans.getOrigin().x();
         camera_pose[1] = ROBOT_POSE_[1] + tf_trans.getOrigin().y();
     }catch(tf2::TransformException &ex){
@@ -207,65 +208,50 @@ void basefootprintToCameraTF(){
     } 
 }
 
-void cloudTransform(){
-    int depthPoints = depthCloudROS.height * depthCloudROS.width;
-    int p = 0;
-    geometry_msgs::TransformStamped transform;
-    sensor_msgs::PointCloud2 cloud_transform;
-    tf2_ros::Buffer* tf_buffer_ = new tf2_ros::Buffer;
-    tf2_ros::TransformListener* listener = new tf2_ros::TransformListener(*tf_buffer_);
-    std::vector<Point3D> depthCloud_;
-    depthCloud_.resize(depthPoints);
-    // depthCloudVec_.resize(1);
+std::tuple<float,float> cloudTransform(int px, int py){
+    
 
-    cout << "FRAME_ID DA POINT CLOUD: " << depthCloudROS.header.frame_id.c_str() << endl;
-
-    try{
-        transform = tf_buffer_->lookupTransform("map", "husky1_tf/camera_realsense_gazebo", ros::Time(0), ros::Duration(3.0));
-        tf2::doTransform(depthCloudROS, cloud_transform, transform);
-    } catch (tf2::TransformException& ex) {
-        ROS_WARN("%s", ex.what());
-        ROS_WARN("%s", depthCloudROS.header.frame_id.c_str());
-    }
-
-    sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_transform, "x");
-    sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_transform, "y");
-    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
-
-    cout << "CHEGUEI ATE AQUI!!!!!!!!!!!!!!!!!!!1111" << endl;
-
-    for (size_t i = 0; i < depthPoints; ++i, ++p, ++iter_x, ++iter_y, ++iter_z, ++iter_r, ++iter_g, ++iter_b) {
-        depthCloud_[p].x = *iter_x;
-        depthCloud_[p].y = *iter_y;
-        depthCloud_[p].z = *iter_z;
-    }
-
-    cout << "DEPTH CLOUD HEIGHT: " << depthCloudROS.height << " DEPTH CLOUD WIDTH: " << depthCloudROS.width << endl;
+    // cout << "DEPTH CLOUD HEIGHT: " << depthCloudROS.height << " DEPTH CLOUD WIDTH: " << depthCloudROS.width << endl;
+    // cout << "TESTE DEPTH CLOUD SIZE: " << depthCloud_.size() << endl;
+    int index = matrix2vectorIndex(px,py,depthCloudROS.width);
+    
+    // cout << "DEPTH AT (320,240): " << depthCloud_[index].x << " | " << depthCloud_[index].y << endl;
+    return std::make_tuple(depthCloud_[index].x,depthCloud_[index].y);
 }
 
-void check_object_position(float depth, int object_pos_x, int cell_value){
+void check_object_position(float depth, int object_pos_x, int object_pos_y, int cell_value){
     float odom_x, odom_y;
 
     double f = (IMG_WIDTH / 2.0) / tan(HFOV_RAD / 2.0);
     double object_angle = atan(object_pos_x / f);
     double center_angle = atan((int)(IMG_WIDTH/2) / f);
+    double max_angle = atan(IMG_WIDTH / f);
     double max_angle_img = HFOV_RAD;
     double phi_world = (M_PI - max_angle_img)/2;
     double correction = 0;
-    cout << "MAX ANGLE IN WIDTH: " << max_angle_img << " | DESLOCAMENTO DO ANGULO EM RELACAO AO MUNDO: " << phi_world << endl;
-    cout << "M_PI: " << M_PI << endl;
-    cout << "SUBTRACAO DO MUNDO: " << (-M_PI/2)+phi_world << endl;
-    correction = max_angle_img - object_angle;
+    // cout << "MAX ANGLE IN WIDTH: " << max_angle_img << " | DESLOCAMENTO DO ANGULO EM RELACAO AO MUNDO: " << phi_world << endl;
+    // cout << "M_PI: " << M_PI << endl;
+    // cout << "SUBTRACAO DO MUNDO: " << (-M_PI/2)+phi_world << endl;
+    //correction = max_angle_img - object_angle;
+
+    float object_x, object_y;
+
+    std::tie(object_x,object_y) = cloudTransform(object_pos_x,object_pos_y);
 
     if (cell_value == PERSON_VALUE) {
         cout << "PERSON ANGLE : " << object_angle << endl;
-        cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
-        double ang = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
-        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << endl;
+        // cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
+        double ang;// = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
         
+        
+        if (object_angle == (max_angle_img/2)) {
+            correction = 0;
+        } else {
+            correction = max_angle_img/2 - object_angle;
+        }
+
+        ang = ROBOT_POSE_[2] + correction;
+        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << " | CORRECTION: " << correction << endl;
         // if (object_pos_x >= 320) {
             // correction = object_angle - center_angle;
             // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
@@ -287,9 +273,18 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
         // }
     } else {
         cout << "SUITCASE ANGLE : " << object_angle << endl;
-        cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
-        double ang = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
-        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << endl;
+        // cout << "ANGULO DO OBJETO CORRIGIDO: " << correction << endl;
+        double ang;// = remainder(ROBOT_POSE_[2] + correction + ((-M_PI/2)+phi_world),2.0*M_PI);
+        
+
+        if (object_angle == (max_angle_img/2)) {
+            correction = 0;
+        } else {
+            correction = max_angle_img/2 - object_angle;
+        }
+
+        ang = ROBOT_POSE_[2] + correction;
+        cout << "ROBOT_POSE_ANGLE: " << ROBOT_POSE_[2] << " | SOMA DOS ANGULOS: " << ang << " | CORRECTION: " << correction << endl;
         // if (object_pos_x >= 320) {
             // correction = object_angle - center_angle;
             // odom_x = ROBOT_POSE_[0] + cos(ROBOT_POSE_[2]-correction) * depth;
@@ -308,8 +303,10 @@ void check_object_position(float depth, int object_pos_x, int cell_value){
     }
 
     cout << "ODOM_X: " << odom_x << " ODOM_Y: " << odom_y << endl;
+    cout << "POSITION OF OBJECT: [ " << object_x << " ; " << object_y << " ]" << endl; 
 
-    map_update(odom_x,odom_y, cell_value);
+    // map_update(odom_x,odom_y, cell_value);
+    map_update(object_x,object_y, cell_value);
 }
 
 void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
@@ -323,8 +320,8 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
         int object_pos_x = 0, object_pos_y = 0;
         if (msg->bounding_boxes[x].Class == "suitcase") {
             cout << "SUITCASE | PROBABILITY: " << msg->bounding_boxes[x].probability << endl;
-            cout << " X_MIN: " << msg->bounding_boxes[x].xmin << " X_MAX: " << msg->bounding_boxes[x].xmax << " X_MED: " << (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2 << endl;
-            cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
+            // cout << " X_MIN: " << msg->bounding_boxes[x].xmin << " X_MAX: " << msg->bounding_boxes[x].xmax << " X_MED: " << (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2 << endl;
+            // cout << " Y_MIN: " << msg->bounding_boxes[x].ymin << " Y_MAX: " << msg->bounding_boxes[x].ymax << " Y_MED: " << (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2 << endl;            
             object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
             object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;           
             if (object_pos_x < IMG_WIDTH && object_pos_y < IMG_HEIGTH) {
@@ -345,7 +342,9 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
                             if (!isnan(x_o)  && !isnan(y_o)) {
                                 cout << "POSICAO SUITCASE: [" << meanDepth << " , " << x_o << "]" << endl;
                                 // cout << "POSICAO SUITCASE EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
-                                check_object_position(meanDepth,object_pos_x, SUITCASE_VALUE);
+                                object_pos_x = (msg->bounding_boxes[x].xmax-bound_reduction_scale_x+msg->bounding_boxes[x].xmin+bound_reduction_scale_x)/2;
+                                object_pos_y = (msg->bounding_boxes[x].ymax-bound_reduction_scale_y+msg->bounding_boxes[x].ymin+bound_reduction_scale_y)/2;
+                                check_object_position(meanDepth,object_pos_x,object_pos_y,SUITCASE_VALUE);
                             }
                         // }
                     }
@@ -374,7 +373,9 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
                             if (!isnan(x_o)  && !isnan(y_o)) {
                                 cout << "POSICAO PERSON: [" << meanDepth << " , " << x_o << "]" << endl;
                                 // cout << "POSICAO PERSON EM RELACAO ROBO: [" << ROBOT_POSE_[0]+meanDepth << " , " << ROBOT_POSE_[1]+x_o << "]" <<endl; 
-                                check_object_position(meanDepth,object_pos_x, PERSON_VALUE);
+                                object_pos_x = (msg->bounding_boxes[x].xmax-bound_reduction_scale_x+msg->bounding_boxes[x].xmin+bound_reduction_scale_x)/2;
+                                object_pos_y = (msg->bounding_boxes[x].ymax-bound_reduction_scale_y+msg->bounding_boxes[x].ymin+bound_reduction_scale_y)/2;
+                                check_object_position(meanDepth,object_pos_x,object_pos_y,PERSON_VALUE);
                             }
                         // }
                     }
@@ -450,6 +451,41 @@ void point_cloud_callback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg){
     depthCloudROS.point_step = cloud_msg->point_step;
     depthCloudROS.fields = cloud_msg->fields;
     depthCloudROS.data = cloud_msg->data;
+
+    int depthPoints = depthCloudROS.height * depthCloudROS.width;
+    int p = 0;
+    geometry_msgs::TransformStamped transform;
+    sensor_msgs::PointCloud2 cloud_transform;
+    tf2_ros::Buffer* tf_buffer_ = new tf2_ros::Buffer;
+    tf2_ros::TransformListener* listener = new tf2_ros::TransformListener(*tf_buffer_);
+    
+    depthCloud_.resize(depthPoints);
+    // depthCloudVec_.resize(1);
+
+    // cout << "FRAME_ID DA POINT CLOUD: " << depthCloudROS.header.frame_id.c_str() << endl;
+
+    try{
+        transform = tf_buffer_->lookupTransform("map", "husky1_tf/camera_realsense_gazebo", ros::Time(0), ros::Duration(3.0));
+        tf2::doTransform(depthCloudROS, cloud_transform, transform);
+    } catch (tf2::TransformException& ex) {
+        ROS_WARN("%s", ex.what());
+        ROS_WARN("%s", depthCloudROS.header.frame_id.c_str());
+    }
+
+    sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_transform, "x");
+    sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_transform, "y");
+    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
+    sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
+
+    cout << "CHEGUEI ATE AQUI!!!!!!!!!!!!!!!!!!!1111" << endl;
+    //Retirar o p rgb
+    for (size_t i = 0; i < depthPoints; ++i, ++p, ++iter_x, ++iter_y, ++iter_z, ++iter_r, ++iter_g, ++iter_b) {
+        depthCloud_[p].x = *iter_x;
+        depthCloud_[p].y = *iter_y;
+        depthCloud_[p].z = *iter_z;
+    }
 }
 
 
@@ -477,7 +513,7 @@ int main(int argc, char **argv){
             if (can_publish) {
                 basefootprintToCameraTF();
                 grid_update();
-                cloudTransform();
+                
                 map_pub.publish(grid_map_);
                 can_publish = false;
                 img_out_->header.frame_id = cv_ptr_->header.frame_id;
