@@ -95,7 +95,9 @@ int main(int argc, char **argv){
             } else {
                 if (move_base_client_.waitForResult()) {
                     tie(input_goal_x,input_goal_y) = goals[index];
-
+                    
+                    cout << "NEXT GOAL [" << index << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    
                     goals_output.target_pose.header.frame_id = "husky1_tf/map";
                     goals_output.target_pose.pose.position.x = input_goal_x;
                     goals_output.target_pose.pose.position.y = input_goal_y;

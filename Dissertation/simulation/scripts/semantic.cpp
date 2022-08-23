@@ -61,6 +61,9 @@ bool setup_map = true;
 
 std::vector<sensor_msgs::PointCloud2> depthCloudVec_;
 sensor_msgs::PointCloud2 depthCloudROS;
+sensor_msgs::PointCloud2Iterator<float> iter_x;
+sensor_msgs::PointCloud2Iterator<float> iter_y;
+sensor_msgs::PointCloud2Iterator<float> iter_z;
 
 void init_map(){
     
@@ -472,19 +475,21 @@ void point_cloud_callback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg){
         ROS_WARN("%s", depthCloudROS.header.frame_id.c_str());
     }
 
-    sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_transform, "x");
-    sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_transform, "y");
-    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
-    sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
+    iter_x(cloud_transform, "x");
+    iter_y(cloud_transform, "y");
+    iter_z(cloud_transform, "z");
+    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
+    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
+    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
 
     cout << "CHEGUEI ATE AQUI!!!!!!!!!!!!!!!!!!!1111" << endl;
-    //Retirar o p rgb
-    for (size_t i = 0; i < depthPoints; ++i, ++p, ++iter_x, ++iter_y, ++iter_z, ++iter_r, ++iter_g, ++iter_b) {
-        depthCloud_[p].x = *iter_x;
-        depthCloud_[p].y = *iter_y;
-        depthCloud_[p].z = *iter_z;
+    
+
+    for (size_t i = 0; i < depthPoints; ++i, ++iter_x, ++iter_y, ++iter_z) {
+        // cout << "ITER_X CONTEUDO PRA VER O QUE TEM : " << *iter_x << endl;
+        depthCloud_[i].x = *iter_x;
+        depthCloud_[i].y = *iter_y;
+        depthCloud_[i].z = *iter_z;
     }
 }
 
