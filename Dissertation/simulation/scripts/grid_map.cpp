@@ -225,10 +225,10 @@ void basefootprintToLaserTF(){
     try {
         tf_listerner.waitForTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),ros::Duration(3.0));
         tf_listerner.lookupTransform("husky1_tf/base_footprint","husky1_tf/base_laser",ros::Time::now(),tf_trans);
-        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<ROBOT POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "X: " << robot_pose[0] << " Y: " << robot_pose[1] << endl;
-        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "X: " << robot_pose[0] + tf_trans.getOrigin().x() << " Y: " << robot_pose[1] + tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
+        // cout << "<<<<<<<<<<<<<<<<<<<<<<<<<ROBOT POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        // cout << "X: " << robot_pose[0] << " Y: " << robot_pose[1] << endl;
+        // cout << "<<<<<<<<<<<<<<<<<<<<<<<<<TRANSFORM POSE>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+        // cout << "X: " << robot_pose[0] + tf_trans.getOrigin().x() << " Y: " << robot_pose[1] + tf_trans.getOrigin().y() << " Z: " << tf_trans.getOrigin().z() << endl;
         laser_pose[0] = robot_pose[0] + tf_trans.getOrigin().x();
         laser_pose[1] = robot_pose[1] + tf_trans.getOrigin().y();
     }catch(tf2::TransformException &ex){

@@ -5,11 +5,15 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <std_msgs/Bool.h>
 
 
 using namespace std;
 
 vector<tuple<float,float>> goals;
+int last_index = 0;
+int index_ = 0;
+bool missionStop = false;
 
 void mission_goals(){
     tuple<float,float> inv_goals;    
@@ -54,6 +58,26 @@ void mission_goals(){
     goals.emplace_back(inv_goals);
 }
 
+void stopMission(bool stop){
+    if (stop) {
+        last_index = index_;
+        missionStop = true;
+    }
+}
+
+void resumeMission(bool resume){
+    if (resume)
+        missionStop = false;
+}
+
+void stop_callback(const std_msgs::Bool& stop_msg){
+    stopMission(stop_msg.data);
+}
+
+void resume_callback(const std_msgs::Bool& resume_msg){
+    resumeMission(resume_msg.data);
+}
+
 int main(int argc, char **argv){
     
     ros::init(argc, argv, "patrol_move");
@@ -63,11 +87,14 @@ int main(int argc, char **argv){
 
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> move_base_client_("/husky1/move_base");
 
+    ros::Subscriber stop_mission_sub = node.subscribe("/stop_mission",1,stop_callback);
+    ros::Subscriber resume_mission_sub = node.subscribe("/resume_mission",1,resume_callback);
+
     move_base_msgs::MoveBaseGoal goals_output;
 
     ros::Rate rate(10);
 
-    int index = 0;
+    // int index = 0;
     float input_goal_x, input_goal_y;
     bool setup = true;
 
@@ -77,27 +104,10 @@ int main(int argc, char **argv){
             ros::spinOnce();
             rate.sleep();
         } else {
-            if (setup) {
-                tie(input_goal_x,input_goal_y) = goals[index];
+            if (!missionStop) {
+                if (setup) {
+                    tie(input_goal_x,input_goal_y) = goals[index_];
 
-                goals_output.target_pose.header.frame_id = "husky1_tf/map";
-                goals_output.target_pose.pose.position.x = input_goal_x;
-                goals_output.target_pose.pose.position.y = input_goal_y;
-                goals_output.target_pose.pose.position.z = 0;
-                goals_output.target_pose.pose.orientation.x = 0.0;
-                goals_output.target_pose.pose.orientation.y = 0.0;
-                goals_output.target_pose.pose.orientation.z = 0.25;
-                goals_output.target_pose.pose.orientation.w = 0.95;
-
-                move_base_client_.sendGoal(goals_output);
-                index++;
-                setup = false;
-            } else {
-                if (move_base_client_.waitForResult()) {
-                    tie(input_goal_x,input_goal_y) = goals[index];
-                    
-                    cout << "NEXT GOAL [" << index << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    
                     goals_output.target_pose.header.frame_id = "husky1_tf/map";
                     goals_output.target_pose.pose.position.x = input_goal_x;
                     goals_output.target_pose.pose.position.y = input_goal_y;
@@ -108,11 +118,33 @@ int main(int argc, char **argv){
                     goals_output.target_pose.pose.orientation.w = 0.95;
 
                     move_base_client_.sendGoal(goals_output);
-                    index++;
-                    if (index > 13) {
-                        index = 0;
+                    index_++;
+                    setup = false;
+                } else {
+                    if (move_base_client_.waitForResult()) {
+                        tie(input_goal_x,input_goal_y) = goals[index_];
+                        
+                        cout << "NEXT GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                        
+                        goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                        goals_output.target_pose.pose.position.x = input_goal_x;
+                        goals_output.target_pose.pose.position.y = input_goal_y;
+                        goals_output.target_pose.pose.position.z = 0;
+                        goals_output.target_pose.pose.orientation.x = 0.0;
+                        goals_output.target_pose.pose.orientation.y = 0.0;
+                        goals_output.target_pose.pose.orientation.z = 0.25;
+                        goals_output.target_pose.pose.orientation.w = 0.95;
+
+                        move_base_client_.sendGoal(goals_output);
+                        index_++;
+                        if (index_ > 13) {
+                            index_ = 0;
+                        }
                     }
                 }
+            } else {
+                move_base_client_.cancelAllGoals();
+                index_ = last_index;
             }
         }
         ros::spinOnce();
