@@ -14,6 +14,10 @@ vector<tuple<float,float>> goals;
 int last_index = 0;
 int index_ = 0;
 bool missionStop = false;
+//----------------------------------------------------------------------------------------------------------
+// bool mission_finished_;
+// bool marking_finished_;
+//----------------------------------------------------------------------------------------------------------
 
 void mission_goals(){
     tuple<float,float> inv_goals;    
@@ -78,6 +82,12 @@ void resume_callback(const std_msgs::Bool& resume_msg){
     resumeMission(resume_msg.data);
 }
 
+//----------------------------------------------------------------------------------------------------------
+// void finished_marking_callback(const std_msgs::Bool& finished_marking_msg){
+//     marking_finished_ = finished_marking_msg.data;
+// }
+//----------------------------------------------------------------------------------------------------------
+
 int main(int argc, char **argv){
     
     ros::init(argc, argv, "patrol_move");
@@ -89,6 +99,27 @@ int main(int argc, char **argv){
 
     ros::Subscriber stop_mission_sub = node.subscribe("/stop_mission",1,stop_callback);
     ros::Subscriber resume_mission_sub = node.subscribe("/resume_mission",1,resume_callback);
+
+    /*
+        ***************************EXPERIMENTAL******************************************************
+        Parte experimental para considerar as marcações no semantic_map somente quando chegou no goal.
+        Os goals são controlados pelo patrol.cpp, utilizar um par de tópicos, sendo eles: um para mandar o resultado da
+        missão atual e outro para enviar o resultado da marcação do semantic_map e resumo da missão.
+
+        /husky1/finished_mission
+            type: bool
+            description: Utilizado para receber/enviar mensagem de finalização de cada missão executada pelo robô.
+            parent: partol.cpp
+        /husky1/finished_marking
+            type: bool
+            description: Utilizado para receber/enviar mensagem de finalização do processo de marcação dos objetos
+                         no Semantic_map.
+            parent: semantic.cpp
+    */
+    //----------------------------------------------------------------------------------------------------------
+    // ros::Subscriber finished_marking_sub = node.subscribe("/husky1/finished_marking",1000,finished_marking_callback);
+    // ros::Publisher finished_mission_pub = node.advertise<std_msgs::Bool>("/husky1/finished_mission",10);
+    //----------------------------------------------------------------------------------------------------------
 
     move_base_msgs::MoveBaseGoal goals_output;
 
@@ -104,6 +135,9 @@ int main(int argc, char **argv){
             ros::spinOnce();
             rate.sleep();
         } else {
+            //----------------------------------------------------------------------------------------------------------
+            // if (!mission_finished_){
+            //----------------------------------------------------------------------------------------------------------
             if (!missionStop) {
                 if (setup) {
                     tie(input_goal_x,input_goal_y) = goals[index_];
@@ -135,6 +169,11 @@ int main(int argc, char **argv){
                         goals_output.target_pose.pose.orientation.z = 0.25;
                         goals_output.target_pose.pose.orientation.w = 0.95;
 
+                        //----------------------------------------------------------------------------------------------------------
+                        // finished_mission_pub.publish(mission_finished_);
+                        // mission_finished_ = true;
+                        //----------------------------------------------------------------------------------------------------------
+
                         move_base_client_.sendGoal(goals_output);
                         index_++;
                         if (index_ > 13) {
@@ -146,6 +185,13 @@ int main(int argc, char **argv){
                 move_base_client_.cancelAllGoals();
                 index_ = last_index;
             }
+            //----------------------------------------------------------------------------------------------------------
+            // } else {
+                // if (marking_finished_) {
+                    // mission_finished_ = false;
+                // }
+            // }
+            //----------------------------------------------------------------------------------------------------------
         }
         ros::spinOnce();
         rate.sleep();

@@ -68,6 +68,10 @@ std::vector<sensor_msgs::PointCloud2> depthCloudVec_;
 sensor_msgs::PointCloud2 depthCloudROS;
 
 
+//----------------------------------------------------------------------------------------------------------
+// bool mission_finished_;
+//----------------------------------------------------------------------------------------------------------
+
 void init_map(){
     for (int x = 0; x < 4000; x++) {
         for (int y = 0; y < 4000; y++) {
@@ -213,24 +217,26 @@ void map_update(float pos_x, float pos_y, int cell_value){
 
 /*
 Implementar esta função para escanear as marcações que estão no
-mapa semântico e dever ser apagados do mesmo. Neste momento estou
+mapa semântico e dever ser apagados do mesmo caso nenhum objeto exista no local. Neste momento estou
 utilizando a posição da câmera do robô, contudo, é melhor conseguir
 a posição que fica mais próximo do início da pointcloud.
 */
-// void scanForObejctsInMap(){
-//     int cell_x, cell_y;
-//     int radius = 50;
+void scanForObejctsInMap(){
+    int cell_x, cell_y;
+    int radius = 50;
 
-//     tie(cell_x, cell_y) = odom2cell(camera_pose[0], camera_pose[1]);
+    tie(cell_x, cell_y) = odom2cell(camera_pose[0], camera_pose[1]);
 
-//     for (int y = cell_y - radius; y < cell_y + radius; y++) {
-//         for (int x = cell_x - radius; x < cell_x + radius; x++) {
-//             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
-//                 map_[x][y] = cell_value;
-//             }
-//         }
-//     }
-// }
+    for (int y = cell_y; y < cell_y + radius; y++) {
+        for (int x = cell_x - radius; x < cell_x + radius; x++) {
+            if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
+                if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE) {
+                    map_[x][y] = 0;
+                }
+            }
+        }
+    }
+}
 
 void basefootprintToCameraTF(){
     tf::TransformListener tf_listerner;
@@ -504,6 +510,11 @@ void found_object_callback(const darknet_ros_msgs::ObjectCount& count_msg){
     cout << "QNT: " << count_objects_ << endl;
 }
 
+//----------------------------------------------------------------------------------------------------------
+// void finished_mission_callback(const std_msgs::Bool& finished_mission_msg){
+//     mission_finished_ = finished_mission_msg.data;
+// }
+//----------------------------------------------------------------------------------------------------------
 
 int main(int argc, char **argv){
 
@@ -520,6 +531,27 @@ int main(int argc, char **argv){
     ros::Subscriber point_cloud_sub = node.subscribe("/husky1/realsense/depth/color/points", 1, point_cloud_callback);
     ros::Subscriber dkn_object_sub = node.subscribe("/darknet_ros/found_object", 1000, found_object_callback);
 
+    /*
+        ***************************EXPERIMENTAL******************************************************
+        Parte experimental para considerar as marcações no semantic_map somente quando chegou no goal.
+        Os goals são controlados pelo patrol.cpp, utilizar um par de tópicos, sendo eles: um para mandar o resultado da
+        missão atual e outro para enviar o resultado da marcação do semantic_map e resumo da missão.
+
+        /husky1/finished_mission
+            type: bool
+            description: Utilizado para receber/enviar mensagem de finalização de cada missão executada pelo robô.
+            parent: partol.cpp
+        /husky1/finished_marking
+            type: bool
+            description: Utilizado para receber/enviar mensagem de finalização do processo de marcação dos objetos
+                         no Semantic_map.
+            parent: semantic.cpp
+    */
+    //--------------------------------------------------------------------
+    // ros::Subscriber mission_finished_sub = node.subscribe("/husky1/finished_mission",1000,finished_mission_callback);
+    // ros::Publisher finished_marking_pub = node.advertise<std_msgs::Bool>("/husky1/finished_marking",10);
+    //--------------------------------------------------------------------
+
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_out_s",10);
     ros::Publisher img_out = node.advertise<sensor_msgs::Image>("/img_out",10);
     ros::Publisher stop_mission_pub = node.advertise<std_msgs::Bool>("/stop_mission",10);
@@ -529,17 +561,21 @@ int main(int argc, char **argv){
 
     while(ros::ok()){
         if (cv_ptr_){
-            if (can_publish) {
-                basefootprintToCameraTF();
-                grid_update();
-                
-                map_pub.publish(grid_map_);
-                can_publish = false;
-                img_out_->header.frame_id = cv_ptr_->header.frame_id;
-                img_out_->header.seq = cv_ptr_->header.seq;
-                img_out_->header.stamp = cv_ptr_->header.stamp;
-                img_out_->encoding = cv_ptr_->encoding;
-                img_out.publish(img_out_->toImageMsg());
+            if (count_objects_ > 0) {
+                if (can_publish) {
+                    basefootprintToCameraTF();
+                    grid_update();
+                    
+                    map_pub.publish(grid_map_);
+                    can_publish = false;
+                    img_out_->header.frame_id = cv_ptr_->header.frame_id;
+                    img_out_->header.seq = cv_ptr_->header.seq;
+                    img_out_->header.stamp = cv_ptr_->header.stamp;
+                    img_out_->encoding = cv_ptr_->encoding;
+                    img_out.publish(img_out_->toImageMsg());
+                }
+            } else {
+                scanForObejctsInMap();
             }
         }
             ros::spinOnce();
