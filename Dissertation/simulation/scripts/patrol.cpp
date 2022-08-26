@@ -15,8 +15,9 @@ int last_index = 0;
 int index_ = 0;
 bool missionStop = false;
 //----------------------------------------------------------------------------------------------------------
-// bool mission_finished_;
-// bool marking_finished_;
+bool mission_finished_ = false;
+std_msgs::Bool ros_mission_finished_;
+bool marking_finished_ = false;
 //----------------------------------------------------------------------------------------------------------
 
 void mission_goals(){
@@ -83,9 +84,9 @@ void resume_callback(const std_msgs::Bool& resume_msg){
 }
 
 //----------------------------------------------------------------------------------------------------------
-// void finished_marking_callback(const std_msgs::Bool& finished_marking_msg){
-//     marking_finished_ = finished_marking_msg.data;
-// }
+void finished_marking_callback(const std_msgs::Bool& finished_marking_msg){
+    marking_finished_ = finished_marking_msg.data;
+}
 //----------------------------------------------------------------------------------------------------------
 
 int main(int argc, char **argv){
@@ -117,8 +118,8 @@ int main(int argc, char **argv){
             parent: semantic.cpp
     */
     //----------------------------------------------------------------------------------------------------------
-    // ros::Subscriber finished_marking_sub = node.subscribe("/husky1/finished_marking",1000,finished_marking_callback);
-    // ros::Publisher finished_mission_pub = node.advertise<std_msgs::Bool>("/husky1/finished_mission",10);
+    ros::Subscriber finished_marking_sub = node.subscribe("/husky1/finished_marking",1000,finished_marking_callback);
+    ros::Publisher finished_mission_pub = node.advertise<std_msgs::Bool>("/husky1/finished_mission",10);
     //----------------------------------------------------------------------------------------------------------
 
     move_base_msgs::MoveBaseGoal goals_output;
@@ -136,30 +137,12 @@ int main(int argc, char **argv){
             rate.sleep();
         } else {
             //----------------------------------------------------------------------------------------------------------
-            // if (!mission_finished_){
+            if (!mission_finished_){
             //----------------------------------------------------------------------------------------------------------
-            if (!missionStop) {
-                if (setup) {
-                    tie(input_goal_x,input_goal_y) = goals[index_];
-
-                    goals_output.target_pose.header.frame_id = "husky1_tf/map";
-                    goals_output.target_pose.pose.position.x = input_goal_x;
-                    goals_output.target_pose.pose.position.y = input_goal_y;
-                    goals_output.target_pose.pose.position.z = 0;
-                    goals_output.target_pose.pose.orientation.x = 0.0;
-                    goals_output.target_pose.pose.orientation.y = 0.0;
-                    goals_output.target_pose.pose.orientation.z = 0.25;
-                    goals_output.target_pose.pose.orientation.w = 0.95;
-
-                    move_base_client_.sendGoal(goals_output);
-                    index_++;
-                    setup = false;
-                } else {
-                    if (move_base_client_.waitForResult()) {
+                if (!missionStop) {
+                    if (setup) {
                         tie(input_goal_x,input_goal_y) = goals[index_];
-                        
-                        cout << "NEXT GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                        
+
                         goals_output.target_pose.header.frame_id = "husky1_tf/map";
                         goals_output.target_pose.pose.position.x = input_goal_x;
                         goals_output.target_pose.pose.position.y = input_goal_y;
@@ -169,28 +152,50 @@ int main(int argc, char **argv){
                         goals_output.target_pose.pose.orientation.z = 0.25;
                         goals_output.target_pose.pose.orientation.w = 0.95;
 
-                        //----------------------------------------------------------------------------------------------------------
-                        // finished_mission_pub.publish(mission_finished_);
-                        // mission_finished_ = true;
-                        //----------------------------------------------------------------------------------------------------------
-
                         move_base_client_.sendGoal(goals_output);
                         index_++;
-                        if (index_ > 13) {
-                            index_ = 0;
+                        setup = false;
+                    } else {
+                        if (move_base_client_.waitForResult()) {
+                            tie(input_goal_x,input_goal_y) = goals[index_];
+                            
+                            cout << "NEXT GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                            
+                            goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                            goals_output.target_pose.pose.position.x = input_goal_x;
+                            goals_output.target_pose.pose.position.y = input_goal_y;
+                            goals_output.target_pose.pose.position.z = 0;
+                            goals_output.target_pose.pose.orientation.x = 0.0;
+                            goals_output.target_pose.pose.orientation.y = 0.0;
+                            goals_output.target_pose.pose.orientation.z = 0.25;
+                            goals_output.target_pose.pose.orientation.w = 0.95;
+
+                            //----------------------------------------------------------------------------------------------------------
+                            mission_finished_ = true;
+                            ros_mission_finished_.data = mission_finished_;
+                            finished_mission_pub.publish(ros_mission_finished_);
+                            //----------------------------------------------------------------------------------------------------------
+
+                            // move_base_client_.sendGoal(goals_output);
+                            index_++;
+                            if (index_ > 13) {
+                                index_ = 0;
+                            }
                         }
                     }
+                } else {
+                    move_base_client_.cancelAllGoals();
+                    index_ = last_index;
                 }
-            } else {
-                move_base_client_.cancelAllGoals();
-                index_ = last_index;
-            }
             //----------------------------------------------------------------------------------------------------------
-            // } else {
-                // if (marking_finished_) {
-                    // mission_finished_ = false;
-                // }
-            // }
+            } else {
+                if (marking_finished_) {
+                    mission_finished_ = false;
+                    ros_mission_finished_.data = mission_finished_;
+                    finished_mission_pub.publish(ros_mission_finished_);
+                    move_base_client_.sendGoal(goals_output);
+                }
+            }
             //----------------------------------------------------------------------------------------------------------
         }
         ros::spinOnce();
