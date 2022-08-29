@@ -93,7 +93,8 @@ void copy_map(){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
-            if (map_[x][y] != SUITCASE_VALUE || map_[x][y] != PERSON_VALUE) {
+            if (map_[x][y] != SUITCASE_VALUE && map_[x][y] != PERSON_VALUE) {
+                // cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
                 map_[x][y] = grid_map_.data[index];
             }else{
                 cout << "------------------------------------------------------------------------------" << endl;
@@ -200,15 +201,15 @@ void grid_update(){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
-            if (map_[x][y] != SUITCASE_VALUE || map_[x][y] != PERSON_VALUE) {
+            // if (map_[x][y] != SUITCASE_VALUE || map_[x][y] != PERSON_VALUE) {
                 grid_map_.data[index] = map_[x][y];
-            }else{
-                cout << "------------------------------------------------------------------------------" << endl;
-                cout << "GRID_UPDATE" << endl;
-                cout << "*****************AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-                cout << "VALOR DO QUE EU COMPAREI: " << map_[x][y] << endl;
-                cout << "------------------------------------------------------------------------------" << endl;
-            }
+            // }else{
+            //     cout << "------------------------------------------------------------------------------" << endl;
+            //     cout << "GRID_UPDATE" << endl;
+            //     cout << "*****************AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
+            //     cout << "VALOR DO QUE EU COMPAREI: " << map_[x][y] << endl;
+            //     cout << "------------------------------------------------------------------------------" << endl;
+            // }
         }
     }
 }
@@ -245,16 +246,17 @@ a posição que fica mais próximo do início da pointcloud.
 */
 void scanForObejctsInMap(){
     int cell_x, cell_y;
-    int radius = 50;
+    int radius_y = 150;
+    int radius_x = 50;
 
     tie(cell_x, cell_y) = odom2cell(camera_pose[0], camera_pose[1]);
 
-    for (int y = cell_y; y < cell_y + radius; y++) {
-        for (int x = cell_x - radius; x < cell_x + radius; x++) {
+    for (int y = cell_y; y < cell_y + radius_y; y++) {
+        for (int x = cell_x - radius_x; x < cell_x + radius_x; x++) {
             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
-                if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE) {
-                    map_[x][y] = 0;
-                }
+                // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE) {
+                    map_[x][y] = 80;
+                // }
             }
         }
     }
@@ -337,6 +339,7 @@ void objectInSemanticMap(int object_pos_x, int object_pos_y){
         for (int x = cell_x - radius; x < cell_x + radius; x++) {
             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
                 if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == VASE_VALUE || map_[x][y] == BICYCLE_VALUE) {
+                    cout << "ACHEI UM OBJETO AQUI DENTRO!!!!!!!!!!!!!!!!!1111" << endl;
                     objectInMap_ = true;
                     break;
                 } else {
@@ -472,19 +475,19 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
         copy_map();
         setup_map = false;
     } else {
-        for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
-            if (grid_map_.data[x] != SUITCASE_VALUE || grid_map_.data[x] != PERSON_VALUE || grid_map_.data[x] != VASE_VALUE || grid_map_.data[x] != BICYCLE_VALUE) {
-                grid_map_.data[x] = map_msg->data[x];
-            }else{
-                cout << "------------------------------------------------------------------------------" << endl;
-                cout << "GRID_CALLBACK" << endl;
-                cout << "AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-                cout << "VALOR QUE TA NA VARIAVEL: " << grid_map_.data[x] << endl;
-                cout << "------------------------------------------------------------------------------" << endl;
-            }
-        }
         if (!can_publish){
-            copy_map();
+            for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
+                if (grid_map_.data[x] != SUITCASE_VALUE || grid_map_.data[x] != PERSON_VALUE || grid_map_.data[x] != VASE_VALUE || grid_map_.data[x] != BICYCLE_VALUE) {
+                    grid_map_.data[x] = map_msg->data[x];
+                }else{
+                    cout << "------------------------------------------------------------------------------" << endl;
+                    cout << "GRID_CALLBACK" << endl;
+                    cout << "AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
+                    cout << "VALOR QUE TA NA VARIAVEL: " << grid_map_.data[x] << endl;
+                    cout << "------------------------------------------------------------------------------" << endl;
+                }
+            }
+            // copy_map();
         }
     }
 }
@@ -612,13 +615,15 @@ int main(int argc, char **argv){
     ros::Rate rate(10);
 
     while(ros::ok()){
+        basefootprintToCameraTF();
         if (cv_ptr_){
             checkGridForValue();
             if (mission_finished_){    
                 if (count_objects_ > 0) {
+                    copy_map();
                     boundToSemanticMap();
                     if (can_publish) {
-                        basefootprintToCameraTF();
+                        
                         grid_update();
                         
                         map_pub.publish(grid_map_);
@@ -635,7 +640,10 @@ int main(int argc, char **argv){
                         finished_marking_pub.publish(ros_finished_marking_);
                     }
                 } else {
+                    copy_map();
                     scanForObejctsInMap();
+                    grid_update();   
+                    map_pub.publish(grid_map_);
                     ros_finished_marking_.data = true;
                     finished_marking_pub.publish(ros_finished_marking_);
                 }
