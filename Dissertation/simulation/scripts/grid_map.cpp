@@ -210,9 +210,7 @@ void himm_inc(int grid_map[][4000], int robot_cell_x, int robot_cell_y, int lase
     if (!inf){
         grid_map[laser_cell_x][laser_cell_y] += 21;
         if (grid_map[laser_cell_x][laser_cell_y] > 100) {
-            // if (grid_map[laser_cell_x][laser_cell_y] != 230) {
-                grid_map[laser_cell_x][laser_cell_y] = 100;
-            // }
+            grid_map[laser_cell_x][laser_cell_y] = 100;
         }
     }
     
@@ -263,7 +261,6 @@ nav_msgs::OccupancyGrid update_map(nav_msgs::OccupancyGrid map){
             }
         }
     }
-    
     
     for(int x = 0; x < map_width2; x++){
         int multi = x * map_width2;

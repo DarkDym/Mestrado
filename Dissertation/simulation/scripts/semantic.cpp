@@ -51,18 +51,24 @@ const float map_resolution = 0.05;
 const float map_origin_x = -107.00;
 const float map_origin_y = -100.00; 
 
+const float HFOV_RAD = 1.5184351666666667;
+const float CROP_SCALE = 4;
+
 const int VASE_VALUE = 110;
 const int BICYCLE_VALUE = 130;
 const int PERSON_VALUE = 160;
 const int SUITCASE_VALUE = 240;
-const float HFOV_RAD = 1.5184351666666667;
-const float CROP_SCALE = 4;
+const int UNKWON_VALUE = 80;
+
+const float ANGLE_INCREASE = 0.002811917;
+const int MAX_BEAMS = 540;
+const int MAX_RANGE_CAM_DEPTH = 15;
 
 float ROBOT_POSE_[3];
 bool can_publish = false;
 int map_[4000][4000];
 
-float camera_pose[2];
+float camera_pose[3];
 
 bool setup_map = true;
 bool objectInMap_ = false;
@@ -93,16 +99,17 @@ void copy_map(){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
-            if (map_[x][y] != SUITCASE_VALUE && map_[x][y] != PERSON_VALUE) {
+            if (map_[x][y] != SUITCASE_VALUE && map_[x][y] != PERSON_VALUE && map_[x][y] != VASE_VALUE && map_[x][y] != BICYCLE_VALUE) {
                 // cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
                 map_[x][y] = grid_map_.data[index];
-            }else{
-                cout << "------------------------------------------------------------------------------" << endl;
-                cout << "COPY_MAP" << endl;
-                cout << "&&&&&&&&&&&&&&&&&&&&&AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-                cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
-                cout << "------------------------------------------------------------------------------" << endl;
             }
+            // else{
+            //     cout << "------------------------------------------------------------------------------" << endl;
+            //     cout << "COPY_MAP" << endl;
+            //     cout << "&&&&&&&&&&&&&&&&&&&&&AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
+            //     cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
+            //     cout << "------------------------------------------------------------------------------" << endl;
+            // }
         }
     }
 }
@@ -183,13 +190,13 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
 }
 //--------------------------------------------------------------------------------------------------------------
 void checkGridForValue(){
-    cout << "ENTREI NA VERIFICACAO!!!!!" << endl;
+    // cout << "ENTREI NA VERIFICACAO!!!!!" << endl;
     for(int x = 0; x < map_width; x++){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
-            if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE) {
-                cout << "ACHEI UM DOS OBJETOS QUE ESTAVA PROCURANDO!!!!" << map_[x][y] << endl;
+            if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == VASE_VALUE || map_[x][y] == BICYCLE_VALUE) {
+                // cout << "ACHEI UM DOS OBJETOS QUE ESTAVA PROCURANDO!!!!" << map_[x][y] << endl;
             }
         }
     }
@@ -225,7 +232,7 @@ void map_update(float pos_x, float pos_y, int cell_value){
     tie(cell_x, cell_y) = odom2cell(pos_x, pos_y);
     int index;
 
-    int radius = 1;
+    int radius = 3;
     for (int y = cell_y - radius; y < cell_y + radius; y++) {
         for (int x = cell_x - radius; x < cell_x + radius; x++) {
             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
@@ -237,27 +244,91 @@ void map_update(float pos_x, float pos_y, int cell_value){
     can_publish = true;
 }
 
+//----------------------------------------------------------------
+//HIMM FOR IMAGE SCAN
+//Later: Change the name of the function to clarify what it is doing.
+void himm_inc(int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_cell_y){
+    int delta_x, delta_y, precision, precision2, xy2, x, y, xf, step_x, step_y;
+    
+    delta_x = laser_cell_x - robot_cell_x;
+    delta_y = laser_cell_y - robot_cell_y;
 
-/*
-Implementar esta função para escanear as marcações que estão no
-mapa semântico e dever ser apagados do mesmo caso nenhum objeto exista no local. Neste momento estou
-utilizando a posição da câmera do robô, contudo, é melhor conseguir
-a posição que fica mais próximo do início da pointcloud.
-*/
+    x = robot_cell_x;
+    y = robot_cell_y;
+
+    if (delta_x < 0) {
+        delta_x = -delta_x;
+        step_x = -1;
+    } else {
+        step_x = 1;
+    }
+
+    if (delta_y < 0) {
+        delta_y = -delta_y;
+        step_y = -1;
+    } else {
+        step_y = 1;
+    }
+
+    if (abs(delta_x) > abs(delta_y)) {
+        precision = 2 * delta_y - delta_x;
+        precision2 = 2 * delta_y;
+        xy2 = 2 * (delta_y - delta_x);
+
+        while(x != laser_cell_x){
+
+            x += step_x;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                y += step_y;
+                precision += xy2;
+            }
+            if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
+                map_[x][y] = 0;
+            }       
+        }
+    } else {
+        precision = 2 * delta_x - delta_y;
+        precision2 = 2 * delta_x;
+        xy2 = 2 * (delta_x - delta_y);
+
+        while(y != laser_cell_y){
+            y += step_y;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                x += step_x;
+                precision += xy2;
+            }
+            
+            if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
+                map_[x][y] = 0;
+            }      
+        }
+    }    
+}
+
 void scanForObejctsInMap(){
     int cell_x, cell_y;
     int radius_y = 150;
-    int radius_x = 50;
+    int radius_x = 1;
+    int radius_cell = 300;
+    int odom_y,odom_x;
+    float laser_x, laser_y,robot_rad;
+    float beta = HFOV_RAD/2;
 
     tie(cell_x, cell_y) = odom2cell(camera_pose[0], camera_pose[1]);
 
-    for (int y = cell_y; y < cell_y + radius_y; y++) {
-        for (int x = cell_x - radius_x; x < cell_x + radius_x; x++) {
-            if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
-                // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE) {
-                    map_[x][y] = 80;
-                // }
-            }
+    for (int ang = 0; ang < MAX_BEAMS; ang++) {
+        robot_rad = remainder(ROBOT_POSE_[2]+((ang*ANGLE_INCREASE)-beta),2.0*M_PI);
+        laser_x = (cos(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        laser_y = (sin(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        tie(odom_x,odom_y) = odom2cell(camera_pose[0]+laser_x,camera_pose[1]+laser_y);
+        if ((odom_x >= 0 && odom_x < map_width) && (odom_y >= 0 && odom_y < map_height)) {
+            himm_inc(cell_x,cell_y,odom_x,odom_y);
         }
     }
 }
@@ -284,46 +355,10 @@ std::tuple<float,float> cloudTransform(int px, int py){
 }
 
 void check_object_position(float depth, int object_pos_x, int object_pos_y, int cell_value){
-    // float odom_x, odom_y;
-
-    // double f = (IMG_WIDTH / 2.0) / tan(HFOV_RAD / 2.0);
-    // double object_angle = atan(object_pos_x / f);
-    // double center_angle = atan((int)(IMG_WIDTH/2) / f);
-    // double max_angle = atan(IMG_WIDTH / f);
-    // double max_angle_img = HFOV_RAD;
-    // double phi_world = (M_PI - max_angle_img)/2;
-    // double correction = 0;
 
     float object_x, object_y;
 
     std::tie(object_x,object_y) = cloudTransform(object_pos_x,object_pos_y);
-
-    // if (cell_value == PERSON_VALUE) {
-    //     double ang;
-        
-    //     if (object_angle == (max_angle_img/2)) {
-    //         correction = 0;
-    //     } else {
-    //         correction = max_angle_img/2 - object_angle;
-    //     }
-
-    //     ang = ROBOT_POSE_[2] + correction;
-    //     odom_x = camera_pose[0] + cos(ang) * depth;
-    //     odom_y = camera_pose[1] + sin(ang) * depth;
-    // } else {
-    //     double ang;
-        
-
-    //     if (object_angle == (max_angle_img/2)) {
-    //         correction = 0;
-    //     } else {
-    //         correction = max_angle_img/2 - object_angle;
-    //     }
-
-    //     ang = ROBOT_POSE_[2] + correction;
-    //     odom_x = camera_pose[0] + cos(ang) * depth;
-    //     odom_y = camera_pose[1] + sin(ang) * depth;
-    // }
 
     map_update(object_x,object_y, cell_value);
 }
@@ -339,7 +374,6 @@ void objectInSemanticMap(int object_pos_x, int object_pos_y){
         for (int x = cell_x - radius; x < cell_x + radius; x++) {
             if ((x >= 0 && x < map_width) && (y >= 0 && y < map_height)) {
                 if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == VASE_VALUE || map_[x][y] == BICYCLE_VALUE) {
-                    cout << "ACHEI UM OBJETO AQUI DENTRO!!!!!!!!!!!!!!!!!1111" << endl;
                     objectInMap_ = true;
                     break;
                 } else {
@@ -358,6 +392,7 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
     int screen_position_depth_x,screen_position_depth_y; 
 
     box_teste.clear();
+    box_class.clear();
     for (int x = 0; x < msg->bounding_boxes.size(); x++){
         vector<int> t;
         t.push_back(msg->bounding_boxes[x].xmin);
@@ -367,52 +402,6 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
         box_teste.push_back(t);
         box_class.push_back(msg->bounding_boxes[x].Class);
     }
-    
-    // for (const auto &i : box_objects_) {
-    //     cout << "TESTE: " << get<0>(i) << " | " << get<1>(i) << " | " << get<2>(i) << " | " << get<3>(i) << endl;
-    // }
-
-    // for (int x = 0; x < msg->bounding_boxes.size(); x++) {
-        
-    //     //----------------------------------------------------------------------------------------------------------
-    //     // box_objects_.push_back(std::make_tuple(msg->bounding_boxes[x].xmin,msg->bounding_boxes[x].xmax,msg->bounding_boxes[x].ymin,msg->bounding_boxes[x].ymax));
-    //     // std::tuple<int,int,int,int> t = box_objects_.at(0);
-        
-    //     // cout << "TESTE: " << box_objects_.at(0) << endl;
-    //     // cout << "VALOR: " << msg->bounding_boxes[x].xmin << endl;
-    //     //----------------------------------------------------------------------------------------------------------
-
-    //     int object_pos_x = 0, object_pos_y = 0;
-    //     int bound_reduction_scale_x = (msg->bounding_boxes[x].xmax - msg->bounding_boxes[x].xmin)/CROP_SCALE;
-    //     int bound_reduction_scale_y = (msg->bounding_boxes[x].ymax - msg->bounding_boxes[x].ymin)/CROP_SCALE;
-    //     object_pos_x = (msg->bounding_boxes[x].xmax-bound_reduction_scale_x+msg->bounding_boxes[x].xmin+bound_reduction_scale_x)/2;
-    //     object_pos_y = (msg->bounding_boxes[x].ymax-bound_reduction_scale_y+msg->bounding_boxes[x].ymin+bound_reduction_scale_y)/2;
-    //     // object_pos_x = (msg->bounding_boxes[x].xmax + msg->bounding_boxes[x].xmin)/2;
-    //     // object_pos_y = (msg->bounding_boxes[x].ymax + msg->bounding_boxes[x].ymin)/2;
-    //     if (object_pos_x < IMG_WIDTH && object_pos_y < IMG_HEIGTH) {
-    //         if (grid_map_.info.height > 0) {
-    //             if (cv_ptr_){
-    //                 float meanDepth = meanDepthValue(msg->bounding_boxes[x].xmin+bound_reduction_scale_x,msg->bounding_boxes[x].xmax-bound_reduction_scale_x,msg->bounding_boxes[x].ymin+bound_reduction_scale_y,msg->bounding_boxes[x].ymax-bound_reduction_scale_y,cv_ptr_);
-    //                 float x_o = meanDepth * ((object_pos_x - cx)/fx);
-    //                 float y_o = meanDepth * ((object_pos_y - cy)/fy);
-    //                 if (!isnan(x_o)  && !isnan(y_o)) {
-    //                     objectInSemanticMap(object_pos_x,object_pos_y);
-    //                     if (!objectInMap_) {
-    //                         if (msg->bounding_boxes[x].Class == "suitcase") {            
-    //                             check_object_position(meanDepth,object_pos_x,object_pos_y,SUITCASE_VALUE);
-    //                         } else if (msg->bounding_boxes[x].Class == "person") {
-    //                             check_object_position(meanDepth,object_pos_x,object_pos_y,PERSON_VALUE);
-    //                         } else if (msg->bounding_boxes[x].Class == "vase") {
-    //                             check_object_position(meanDepth,object_pos_x,object_pos_y,VASE_VALUE);
-    //                         } else if (msg->bounding_boxes[x].Class == "bicycle") {
-    //                             check_object_position(meanDepth,object_pos_x,object_pos_y,BICYCLE_VALUE);
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } 
-    // }
 }
 
 void boundToSemanticMap(){
@@ -433,6 +422,7 @@ void boundToSemanticMap(){
                     if (!isnan(x_o)  && !isnan(y_o)) {
                         objectInSemanticMap(object_pos_x,object_pos_y);
                         if (!objectInMap_) {
+                            cout << "CLASS: " << box_class[x] << endl;
                             if (box_class[x] == "suitcase") {            
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,SUITCASE_VALUE);
                             } else if (box_class[x] == "person") {
@@ -441,6 +431,9 @@ void boundToSemanticMap(){
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,VASE_VALUE);
                             } else if (box_class[x] == "bicycle") {
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,BICYCLE_VALUE);
+                            } else {
+                                cout << "UNKNOW CLASS, ADD TO MAP WITH UNKWON VALUE JUST TO CHECK LATER" << endl;
+                                check_object_position(meanDepth,object_pos_x,object_pos_y,UNKWON_VALUE);
                             }
                         }
                     }
@@ -479,15 +472,15 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
             for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
                 if (grid_map_.data[x] != SUITCASE_VALUE || grid_map_.data[x] != PERSON_VALUE || grid_map_.data[x] != VASE_VALUE || grid_map_.data[x] != BICYCLE_VALUE) {
                     grid_map_.data[x] = map_msg->data[x];
-                }else{
-                    cout << "------------------------------------------------------------------------------" << endl;
-                    cout << "GRID_CALLBACK" << endl;
-                    cout << "AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-                    cout << "VALOR QUE TA NA VARIAVEL: " << grid_map_.data[x] << endl;
-                    cout << "------------------------------------------------------------------------------" << endl;
                 }
+                // else{
+                //     cout << "------------------------------------------------------------------------------" << endl;
+                //     cout << "GRID_CALLBACK" << endl;
+                //     cout << "AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
+                //     cout << "VALOR QUE TA NA VARIAVEL: " << grid_map_.data[x] << endl;
+                //     cout << "------------------------------------------------------------------------------" << endl;
+                // }
             }
-            // copy_map();
         }
     }
 }
@@ -544,13 +537,7 @@ void point_cloud_callback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg){
 
     sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_transform, "x");
     sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_transform, "y");
-    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");
-    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(cloud_transform, "r");
-    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(cloud_transform, "g");
-    // sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(cloud_transform, "b");
-
-    // cout << "CHEGUEI ATE AQUI!!!!!!!!!!!!!!!!!!!1111" << endl;
-    
+    sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_transform, "z");    
 
     for (size_t i = 0; i < depthPoints; ++i, ++iter_x, ++iter_y, ++iter_z) {
         depthCloud_[i].x = *iter_x;
@@ -560,9 +547,7 @@ void point_cloud_callback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg){
 }
 
 void found_object_callback(const darknet_ros_msgs::ObjectCount& count_msg){
-    // cout << "QUANTIDADE DE OBJETOS ENCONTRADOS: " << count_msg.count << endl;
     count_objects_ = count_msg.count;
-    // cout << "QNT: " << count_objects_ << endl;
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -617,7 +602,7 @@ int main(int argc, char **argv){
     while(ros::ok()){
         basefootprintToCameraTF();
         if (cv_ptr_){
-            checkGridForValue();
+            // checkGridForValue();
             if (mission_finished_){    
                 if (count_objects_ > 0) {
                     copy_map();
@@ -628,11 +613,14 @@ int main(int argc, char **argv){
                         
                         map_pub.publish(grid_map_);
                         can_publish = false;
+                        //**************************************************************************************************
+                        //FOR TEST PURPOSES, NEED TO BE EXCLUDED LATER
                         img_out_->header.frame_id = cv_ptr_->header.frame_id;
                         img_out_->header.seq = cv_ptr_->header.seq;
                         img_out_->header.stamp = cv_ptr_->header.stamp;
                         img_out_->encoding = cv_ptr_->encoding;
                         img_out.publish(img_out_->toImageMsg());
+                        //**************************************************************************************************
                         ros_finished_marking_.data = true;
                         finished_marking_pub.publish(ros_finished_marking_);
                     } else {
