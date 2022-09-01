@@ -13,11 +13,12 @@
     <arg name="verbose" default="true"/>
     <arg name="extra_gazebo_args" default=""/>
     <arg name="navigating" default="true"/>
+    <arg name="map_name" default=""/>
 
     <node if="$(arg run_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find dissertation_simulation)/config/husky.rviz" required="true"/>
 
     <group if="$(arg navigating)">
-        <node pkg="map_server" type="map_server" name="map_server" args="$(find dissertation_simulation)/worlds/warehouse_cells_joystick.yaml"/>    
+        <node pkg="map_server" type="map_server" name="map_server" args="$(find dissertation_simulation)/worlds/$(arg map_name).yaml"/>    
     </group>
 
     <group>

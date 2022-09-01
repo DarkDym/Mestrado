@@ -13,8 +13,8 @@ always_send_full_costmap: true
 inflater_layer:
   enabled: true
   inflate_unknow: true
-  inflation_radius: 0.40
-  cost_scaling_factor: 0.3
+  inflation_radius: 1.00
+  cost_scaling_factor: 1.5
   layer: combined_layer
 
 obstacles_layer:
