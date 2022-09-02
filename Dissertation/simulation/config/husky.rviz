@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /husky11
+        - /husky11/LocalPath1/Status1
         - /DepthCloud1/Auto Size1
       Splitter Ratio: 0.6088235378265381
     Tree Height: 188
@@ -58,7 +59,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map_out_s
+      Topic: /map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -85,7 +86,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /husky1/move_base/DWAPlannerROS/global_plan
+          Topic: /husky1/move_base/TebLocalPlannerROS/global_plan
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -109,7 +110,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /husky1/move_base/DWAPlannerROS/local_plan
+          Topic: /husky1/move_base/TebLocalPlannerROS/local_plan
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -357,12 +358,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Map
           Topic: /husky1/move_base/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /husky1/explore/frontiers
@@ -650,8 +651,8 @@ Visualization Manager:
         Value: true
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 7.085341453552246
-        Min Value: 0.07149350643157959
+        Max Value: 2.5626397132873535
+        Min Value: 0.06934559345245361
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -720,7 +721,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 19.82138442993164
+      Distance: 34.03379821777344
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -728,9 +729,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.02644040621817112
-        Y: 0.04346528649330139
-        Z: 3.7588934898376465
+        X: 5.553942680358887
+        Y: 1.2855033874511719
+        Z: 3.7605111598968506
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -738,7 +739,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: husky1_tf/base_footprint
-      Yaw: 3.1604321002960205
+      Yaw: 4.72043514251709
     Saved: ~
 Window Geometry:
   AprilTag_Husky1:

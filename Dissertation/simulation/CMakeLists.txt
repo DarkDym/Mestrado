@@ -53,6 +53,9 @@ target_link_libraries(patrol_move ${catkin_LIBRARIES})
 add_executable(semantic scripts/semantic.cpp)
 target_link_libraries(semantic ${catkin_LIBRARIES})
 
+add_executable(sim_time_sowdc scripts/sim_time_sowdc.cpp)
+target_link_libraries(sim_time_sowdc ${catkin_LIBRARIES})
+
 # install roslaunch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

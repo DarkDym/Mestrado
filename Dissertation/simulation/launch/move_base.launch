@@ -7,8 +7,8 @@
   <arg name="navigating" default="true"/>
 
   <arg name="base_global_planner" default="navfn/NavfnROS"/>
-  <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
-  <!-- <arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS"/> -->
+  <!-- <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/> -->
+  <arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS"/>
   
   <arg name="odom_frame_id" default="$(arg model)_tf/odom"/>
   <!-- <arg name="base_local_planner" default="base_local_planner/TrajectoryPlannerROS"/> -->
@@ -19,8 +19,8 @@
     <param name="base_global_planner" value="$(arg base_global_planner)"/>
     <param name="base_local_planner" value="$(arg base_local_planner)"/>
      
-    <rosparam file="$(find dissertation_simulation)/config/planner.yaml" command="load"/>
-    <!-- <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load"/> -->
+    <!-- <rosparam file="$(find dissertation_simulation)/config/planner.yaml" command="load"/> -->
+    <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load"/>
 
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="global_costmap"/>
