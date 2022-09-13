@@ -6,7 +6,14 @@
   <arg name="model" default="husky"/>
   <arg name="navigating" default="true"/>
 
-  <arg name="base_global_planner" default="navfn/NavfnROS"/>
+  <!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->
+  <arg name="base_global_planner" default="global_planner/GlobalPlanner"/>
+  <rosparam>
+    GlobalPlanner:
+      cost_factor: 0.50
+      neutral_cost: 60
+      lethal_cost: 253
+  </rosparam>
   <!-- <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/> -->
   <arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS"/>
   
@@ -20,7 +27,7 @@
     <param name="base_local_planner" value="$(arg base_local_planner)"/>
      
     <!-- <rosparam file="$(find dissertation_simulation)/config/planner.yaml" command="load"/> -->
-    <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load"/>
+    <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load" ns="TebLocalPlannerROS"/>
 
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="global_costmap"/>

@@ -6,12 +6,16 @@
 #include <iostream>
 #include <vector>
 #include <std_msgs/Bool.h>
+#include <chrono>
 
-
+using namespace std::chrono;
 using namespace std;
 
 vector<tuple<float,float>> goals;
 int index_ = 0;
+bool time_started_ = false;
+std::chrono::steady_clock::time_point start_time_;
+std::chrono::steady_clock::time_point end_time_;
 
 void mission_goals(){
     tuple<float,float> inv_goals;    
@@ -57,7 +61,7 @@ int main(int argc, char **argv){
         } else {
             if (setup) {
                 tie(input_goal_x,input_goal_y) = goals[index_];
-
+                cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                 goals_output.target_pose.header.frame_id = "husky1_tf/map";
                 goals_output.target_pose.pose.position.x = input_goal_x;
                 goals_output.target_pose.pose.position.y = input_goal_y;
@@ -70,11 +74,13 @@ int main(int argc, char **argv){
                 move_base_client_.sendGoal(goals_output);
                 index_++;
                 setup = false;
+                if (!time_started_) {
+                    time_started_ = true;
+                    start_time_ = std::chrono::steady_clock::now();
+                }
             } else {
                 if (move_base_client_.waitForResult()) {
                     tie(input_goal_x,input_goal_y) = goals[index_];
-                    
-                    cout << "NEXT GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                     
                     goals_output.target_pose.header.frame_id = "husky1_tf/map";
                     goals_output.target_pose.pose.position.x = input_goal_x;
@@ -86,9 +92,24 @@ int main(int argc, char **argv){
                     goals_output.target_pose.pose.orientation.w = 0.95;
 
                     move_base_client_.sendGoal(goals_output);
+                    if (!time_started_) {
+                        time_started_ = true;
+                        start_time_ = std::chrono::steady_clock::now();
+                    } else {
+                        end_time_ = std::chrono::steady_clock::now();
+                        // time_started_ = false;
+                        std::cout << "GOAL [" << index_-1 << "]" << " | Time difference = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ - start_time_).count() << "[ms]" << std::endl;
+                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end_time_ - start_time_).count() << "[µs]" << std::endl;
+                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end_time_ - start_time_).count() << "[ns]" << std::endl;
+                        start_time_ = std::chrono::steady_clock::now();
+                    }
+
+                    cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+
                     index_++;
                     if (index_ > 5) {
-                        index_ = 0;
+                        index_ = 1;
                     }
                 }
             }
