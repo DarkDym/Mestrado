@@ -4,8 +4,9 @@ robot_base_frame: base_footprint
 footprint: [[-0.5, -0.30], [-0.5, 0.30], [0.5, 0.30], [0.5, -0.30]]
 footprint_padding: 0.01
 
-update_frequency: 2.0
-publish_frequency: 5.0
+update_frequency: 4.0
+publish_frequency: 4.0
+transform_tolerance: 0.5
 obstacle_range: 5.5
 raytrace_range: 6.0
 width: 15.0
@@ -15,7 +16,7 @@ always_send_full_costmap: true
 inflater_layer:
   enabled: true
   inflate_unknow: true
-  inflation_radius: 0.2
+  inflation_radius: 0.5
   cost_scaling_factor: 1.0
   layer: combined_layer
 
