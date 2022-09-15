@@ -45,7 +45,8 @@
       
         <param name="global_frame_id" value="map"/>	
         <!-- <param name="base_frame_id" value="$(arg model)_tf/base_link"/> -->
-        <param name="base_frame_id" value="$(arg model)_tf/base_footprint"/>
+        <!-- <param name="base_frame_id" value="$(arg model)_tf/base_footprint"/> -->
+        <param name="base_frame_id" value="$(arg model)_tf/base_link"/>
         <remap from="static_map" to="/static_map" /> 
         <remap from="map" to="/map" />
         <!-- <remap from="scan" to="/scan"/> -->

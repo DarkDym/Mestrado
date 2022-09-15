@@ -13,6 +13,9 @@ find_package(catkin REQUIRED
     el
     darknet_ros
     darknet_ros_msgs
+    pioneer_description
+    pioneer_gazebo
+    pioneer_control
 )
 
 # set(CMAKE_PREFIX_PATH "/home/phi/m_explore_ws/devel/")
@@ -28,6 +31,9 @@ catkin_package(
         el
         darknet_ros
         darknet_ros_msgs
+        pioneer_description
+        pioneer_gazebo
+        pioneer_control
 )
 
 include_directories(

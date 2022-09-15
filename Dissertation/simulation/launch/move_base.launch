@@ -30,7 +30,8 @@
 
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="global_costmap"/>
-      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
+      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <!-- <remap from="realsense/depth/color/points" to="realsense/depth/color/points"/> -->
       <!-- <param name="global_costmap/obstacles_camera/camera_mark/topic" value="realsense/depth/color/points"/> -->
       <!-- <param name="global_costmap/obstacles_camera/camera_clear/topic" value="realsense/depth/color/points"/> -->
@@ -39,7 +40,8 @@
     <!-- </rosparam> -->
 
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="local_costmap"/>
-      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
+      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <param name="local_costmap/obstacles_layer/laser_scan_sensor/topic" value="/$(arg model)/scan"/>
       <param name="global_costmap/obstacles_layer/laser_scan_sensor/topic" value="/$(arg model)/scan"/>
       <param name="local_costmap/obstacles_layer/camera_sensor/topic" value="/$(arg model)/realsense/depth/color/points"/>

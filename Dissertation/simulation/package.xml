@@ -13,6 +13,9 @@
     <build_depend>mmm</build_depend>
     <build_depend>darknet_ros</build_depend>
     <build_depend>darknet_ros_msgs</build_depend>
+    <build_depend>pioneer_gazebo</build_depend>
+    <build_depend>pioneer_description</build_depend>
+    <build_depend>pioneer_control</build_depend>
 
 
     <depend>gazebo_ros</depend>
@@ -27,6 +30,9 @@
     <build_export_depend>mmm</build_export_depend>
     <build_export_depend>darknet_ros</build_export_depend>
     <build_export_depend>darknet_ros_msgs</build_export_depend>
+    <build_export_depend>pioneer_gazebo</build_export_depend>
+    <build_export_depend>pioneer_description</build_export_depend>
+    <build_export_depend>pioneer_control</build_export_depend>
     <exec_depend>roscpp</exec_depend>
     <exec_depend>rospy</exec_depend>
     <exec_depend>apriltag_ros</exec_depend>
@@ -34,8 +40,10 @@
     <exec_depend>mmm</exec_depend>
     <exec_depend>darknet_ros</exec_depend>
     <exec_depend>darknet_ros_msgs</exec_depend>
-
-
+    <exec_depend>pioneer_gazebo</exec_depend>
+    <exec_depend>pioneer_description</exec_depend>
+    <exec_depend>pioneer_control</exec_depend>
+    
     <export>
         <gazebo_ros gazebo_model_path="${prefix}/models/"/>
     </export>
