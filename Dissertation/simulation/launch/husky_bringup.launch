@@ -40,6 +40,7 @@
     
       <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
         <param name="tf_prefix" value="$(arg model)_tf"/>
+        <param name="publish_frequency" value="80"/>
       </node>
     
       <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
@@ -59,7 +60,7 @@
       <arg name="model" value="$(arg model)"/>
     </include>
 
-    <node pkg="tf" type="static_transform_publisher" name="map_model_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/map 100"/>
+    <!-- <node pkg="tf" type="static_transform_publisher" name="map_model_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/map 100"/> -->
 
     <include file="$(find dissertation_simulation)/launch/move_base.launch" >
         <arg name="model" value="$(arg model)"/>

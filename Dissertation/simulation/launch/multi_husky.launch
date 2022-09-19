@@ -5,6 +5,7 @@
     <arg name="world_path" default="$(find dissertation_simulation)/worlds"/>
     <!-- <arg name="world_path" default="$(find dissertation_simulation)/worlds/tecnopucSim.world"/> -->
     <arg name="world_name" default="empty_world"/>
+    <arg name="map_name" default=""/>
     <arg name="navigating" default="true"/>
     <arg name="run_rviz" default="true"/>
     <arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/>
@@ -15,7 +16,7 @@
 
     <include file="$(find dissertation_simulation)/launch/simulation.launch">
         <arg name="world_path" value="$(arg world_path)/$(arg world_name).world"/>
-        <arg name="map_name" value="$(arg world_name)"/>
+        <arg name="map_name" value="$(arg map_name)"/>
         <arg name="run_rviz" value="$(arg run_rviz)"/>
         <arg name="verbose" value="true"/>
         <arg name="navigating" value="$(arg navigating)"/>
@@ -25,18 +26,20 @@
       <arg name="model" value="husky"/>
     </include>
 
-    <arg name="robot1_name" value="husky1"/>
+    <!-- <arg name="robot1_name" value="husky1"/> -->
+    <arg name="robot1_name" value="pioneer"/>
     <group ns="$(arg robot1_name)">
         <param name="tf_prefix" value="$(arg robot1_name)_tf"/>
         <param name="/$(arg robot1_name)/map_merge/init_pose_x" value="0.00"/>
         <param name="/$(arg robot1_name)/map_merge/init_pose_y" value="0.00"/>
         <param name="/$(arg robot1_name)/map_merge/init_pose_z" value="0.00"/>
         <param name="/$(arg robot1_name)/map_merge/init_pose_yaw" value="0.00"/>
-        <include file="$(find dissertation_simulation)/launch/husky_bringup.launch">
+        <!-- <include file="$(find dissertation_simulation)/launch/husky_bringup.launch"> -->
+        <include file="$(find dissertation_simulation)/launch/pioneer_bringup.launch">
             <arg name="model" value="$(arg robot1_name)"/>
             <arg name="init_pose" value="-x 0.00 -y 0.00 -Y 0.0"/>
-            <arg name="ipx" value="0.00"/>
-            <arg name="ipy" value="0.00"/>
+            <arg name="ipx" value="16.95"/>
+            <arg name="ipy" value="-6.63"/>
             <arg name="navigating" value="$(arg navigating)"/>
             <arg name="id_cont" value="0"/>
             <arg name="port" value="3128"/>

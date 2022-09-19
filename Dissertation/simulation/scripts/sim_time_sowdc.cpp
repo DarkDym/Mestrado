@@ -23,6 +23,9 @@ void mission_goals(){
     inv_goals = make_tuple(16.83527374267578,-4.076648712158203);
     goals.emplace_back(inv_goals);
 
+    inv_goals = make_tuple(16.635780334472656,2.5355117321014404);
+    goals.emplace_back(inv_goals);
+
     inv_goals = make_tuple(10.314708709716797,43.58147430419922);
     goals.emplace_back(inv_goals);
 
@@ -62,7 +65,7 @@ int main(int argc, char **argv){
             if (setup) {
                 tie(input_goal_x,input_goal_y) = goals[index_];
                 cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                goals_output.target_pose.header.frame_id = "map";
                 goals_output.target_pose.pose.position.x = input_goal_x;
                 goals_output.target_pose.pose.position.y = input_goal_y;
                 goals_output.target_pose.pose.position.z = 0;
@@ -82,7 +85,7 @@ int main(int argc, char **argv){
                 if (move_base_client_.waitForResult()) {
                     tie(input_goal_x,input_goal_y) = goals[index_];
                     
-                    goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                    goals_output.target_pose.header.frame_id = "map";
                     goals_output.target_pose.pose.position.x = input_goal_x;
                     goals_output.target_pose.pose.position.y = input_goal_y;
                     goals_output.target_pose.pose.position.z = 0;
@@ -98,7 +101,7 @@ int main(int argc, char **argv){
                     } else {
                         end_time_ = std::chrono::steady_clock::now();
                         // time_started_ = false;
-                        std::cout << "GOAL [" << index_-1 << "]" << " | Time difference = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                        std::cout << "GOAL [" << index_-1 << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ - start_time_).count() << "[ms]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end_time_ - start_time_).count() << "[µs]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end_time_ - start_time_).count() << "[ns]" << std::endl;
@@ -108,8 +111,8 @@ int main(int argc, char **argv){
                     cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
 
                     index_++;
-                    if (index_ > 5) {
-                        index_ = 1;
+                    if (index_ > 6) {
+                        index_ = 2;
                     }
                 }
             }

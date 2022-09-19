@@ -18,7 +18,6 @@
   <arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS"/>
   
   <arg name="odom_frame_id" default="$(arg model)_tf/odom"/>
-  <!-- <arg name="base_local_planner" default="base_local_planner/TrajectoryPlannerROS"/> -->
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
 
@@ -31,7 +30,8 @@
 
     <!-- observation sources located in costmap_common.yaml -->
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="global_costmap"/>
-      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
+      <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <!-- <remap from="realsense/depth/color/points" to="realsense/depth/color/points"/> -->
       <!-- <param name="global_costmap/obstacles_camera/camera_mark/topic" value="realsense/depth/color/points"/> -->
       <!-- <param name="global_costmap/obstacles_camera/camera_clear/topic" value="realsense/depth/color/points"/> -->
@@ -40,7 +40,8 @@
     <!-- </rosparam> -->
 
     <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="local_costmap"/>
-      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/>
+      <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
+      <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <param name="local_costmap/obstacles_layer/laser_scan_sensor/topic" value="/$(arg model)/scan"/>
       <param name="global_costmap/obstacles_layer/laser_scan_sensor/topic" value="/$(arg model)/scan"/>
       <param name="local_costmap/obstacles_layer/camera_sensor/topic" value="/$(arg model)/realsense/depth/color/points"/>
@@ -59,7 +60,7 @@
       <!-- <param name="local_costmap/height" value="15.0"/> -->
       <!-- <rosparam param="local_costmap/global_frame" subst_value="true">$(arg model)_tf/odom</rosparam> -->
       <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
-      <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
+      <!-- <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/> -->
       
       <!-- <param name="local_costmap/global_frame" value="$(arg model)_tf/odom"/> -->
       <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
@@ -68,7 +69,10 @@
     <!-- static global costmap, static map provides size -->
     <rosparam file="$(find dissertation_simulation)/config/global_costmap.yaml" command="load" ns="global_costmap" unless="$(arg no_static_map)"/>
       <!-- <param name="global_costmap/global_frame" value="$(arg model)_tf/map"/> -->
-      <rosparam param="global_costmap/global_frame" subst_value="true">$(arg model)_tf/map</rosparam>
+      
+      <!-- comentar pra teste sem o merge -->
+      <!-- <rosparam param="global_costmap/global_frame" subst_value="true">$(arg model)_tf/map</rosparam> -->
+      
       <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/> -->
     <!-- </rosparam> -->
     
