@@ -18,10 +18,10 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /$(arg tfprefix)/odom 100" /> -->
 
   <!-- convert joint states to TF transforms for rviz, etc -->
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen"></node>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
     <param name="tf_prefix" value="$(arg tfprefix)"/>
-    <!-- <remap from="/joint_states" to="joint_states" /> -->
+    <remap from="/joint_states" to="joint_states" />
   </node>
 
 </launch>

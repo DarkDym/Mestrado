@@ -24,6 +24,11 @@
     <param name="tf_prefix" value="$(arg model)_tf"/>
     <param name="base_global_planner" value="$(arg base_global_planner)"/>
     <param name="base_local_planner" value="$(arg base_local_planner)"/>
+    <param name="controller_frequency" value="15.0"/>
+    <param name="controller_patience" value="5.0"/>
+    <param name="planner_patience" value="20.0"/>
+    <param name="oscillation_timeout" value="20.0"/>
+    <param name="oscillation_distance" value="1.0"/>    
      
     <!-- <rosparam file="$(find dissertation_simulation)/config/planner.yaml" command="load"/> -->
     <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load" ns="TebLocalPlannerROS"/>
@@ -91,7 +96,7 @@
       <param name="local_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
       <param name="global_costmap/voxel_layer/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
       <param name="global_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
-      <remap from="odom" to="odometry/filtered" if="$(arg navigating)"/>
+      <!-- <remap from="odom" to="odom" if="$(arg navigating)"/> -->
       <param name="local_costmap/obstacle_layer/camera_sensor/topic" value="/$(arg model)/realsense/depth/color/points"/>
 
       <remap from="map" to="map" unless="$(arg navigating)"/>  
@@ -101,7 +106,7 @@
       <param name="local_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" unless="$(arg navigating)"/>
       <param name="global_costmap/voxel_layer/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points" unless="$(arg navigating)"/>
       <param name="global_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" unless="$(arg navigating)"/>
-      <remap from="odom" to="odometry/filtered" unless="$(arg navigating)"/> 
+      <!-- <remap from="odom" to="odom" unless="$(arg navigating)"/>  -->
     
     <!-- <remap from="move_base/local_costmap/costmap_updates" to="costmap_updates"/> -->
     <!-- <remap from="odom" to="$(arg model)_tf/odom"/> -->

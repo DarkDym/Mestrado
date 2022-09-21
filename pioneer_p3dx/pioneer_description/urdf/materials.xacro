@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 This project is based on work by Tracy Davies, where it was in turn based on
 work original in ucs-ros-pkg.
  -->
-<robot>
+<robot name="pioneer">
 	<material name="ChassisRed">
 		<color rgba="0.851 0.0 0.0 1.0"/>
 	</material>
@@ -32,13 +32,7 @@ work original in ucs-ros-pkg.
 	<material name="HubcapYellow">
 		<color rgba="1.0 0.811 0.151 1.0"/>
 	</material>
-	<material name="ChassisRed">
-		<color rgba="0.8 0.0 0.0 1.0"/>
-	</material>
 	<material name="TopBlack">
 		<color rgba="0.038 0.038 0.038 1.0"/>
 	</material>
-	<!-- <material name="black">
-  		<color rgba="0.000 0.000 0.000 1.000"/>
-	</material> -->
 </robot>

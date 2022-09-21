@@ -19,19 +19,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 This project is based on work by Tracy Davies, where it was in turn based on
 work original in ucs-ros-pkg.
  -->
-<robot name="pioneer" 
-	xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="pioneer" xmlns:xacro="http://ros.org/wiki/xacro">
 	<!-- import all gazebo-customization elements, including gazebo colors -->
 	
-	
+	<xacro:include filename="$(find pioneer_description)/urdf/materials.xacro" />
 	<xacro:include filename="$(find pioneer_description)/urdf/pioneer3dx.gazebo" />
 	<!-- import the pioneer 3dx's wheels -->
 	<xacro:include filename="$(find pioneer_description)/urdf/pioneer3dx_wheel.xacro" />
+	<xacro:include filename="$(find pioneer_description)/urdf/intel_realsense.urdf.xacro"/>
 	<!-- chassis -->
+	<link name="dummy"/>
+	<joint name="dummy_joint" type="fixed">
+		<parent link="dummy"/>
+		<child link="base_link"/>
+	</joint>
 	<link name="base_link">
 		<inertial>
 			<mass value="3.5" />
-			<!--<origin xyz="-0.025 0 -0.223"/> -->
+			<origin xyz="-0.025 0 -0.223"/>
 			<origin xyz="-0.05 0 0" />
 			<inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
 		</inertial>
@@ -87,7 +92,7 @@ work original in ucs-ros-pkg.
 			<geometry name="pioneer_geom">
 				<mesh filename="package://pioneer_description/meshes/swivel.stl" />
 			</geometry>
-			<material name="swivel"></material>
+			<material name="WheelBlack"></material>
 		</visual>
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -117,7 +122,7 @@ work original in ucs-ros-pkg.
 			<geometry name="pioneer_geom">
 				<mesh filename="package://pioneer_description/meshes/center_hubcap.stl" />
 			</geometry>
-			<material name="swivel"></material>
+			<material name="HubcapYellow"></material>
 		</visual>
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -221,4 +226,28 @@ work original in ucs-ros-pkg.
 		<parent link="base_link" />
 		<child link="lms100" />
 	</joint>
+	<!-- REALSENSE -->
+	<link name="r_mount">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.01 0.01 0.15"/>
+			</geometry>
+		</visual>
+	</link>
+	<joint name="r_mount_joint" type="fixed">
+		<axis xyz="0 1 0"/>
+		<origin xyz="0.12 0.0 0.33" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="r_mount"/>
+	</joint>
+	<link name="realsense_mountpoint"/>
+	<joint name="realsense_joint" type="fixed">
+		<axis xyz="0 1 0"/>
+		<origin xyz="0.12 0.0 0.4" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="realsense_mountpoint"/>
+	</joint>
+	<xacro:intel_realsense_mount prefix="camera" topic="realsense" parent_link="realsense_mountpoint"/>
+    <xacro:include filename="$(find pioneer_description)/urdf/_d435.urdf.xacro"/> 
 </robot>

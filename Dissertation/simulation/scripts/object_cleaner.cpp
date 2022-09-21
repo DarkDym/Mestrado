@@ -42,12 +42,18 @@ void mission_goals(){
 
 }
 
+void objects_goal_to_remove_callback(const move_base_msgs::MoveBaseGoal::ConstPtr& object_goal_msg){
+
+}
+
 int main(int argc, char **argv){
     
-    ros::init(argc, argv, "SOWDC_move");
+    ros::init(argc, argv, "object_to_remove");
     ros::NodeHandle node;
 
-    mission_goals();
+    // mission_goals();
+
+    ros::Subscriber new_object_to_remove_sub = node.subscribe("/objects_goal_to_remove",1,objects_goal_to_remove_callback);
 
     std::stringstream move_base_topic_stream;
     move_base_topic_stream << "/" << (std::string)argv[1] << "/move_base";

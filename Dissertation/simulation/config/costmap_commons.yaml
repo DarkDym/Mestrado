@@ -2,11 +2,12 @@ global_frame: map
 # robot_base_frame: base_footprint
 robot_base_frame: base_link
 
-footprint: [[-0.5, -0.30], [-0.5, 0.30], [0.5, 0.30], [0.5, -0.30]]
+# footprint: [[-0.5, -0.30], [-0.5, 0.30], [0.5, 0.30], [0.5, -0.30]] #HUSKY FOOTPRINT
+footprint: [[-0.3, -0.18], [-0.3, 0.18], [0.2, 0.18], [0.2, -0.18]] #PIONEER FOOTPRINT
 footprint_padding: 0.01
 
-update_frequency: 4.0
-publish_frequency: 4.0
+update_frequency: 2.0
+publish_frequency: 2.0
 transform_tolerance: 0.5
 obstacle_range: 5.5
 raytrace_range: 6.0
