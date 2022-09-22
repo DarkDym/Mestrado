@@ -143,7 +143,7 @@ int main(int argc, char **argv){
                     if (setup) {
                         tie(input_goal_x,input_goal_y) = goals[index_];
 
-                        goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                        goals_output.target_pose.header.frame_id = "map";
                         goals_output.target_pose.pose.position.x = input_goal_x;
                         goals_output.target_pose.pose.position.y = input_goal_y;
                         goals_output.target_pose.pose.position.z = 0;
@@ -161,7 +161,7 @@ int main(int argc, char **argv){
                             
                             cout << "NEXT GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                             
-                            goals_output.target_pose.header.frame_id = "husky1_tf/map";
+                            goals_output.target_pose.header.frame_id = "map";
                             goals_output.target_pose.pose.position.x = input_goal_x;
                             goals_output.target_pose.pose.position.y = input_goal_y;
                             goals_output.target_pose.pose.position.z = 0;

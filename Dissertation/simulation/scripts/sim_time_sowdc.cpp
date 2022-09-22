@@ -61,6 +61,7 @@ int main(int argc, char **argv){
 
     float input_goal_x, input_goal_y;
     bool setup = true;
+    int last_index = 0;
 
     while(ros::ok()){
 
@@ -81,6 +82,7 @@ int main(int argc, char **argv){
                 goals_output.target_pose.pose.orientation.w = 0.95;
 
                 move_base_client_.sendGoal(goals_output);
+                last_index = index_;
                 index_++;
                 setup = false;
                 if (!time_started_) {
@@ -107,15 +109,16 @@ int main(int argc, char **argv){
                     } else {
                         end_time_ = std::chrono::steady_clock::now();
                         // time_started_ = false;
-                        std::cout << "GOAL [" << index_-1 << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                        std::cout << "GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ - start_time_).count() << "[ms]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end_time_ - start_time_).count() << "[µs]" << std::endl;
                         // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end_time_ - start_time_).count() << "[ns]" << std::endl;
                         start_time_ = std::chrono::steady_clock::now();
                     }
-
+                    cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
                     cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
 
+                    last_index = index_;
                     index_++;
                     if (index_ > 5) {
                         index_ = 2;

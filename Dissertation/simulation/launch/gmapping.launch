@@ -49,8 +49,8 @@
         <!-- <remap from="map" to="map"/> -->
         <param name="odom_frame" value="$(arg model)_tf/odom"/>
         <!-- <param name="base_frame" value="$(arg model)_tf/base_link"/> -->
-        <!-- <param name="base_frame" value="$(arg model)_tf/base_footprint"/> -->
-        <param name="base_frame" value="$(arg model)_tf/base_link"/>
+        <param name="base_frame" value="$(arg model)_tf/base_footprint"/>
+        <!-- <param name="base_frame" value="$(arg model)_tf/base_link"/> -->
         <!-- <param name="map_frame" value="/map"/> -->
         <param name="tf_prefix" value="$(arg model)_tf"/>
         <rosparam param="map_frame" subst_value="True">/$(arg model)_tf/map</rosparam>

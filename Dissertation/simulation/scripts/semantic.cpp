@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <vector>
+#include <fstream>
 // #include <string>
 
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
@@ -221,11 +222,30 @@ void grid_update(){
     }
 }
 
+/*
+---FUNÇÃO QUE RECEBE O TIPO DE OBJETO E A SUA POSIÇÃO REFERENTE NO MAPA---
+---ESTAS INFORMAÇÕES SERÃO UTILIZADAS PARA O ROBÔ SECUNDÁRIO QUE IRÁ FAZER A RETIRADA DE ITENS LEVES---
+*/
+void write_object_in_file(int cell_value, float pos_x, float pos_y){
+
+    ofstream objects_map_file;
+    objects_map_file.open("./objects_in_map.txt",ios::app);
+    if (objects_map_file.is_open()) {
+        cout << "CELL_VALUE:" << cell_value << ";POS_X:" << pos_x << ";POS_Y:" << pos_y << endl;
+        objects_map_file << "CELL_VALUE:" << cell_value << ";POS_X:" << pos_x << ";POS_Y:" << pos_y << endl;
+        objects_map_file.close();
+    }else{
+        cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
+    }
+}
+
 void map_update(float pos_x, float pos_y, int cell_value){
     int width, heigth;
     
     width = grid_map_.info.width;
     heigth = grid_map_.info.height;
+
+    write_object_in_file(cell_value,pos_x,pos_y);
 
     int cell_x, cell_y;
 

@@ -62,13 +62,13 @@
 
     <!-- <node pkg="tf" type="static_transform_publisher" name="map_model_broadcaster" args="0 0 0 0 0 0 /map /$(arg model)_tf/map 100"/> -->
 
-    <include file="$(find dissertation_simulation)/launch/move_base.launch" >
+    <include file="$(find dissertation_simulation)/launch/move_base_husky.launch" >
         <arg name="model" value="$(arg model)"/>
         <arg name="navigating" value="$(arg navigating)"/>
         <arg name="no_static_map" value="true" unless="$(arg navigating)"/>
     </include>
 
-    <include file="$(find dissertation_simulation)/launch/amcl.launch" if="$(arg navigating)">
+    <include file="$(find dissertation_simulation)/launch/amcl_husky.launch" if="$(arg navigating)">
         <arg name="model" value="$(arg model)"/>
         <arg name="ipx" value="$(arg ipx)"/>
         <arg name="ipy" value="$(arg ipy)"/>

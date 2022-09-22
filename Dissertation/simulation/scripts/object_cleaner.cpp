@@ -9,41 +9,39 @@
 #include <chrono>
 #include <sstream>
 #include <string>
+#include <move_base_msgs/MoveBaseGoal.h>
 
 using namespace std::chrono;
 using namespace std;
 
-vector<tuple<float,float>> goals;
-int index_ = 0;
+// vector<tuple<float,float>> goals;
+// int index_ = 0;
+
 bool time_started_ = false;
 std::chrono::steady_clock::time_point start_time_;
 std::chrono::steady_clock::time_point end_time_;
 
-void mission_goals(){
-    tuple<float,float> inv_goals;    
-
-    inv_goals = make_tuple(16.83527374267578,-4.076648712158203);
-    goals.emplace_back(inv_goals);
-
-    inv_goals = make_tuple(16.635780334472656,2.5355117321014404);
-    goals.emplace_back(inv_goals);
-
-    inv_goals = make_tuple(10.314708709716797,43.58147430419922);
-    goals.emplace_back(inv_goals);
-
-    inv_goals = make_tuple(13.89610767364502,2.775299072265625);
-    goals.emplace_back(inv_goals);
-
-    inv_goals = make_tuple(13.953405380249023,43.73188781738281);
-    goals.emplace_back(inv_goals);
-
-    inv_goals = make_tuple(12.793737411499023,2.642454147338867);
-    goals.emplace_back(inv_goals);
-
-}
+move_base_msgs::MoveBaseGoal goals_output_;
+bool is_object_to_clean_ = false;
+bool move_base_started = false;
+bool object_cleaned_ = false;
+std_msgs::Bool object_cleaned_topic_;
 
 void objects_goal_to_remove_callback(const move_base_msgs::MoveBaseGoal::ConstPtr& object_goal_msg){
-
+    cout << "TENHO OBJETO NO MAPA PARA LIMPAR!" << endl;
+    goals_output_.target_pose.header.frame_id = object_goal_msg->target_pose.header.frame_id;
+    goals_output_.target_pose.header.seq = object_goal_msg->target_pose.header.seq;
+    goals_output_.target_pose.header.stamp = object_goal_msg->target_pose.header.stamp;
+    goals_output_.target_pose.pose.position.x = object_goal_msg->target_pose.pose.position.x;
+    goals_output_.target_pose.pose.position.y = object_goal_msg->target_pose.pose.position.y;
+    goals_output_.target_pose.pose.position.z = object_goal_msg->target_pose.pose.position.z;
+    goals_output_.target_pose.pose.orientation.x = object_goal_msg->target_pose.pose.orientation.x;
+    goals_output_.target_pose.pose.orientation.y = object_goal_msg->target_pose.pose.orientation.y;
+    goals_output_.target_pose.pose.orientation.z = object_goal_msg->target_pose.pose.orientation.z;
+    goals_output_.target_pose.pose.orientation.w = object_goal_msg->target_pose.pose.orientation.w;
+    is_object_to_clean_ = true;
+    move_base_started = true;
+    object_cleaned_ = false;
 }
 
 int main(int argc, char **argv){
@@ -51,9 +49,9 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "object_to_remove");
     ros::NodeHandle node;
 
-    // mission_goals();
-
     ros::Subscriber new_object_to_remove_sub = node.subscribe("/objects_goal_to_remove",1,objects_goal_to_remove_callback);
+
+    ros::Publisher clean_object_from_map_pub = node.advertise<std_msgs::Bool>("/clean_object_from_map",10);
 
     std::stringstream move_base_topic_stream;
     move_base_topic_stream << "/" << (std::string)argv[1] << "/move_base";
@@ -61,12 +59,7 @@ int main(int argc, char **argv){
 
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> move_base_client_(move_base_topic);
 
-    move_base_msgs::MoveBaseGoal goals_output;
-
     ros::Rate rate(10);
-
-    float input_goal_x, input_goal_y;
-    bool setup = true;
 
     while(ros::ok()){
 
@@ -74,58 +67,18 @@ int main(int argc, char **argv){
             ros::spinOnce();
             rate.sleep();
         } else {
-            if (setup) {
-                tie(input_goal_x,input_goal_y) = goals[index_];
-                cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                goals_output.target_pose.header.frame_id = "map";
-                goals_output.target_pose.pose.position.x = input_goal_x;
-                goals_output.target_pose.pose.position.y = input_goal_y;
-                goals_output.target_pose.pose.position.z = 0;
-                goals_output.target_pose.pose.orientation.x = 0.0;
-                goals_output.target_pose.pose.orientation.y = 0.0;
-                goals_output.target_pose.pose.orientation.z = 0.25;
-                goals_output.target_pose.pose.orientation.w = 0.95;
+            if (is_object_to_clean_) {
+                cout << "MANDANDO ROBO PARA O PONTO NO QUAL ELE DEVE LIMPAR O OBJETO!" << endl;
+                move_base_client_.sendGoal(goals_output_);
+                is_object_to_clean_ = false;
+            }
 
-                move_base_client_.sendGoal(goals_output);
-                index_++;
-                setup = false;
-                if (!time_started_) {
-                    time_started_ = true;
-                    start_time_ = std::chrono::steady_clock::now();
-                }
-            } else {
-                if (move_base_client_.waitForResult()) {
-                    tie(input_goal_x,input_goal_y) = goals[index_];
-                    
-                    goals_output.target_pose.header.frame_id = "map";
-                    goals_output.target_pose.pose.position.x = input_goal_x;
-                    goals_output.target_pose.pose.position.y = input_goal_y;
-                    goals_output.target_pose.pose.position.z = 0;
-                    goals_output.target_pose.pose.orientation.x = 0.0;
-                    goals_output.target_pose.pose.orientation.y = 0.0;
-                    goals_output.target_pose.pose.orientation.z = 0.25;
-                    goals_output.target_pose.pose.orientation.w = 0.95;
-
-                    move_base_client_.sendGoal(goals_output);
-                    if (!time_started_) {
-                        time_started_ = true;
-                        start_time_ = std::chrono::steady_clock::now();
-                    } else {
-                        end_time_ = std::chrono::steady_clock::now();
-                        // time_started_ = false;
-                        std::cout << "GOAL [" << index_-1 << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ - start_time_).count() << "[ms]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end_time_ - start_time_).count() << "[µs]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end_time_ - start_time_).count() << "[ns]" << std::endl;
-                        start_time_ = std::chrono::steady_clock::now();
-                    }
-
-                    cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-
-                    index_++;
-                    if (index_ > 5) {
-                        index_ = 2;
-                    }
+            if (move_base_started) {
+                if (move_base_client_.waitForResult() && !is_object_to_clean_ && !object_cleaned_) {         
+                    object_cleaned_topic_.data = true;
+                    clean_object_from_map_pub.publish(object_cleaned_topic_);
+                    cout << "CHEGUEI NO OBJETO E JA LIMPEI ELE" << endl;
+                    object_cleaned_ = true;
                 }
             }
         }
