@@ -3,7 +3,7 @@
 <launch>
 
   <arg name="no_static_map" default="false"/>
-  <arg name="model" default="husky"/>
+  <arg name="model" default="pioneer"/>
   <arg name="navigating" default="true"/>
 
   <!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->

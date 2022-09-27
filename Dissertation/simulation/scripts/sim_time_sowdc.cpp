@@ -9,6 +9,7 @@
 #include <chrono>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 using namespace std::chrono;
 using namespace std;
@@ -18,35 +19,94 @@ int index_ = 0;
 bool time_started_ = false;
 std::chrono::steady_clock::time_point start_time_;
 std::chrono::steady_clock::time_point end_time_;
+std::ofstream objects_map_file_;
+std::ofstream fulllog_file_;
+bool first_setup = false;
 
 void mission_goals(){
-    tuple<float,float> inv_goals;    
+    tuple<float,float> inv_goals;
+    float input_goal_x, input_goal_y;
+    fulllog_file_ << "-----------GOALS--------------" << endl;    
 
     inv_goals = make_tuple(16.83527374267578,-4.076648712158203);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[0];
+    fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
     inv_goals = make_tuple(16.635780334472656,2.5355117321014404);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[1];
+    fulllog_file_ << "GOAL 1: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
     inv_goals = make_tuple(10.314708709716797,43.58147430419922);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[2];
+    fulllog_file_ << "GOAL 2: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
     inv_goals = make_tuple(13.89610767364502,2.775299072265625);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[3];
+    fulllog_file_ << "GOAL 3: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
     inv_goals = make_tuple(13.953405380249023,43.73188781738281);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[4];
+    fulllog_file_ << "GOAL 4: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
     inv_goals = make_tuple(12.793737411499023,2.642454147338867);
     goals.emplace_back(inv_goals);
+    tie(input_goal_x,input_goal_y) = goals[5];
+    fulllog_file_ << "GOAL 5: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
+    fulllog_file_ << "-----------GOALS--------------" << endl;
+
+}
+
+void init_file(std::string arq_name){
+
+    std::stringstream name_stream;
+    name_stream << "./sim_time_" << arq_name << ".txt";
+    std::string file_name = name_stream.str();
+    objects_map_file_.open(file_name,ios::app);
+    // return objects_map_file;
+}
+
+void init_fulllog_file(std::string arq_name){
+
+    std::stringstream name_stream;
+    name_stream << "./full_log_" << arq_name << ".txt";
+    std::string file_name = name_stream.str();
+    fulllog_file_.open(file_name,ios::app);
+    // return objects_map_file;
+}
+
+void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time){
+    if (objects_map_file_.is_open()) {
+        if (last_index < 2 && first_setup) {
+            last_index = 5;
+            std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+        } else {
+            std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+        }
+        
+        // objects_map_file.close();
+    }else{
+        cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
+    }
 }
 
 int main(int argc, char **argv){
     
     ros::init(argc, argv, "SOWDC_move");
     ros::NodeHandle node;
+    // std::ofstream sim_time_file;
 
+    init_file((std::string)argv[2]);
+    init_fulllog_file((std::string)argv[2]);
     mission_goals();
 
     std::stringstream move_base_topic_stream;
@@ -62,6 +122,8 @@ int main(int argc, char **argv){
     float input_goal_x, input_goal_y;
     bool setup = true;
     int last_index = 0;
+    int sim_laps = 0;
+    bool finished_lap = false;
 
     while(ros::ok()){
 
@@ -71,7 +133,8 @@ int main(int argc, char **argv){
         } else {
             if (setup) {
                 tie(input_goal_x,input_goal_y) = goals[index_];
-                cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                 goals_output.target_pose.header.frame_id = "map";
                 goals_output.target_pose.pose.position.x = input_goal_x;
                 goals_output.target_pose.pose.position.y = input_goal_y;
@@ -109,19 +172,36 @@ int main(int argc, char **argv){
                     } else {
                         end_time_ = std::chrono::steady_clock::now();
                         // time_started_ = false;
-                        std::cout << "GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ - start_time_).count() << "[ms]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end_time_ - start_time_).count() << "[µs]" << std::endl;
-                        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end_time_ - start_time_).count() << "[ns]" << std::endl;
+                        std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                        write_in_file(last_index,last_index-1,start_time_,end_time_);
                         start_time_ = std::chrono::steady_clock::now();
                     }
                     cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                    cout << "GOAL [" << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
+                    cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
 
                     last_index = index_;
+                    if (last_index > 2){
+                        first_setup = true;
+                    }
+                    if (last_index == 3 && finished_lap) {
+                        finished_lap = false;
+                        if (sim_laps < 10) {
+                            cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            sim_laps++;
+                        } else {
+                            cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                            objects_map_file_.close();
+                            fulllog_file_.close();
+                        }
+                    }
                     index_++;
                     if (index_ > 5) {
                         index_ = 2;
+                        finished_lap = true;
                     }
                 }
             }

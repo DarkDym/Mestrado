@@ -26,7 +26,7 @@
       </joint>
 
       <gazebo reference="${frame}">
-        <turnGravityOff>true</turnGravityOff>
+        <turnGravityOff>false</turnGravityOff>
         <sensor type="depth" name="${prefix}_realsense_depth">
           <update_rate>${update_rate}</update_rate>
           <alwaysOn>true</alwaysOn>

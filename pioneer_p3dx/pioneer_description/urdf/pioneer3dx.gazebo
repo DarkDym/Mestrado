@@ -57,7 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<gazebo>
 		<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
 			<alwaysOn>true</alwaysOn>
-			<updateRate>100</updateRate>
+			<updateRate>50</updateRate>
 			<leftJoint>base_right_wheel_joint</leftJoint>
 			<rightJoint>base_left_wheel_joint</rightJoint>
 			<wheelSeparation>0.314</wheelSeparation>
@@ -100,15 +100,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<ray>
 				<scan>
 					<horizontal>
-						<samples>727</samples>
+						<samples>720</samples>
 						<resolution>1</resolution>
-						<min_angle>-2.0944</min_angle>
-						<max_angle>2.0944</max_angle>
+						<min_angle>-1.57</min_angle>
+						<max_angle>1.57</max_angle>
 					</horizontal>
 				</scan>
 				<range>
 					<min>0.1</min>
-					<max>10.0</max>
+					<max>30.0</max>
 					<resolution>0.01</resolution>
 				</range>
 				<noise>
@@ -117,7 +117,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 						"+-30mm" accuracy at range < 10m. A mean of 0.0m and stddev of 0.01m will 
 						put 99.7% of samples within 0.03m of the true reading. -->
 					<mean>0.0</mean>
-					<stddev>0.01</stddev>
+					<stddev>0.001</stddev>
 				</noise>
 			</ray>
 			<plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
