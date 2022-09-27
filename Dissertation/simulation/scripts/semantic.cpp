@@ -85,6 +85,7 @@ std_msgs::Bool ros_finished_marking_;
 // std::vector<std::tuple<int,int,int,int>> box_objects_;
 vector<vector<int> > box_teste;
 vector<std::string> box_class;
+bool all_objects_marked_ = false;
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -230,12 +231,14 @@ void write_object_in_file(int cell_value, float pos_x, float pos_y){
 
     ofstream objects_map_file;
     objects_map_file.open("./objects_in_map.txt",ios::app);
-    if (objects_map_file.is_open()) {
+    if (objects_map_file.is_open() && !all_objects_marked_) {
         cout << "CELL_VALUE:" << cell_value << ";POS_X:" << pos_x << ";POS_Y:" << pos_y << endl;
-        objects_map_file << "CELL_VALUE:" << cell_value << ";POS_X:" << pos_x << ";POS_Y:" << pos_y << endl;
+        objects_map_file << cell_value << ";" << pos_x << ";" << pos_y << endl;
         objects_map_file.close();
     }else{
-        cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
+        // objects_map_file << "-------------------------------------------------" << endl;
+        // objects_map_file.close();
+        cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO OU TODOS OS OBJETOS JA FORAM MARCADOS NO ARQUIVO!" << endl;
     }
 }
 
@@ -425,6 +428,7 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
 }
 
 void boundToSemanticMap(){
+    cout << "QUANTIDADE DE OBJETOS A SER ANALISADOS: " << box_teste.size() << endl;
     for (int x = 0; x < box_teste.size(); x++) {
 
         int object_pos_x = 0, object_pos_y = 0;
@@ -461,6 +465,7 @@ void boundToSemanticMap(){
             }
         } 
     }
+    all_objects_marked_ = true;
 }
 
 void robot_pos_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
@@ -618,8 +623,10 @@ int main(int argc, char **argv){
     ros::Publisher resume_mission_pub = node.advertise<std_msgs::Bool>("resume_mission",10);
 
     ros::Rate rate(10);
-
+    
     while(ros::ok()){
+        // int c = 0;
+        // cout << "ZEREI O CONTADOR!!!" << endl;
         basefootprintToCameraTF();
         if (cv_ptr_){
             // checkGridForValue();
@@ -628,7 +635,8 @@ int main(int argc, char **argv){
                     copy_map();
                     boundToSemanticMap();
                     if (can_publish) {
-                        
+                        // cout << "Entrei aqui, o valor do contador eh: " << c << endl;
+                        // c++;
                         grid_update();
                         
                         map_pub.publish(grid_map_);
@@ -658,6 +666,7 @@ int main(int argc, char **argv){
             } else {
                 ros_finished_marking_.data = false;
                 finished_marking_pub.publish(ros_finished_marking_);
+                all_objects_marked_ = false;
             }
             
         }

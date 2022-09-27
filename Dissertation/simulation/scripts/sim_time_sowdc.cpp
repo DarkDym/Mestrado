@@ -22,6 +22,8 @@ std::chrono::steady_clock::time_point end_time_;
 std::ofstream objects_map_file_;
 std::ofstream fulllog_file_;
 bool first_setup = false;
+fstream objects_file_;
+vector<tuple<int,float,float>> object_goals_;
 
 void mission_goals(){
     tuple<float,float> inv_goals;
@@ -62,6 +64,21 @@ void mission_goals(){
 
 }
 
+void mission_goals_from_file(){
+    tuple<float,float> inv_goals;
+    float input_goal_x, input_goal_y;
+    int cell;
+    fulllog_file_ << "-----------GOALS--------------" << endl;    
+    for (int x = 0; x < object_goals_.size(); x++) {
+        tie(cell,input_goal_x,input_goal_y) = object_goals_[x];
+        fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+        cout << "INDICE: " << x << " CELL: " << cell << " PX: " << input_goal_x << " PY: " << input_goal_y << endl;
+        inv_goals = make_tuple(input_goal_x-1.0,input_goal_y-1.0);
+        goals.emplace_back(inv_goals);
+    }
+    fulllog_file_ << "-----------GOALS--------------" << endl;
+}
+
 void init_file(std::string arq_name){
 
     std::stringstream name_stream;
@@ -78,6 +95,41 @@ void init_fulllog_file(std::string arq_name){
     std::string file_name = name_stream.str();
     fulllog_file_.open(file_name,ios::app);
     // return objects_map_file;
+}
+
+void open_file(){
+    objects_file_.open("./objects_in_map.txt", ios::in);
+    if (objects_file_.is_open()) {
+        cout << "FILE OPENED SUCCEFULLY!" << endl;
+    } else {
+        cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
+    }
+}
+
+void read_file(){
+    string line, line_aux;
+    int cell_value = 0;
+    bool first_colum = false;
+    tuple<int,float,float> aux_goals;
+    vector<float> aux_pos;
+    while(getline(objects_file_, line)){
+        stringstream st(line);
+        while(getline(st, line_aux, ';')){
+            cout << line_aux << endl;
+            if (!first_colum) {
+                cell_value = stoi(line_aux);
+                first_colum = true;    
+            } else {
+                aux_pos.emplace_back(stof(line_aux));
+            }
+        }
+        cout << "----------------------" << endl;
+        first_colum = false;
+        aux_goals = make_tuple(cell_value,aux_pos[0],aux_pos[1]);
+        object_goals_.emplace_back(aux_goals);
+        cell_value = 0;
+        aux_pos.clear();
+    }
 }
 
 void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time){
@@ -107,7 +159,11 @@ int main(int argc, char **argv){
 
     init_file((std::string)argv[2]);
     init_fulllog_file((std::string)argv[2]);
-    mission_goals();
+    
+    // mission_goals();
+    open_file();
+    read_file();
+    mission_goals_from_file();
 
     std::stringstream move_base_topic_stream;
     move_base_topic_stream << "/" << (std::string)argv[1] << "/move_base";
@@ -199,8 +255,8 @@ int main(int argc, char **argv){
                         }
                     }
                     index_++;
-                    if (index_ > 5) {
-                        index_ = 2;
+                    if (index_ > goals.size()-1) {
+                        index_ = 0;
                         finished_lap = true;
                     }
                 }
