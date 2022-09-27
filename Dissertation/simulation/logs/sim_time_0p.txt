@@ -1,0 +1,58 @@
+GOAL [-1-> 0] | Time elapsed = 7[s]
+GOAL [0-> 1] | Time elapsed = 13[s]
+GOAL [1-> 2] | Time elapsed = 65[s]
+GOAL [2-> 3] | Time elapsed = 65[s]
+GOAL [3-> 4] | Time elapsed = 72[s]
+GOAL [4-> 5] | Time elapsed = 67[s]
+GOAL [5-> 2] | Time elapsed = 62[s]
+----------------------------------- END OF LAP: 0 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 66[s]
+GOAL [3-> 4] | Time elapsed = 69[s]
+GOAL [4-> 5] | Time elapsed = 68[s]
+GOAL [5-> 2] | Time elapsed = 63[s]
+----------------------------------- END OF LAP: 1 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 66[s]
+GOAL [3-> 4] | Time elapsed = 70[s]
+GOAL [4-> 5] | Time elapsed = 67[s]
+GOAL [5-> 2] | Time elapsed = 60[s]
+----------------------------------- END OF LAP: 2 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 63[s]
+GOAL [3-> 4] | Time elapsed = 67[s]
+GOAL [4-> 5] | Time elapsed = 68[s]
+GOAL [5-> 2] | Time elapsed = 151[s]
+----------------------------------- END OF LAP: 3 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 75[s]
+GOAL [3-> 4] | Time elapsed = 83[s]
+GOAL [4-> 5] | Time elapsed = 81[s]
+GOAL [5-> 2] | Time elapsed = 72[s]
+----------------------------------- END OF LAP: 4 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 77[s]
+GOAL [3-> 4] | Time elapsed = 88[s]
+GOAL [4-> 5] | Time elapsed = 83[s]
+GOAL [5-> 2] | Time elapsed = 83[s]
+----------------------------------- END OF LAP: 5 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 83[s]
+GOAL [3-> 4] | Time elapsed = 86[s]
+GOAL [4-> 5] | Time elapsed = 79[s]
+GOAL [5-> 2] | Time elapsed = 74[s]
+----------------------------------- END OF LAP: 6 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 79[s]
+GOAL [3-> 4] | Time elapsed = 81[s]
+GOAL [4-> 5] | Time elapsed = 84[s]
+GOAL [5-> 2] | Time elapsed = 80[s]
+----------------------------------- END OF LAP: 7 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 82[s]
+GOAL [3-> 4] | Time elapsed = 83[s]
+GOAL [4-> 5] | Time elapsed = 81[s]
+GOAL [5-> 2] | Time elapsed = 81[s]
+----------------------------------- END OF LAP: 8 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 76[s]
+GOAL [3-> 4] | Time elapsed = 83[s]
+GOAL [4-> 5] | Time elapsed = 80[s]
+GOAL [5-> 2] | Time elapsed = 81[s]
+----------------------------------- END OF LAP: 9 ------------------------------------
+GOAL [2-> 3] | Time elapsed = 75[s]
+GOAL [3-> 4] | Time elapsed = 94[s]
+GOAL [4-> 5] | Time elapsed = 87[s]
+GOAL [5-> 2] | Time elapsed = 78[s]
+----------------------------------- END OF LAP: 10 ------------------------------------
