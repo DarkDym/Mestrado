@@ -6,15 +6,15 @@
   <arg name="model" default="pioneer"/>
   <arg name="navigating" default="true"/>
 
-  <!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->
   <arg name="base_global_planner" default="global_planner/GlobalPlanner"/>
+
   <rosparam>
     GlobalPlanner:
       cost_factor: 0.50
       neutral_cost: 60
       lethal_cost: 253
   </rosparam>
-  <!-- <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/> -->
+
   <arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS"/>
   
   <arg name="odom_frame_id" default="$(arg model)_tf/odom"/>
@@ -30,11 +30,10 @@
     <param name="oscillation_timeout" value="20.0"/>
     <param name="oscillation_distance" value="1.0"/>    
      
-    <!-- <rosparam file="$(find dissertation_simulation)/config/planner.yaml" command="load"/> -->
-    <rosparam file="$(find dissertation_simulation)/config/teb_config.yaml" command="load" ns="TebLocalPlannerROS"/>
+    <rosparam file="$(find dissertation_simulation)/config/teb_config_pioneer.yaml" command="load" ns="TebLocalPlannerROS"/>
 
     <!-- observation sources located in costmap_common.yaml -->
-    <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find dissertation_simulation)/config/costmap_commons_pioneer.yaml" command="load" ns="global_costmap"/>
       <!-- <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
       <param name="global_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <!-- <remap from="realsense/depth/color/points" to="realsense/depth/color/points"/> -->
@@ -44,7 +43,7 @@
       
     <!-- </rosparam> -->
 
-    <rosparam file="$(find dissertation_simulation)/config/costmap_commons.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find dissertation_simulation)/config/costmap_commons_pioneer.yaml" command="load" ns="local_costmap"/>
       <!-- <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_footprint"/> -->
       <param name="local_costmap/robot_base_frame" value="$(arg model)_tf/base_link"/>
       <param name="local_costmap/obstacles_layer/laser_scan_sensor/topic" value="/$(arg model)/scan"/>
@@ -91,6 +90,7 @@
     <!-- </rosparam> -->
 
       <remap from="map" to="/map" if="$(arg navigating)"/>
+      <remap from="lane_map" to="/lane_map" if="$(arg navigating)"/>
       <remap from="scan" to="scan" if="$(arg navigating)"/>
       <param name="local_costmap/voxel_layer/camera_mark/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>
       <param name="local_costmap/voxel_layer/camera_clear/topic" value="/$(arg model)/realsense/depth/color/points" if="$(arg navigating)"/>

@@ -26,6 +26,8 @@ bool is_object_to_clean_ = false;
 bool move_base_started = false;
 bool object_cleaned_ = false;
 std_msgs::Bool object_cleaned_topic_;
+std_msgs::Bool start_object_cleaned_topic_;
+std_msgs::Bool finished_mission_topic_;
 
 void objects_goal_to_remove_callback(const move_base_msgs::MoveBaseGoal::ConstPtr& object_goal_msg){
     cout << "TENHO OBJETO NO MAPA PARA LIMPAR!" << endl;
@@ -52,6 +54,8 @@ int main(int argc, char **argv){
     ros::Subscriber new_object_to_remove_sub = node.subscribe("/objects_goal_to_remove",1,objects_goal_to_remove_callback);
 
     ros::Publisher clean_object_from_map_pub = node.advertise<std_msgs::Bool>("/clean_object_from_map",10);
+    ros::Publisher mission_finished_pub = node.advertise<std_msgs::Bool>("/reached_mission_goal",10);
+    ros::Publisher start_clean_object_from_map_pub = node.advertise<std_msgs::Bool>("/start_clean_object_from_map",10);
 
     std::stringstream move_base_topic_stream;
     move_base_topic_stream << "/" << (std::string)argv[1] << "/move_base";
@@ -71,15 +75,25 @@ int main(int argc, char **argv){
                 cout << "MANDANDO ROBO PARA O PONTO NO QUAL ELE DEVE LIMPAR O OBJETO!" << endl;
                 move_base_client_.sendGoal(goals_output_);
                 is_object_to_clean_ = false;
+                finished_mission_topic_.data = false;
+                mission_finished_pub.publish(finished_mission_topic_);
+                start_object_cleaned_topic_.data = true;
+                start_clean_object_from_map_pub.publish(start_object_cleaned_topic_);
             }
 
             if (move_base_started) {
                 if (move_base_client_.waitForResult() && !is_object_to_clean_ && !object_cleaned_) {         
                     object_cleaned_topic_.data = true;
+                    finished_mission_topic_.data = true;
                     clean_object_from_map_pub.publish(object_cleaned_topic_);
+                    mission_finished_pub.publish(finished_mission_topic_);
                     cout << "CHEGUEI NO OBJETO E JA LIMPEI ELE" << endl;
                     object_cleaned_ = true;
                 }
+            } 
+            else {
+                start_object_cleaned_topic_.data = false;
+                start_clean_object_from_map_pub.publish(start_object_cleaned_topic_);
             }
         }
         ros::spinOnce();

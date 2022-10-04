@@ -10,7 +10,14 @@
   inflater_layer:
     inflation_radius: 1.0
     cost_scaling_factor: 1.0
+  lane_layer:
+    enabled: true
+    map_topic: lane_map
+    subscribe_to_updates: false
+    trinary_costmap: false
+    lethal_cost_threshold: 255
 
   plugins:
   - {name: static_layer, type: "costmap_2d::StaticLayer"}
   - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
+  - {name: lane_layer, type: "costmap_2d::StaticLayer"}

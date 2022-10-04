@@ -56,9 +56,9 @@
 
     <!-- <node pkg="dissertation_simulation" type="client_move" name="client_move" args="$(arg port)"/> -->
 
-    <!-- <include file="$(find darknet_ros)/launch/darknet_ros.launch">
-      <arg name="image" value="/husky1/realsense/color/image_raw"/>
-    </include> -->
+    <include file="$(find darknet_ros)/launch/darknet_ros_pioneer.launch">
+      <arg name="image" value="/pioneer/realsense/color/image_raw"/>
+    </include>
 
 
     <!-- <rosparam file="$(find dissertation_simulation)/config/control.yaml" command="load"/>

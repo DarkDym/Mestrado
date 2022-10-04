@@ -65,6 +65,12 @@ target_link_libraries(sim_time_sowdc ${catkin_LIBRARIES})
 add_executable(object_cleaner scripts/object_cleaner.cpp)
 target_link_libraries(object_cleaner ${catkin_LIBRARIES})
 
+add_executable(mark_map_sim scripts/mark_map_sim.cpp)
+target_link_libraries(mark_map_sim ${catkin_LIBRARIES})
+
+add_executable(object_position_reader scripts/object_position_reader.cpp)
+target_link_libraries(object_position_reader ${catkin_LIBRARIES})
+
 # install roslaunch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

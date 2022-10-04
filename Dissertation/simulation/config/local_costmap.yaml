@@ -9,9 +9,16 @@
   plugins:
   - {name: obstacles_layer, type: "costmap_2d::ObstacleLayer"}
   - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
+  - {name: lane_layer, type: "costmap_2d::StaticLayer"}
   - {name: voxel_layer2, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
   - {name: voxel_layer, type: "costmap_2d::VoxelLayer"}
 
+  lane_layer:
+    enabled: true
+    map_topic: lane_map
+    subscribe_to_updates: false
+    trinary_costmap: false
+    lethal_cost_threshold: 255
   voxel_layer:
     enabled: true
     origin_z: 0.0

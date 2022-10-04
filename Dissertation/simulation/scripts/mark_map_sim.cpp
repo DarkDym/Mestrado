@@ -27,6 +27,10 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
+#include "darknet_ros_msgs/BoundingBoxes.h"
+#include "darknet_ros_msgs/BoundingBox.h"
+#include "darknet_ros_msgs/ObjectCount.h"
+
 using namespace std;
 using namespace Eigen;
 
@@ -38,6 +42,7 @@ const int UNKWON_VALUE = 80;
 
 int map_[4000][4000];
 nav_msgs::OccupancyGrid grid_map_;
+nav_msgs::OccupancyGrid marked_map_sub_;
 nav_msgs::OccupancyGrid marked_map_;
 bool setup_map = true;
 fstream objects_file_;
@@ -161,6 +166,10 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     }
 }
 
+void marked_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
+    marked_map_sub_.info.height = map_msg->info.height;
+}
+
 void finished_mission_callback(const std_msgs::Bool& finished_mission_msg){
     mission_finished_ = finished_mission_msg.data;
 }
@@ -183,8 +192,9 @@ int main(int argc, char **argv) {
     
 
     ros::Subscriber grid_map = node.subscribe("/map", 1, grid_callback);
-    ros::Subscriber mission_finished_sub = node.subscribe("/husky1/reached_mission_goal",1000,finished_mission_callback);
+    ros::Subscriber mission_finished_sub = node.subscribe("/reached_mission_goal",1000,finished_mission_callback);
     ros::Subscriber dkn_object_sub = node.subscribe("/darknet_ros/found_object", 1000, found_object_callback);
+    ros::Subscriber marked_map_sub = node.subscribe("/map_marked", 1, marked_map_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_marked",10);
 
@@ -208,9 +218,12 @@ int main(int argc, char **argv) {
                 grid_update();
                 marked_map_.data = grid_map_.data;
                 map_pub.publish(marked_map_);
-                finished_marking_ = true;
+                if (marked_map_sub_.info.height > 0) {
+                    finished_marking_ = true;
+                }
             } else {
                 if (mission_finished_) {
+                    cout << "SO PRA SABER SE FOI!!!!!!!!!!!!" << endl;
                     /*
                         if objects_count <= 0
                             scanForObjectsInMap()
