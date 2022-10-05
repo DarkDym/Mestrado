@@ -16,6 +16,7 @@ using namespace std;
 move_base_msgs::MoveBaseGoal goals_output_;
 bool object_cleaned_from_map_ = false;
 bool start_object_cleaned_from_map_ = false;
+bool object_demarked_from_map_ = false;
 bool setup = false;
 vector<tuple<int,float,float>> object_goals_;
 fstream objects_file_;
@@ -63,6 +64,10 @@ void start_clean_object_from_map_callback(const std_msgs::Bool& clean_object_msg
     start_object_cleaned_from_map_ = clean_object_msg.data;
 }
 
+void object_demarked_from_map_callback(const std_msgs::Bool& demarked_from_map_msg){
+    object_demarked_from_map_ = demarked_from_map_msg.data;
+}
+
 int main(int argc, char **argv){
 
     ros::init(argc, argv, "object_goal_reader");
@@ -73,6 +78,7 @@ int main(int argc, char **argv){
 
     ros::Subscriber clean_object_from_map_sub = node.subscribe("/clean_object_from_map",10,clean_object_from_map_callback);
     ros::Subscriber start_clean_object_from_map_sub = node.subscribe("/start_clean_object_from_map",10,start_clean_object_from_map_callback);
+    ros::Subscriber object_demarked_from_map_sub = node.subscribe("/object_demarked_from_map",10,object_demarked_from_map_callback);
     
     ros::Publisher new_object_to_remove_sub = node.advertise<move_base_msgs::MoveBaseGoal>("/objects_goal_to_remove",1);
 
@@ -84,6 +90,7 @@ int main(int argc, char **argv){
 
     while(ros::ok()){
         while(cont_control < object_goals_.size()){
+            cout << "OBJETO QUE VAI SER ANALISADO: " << cont_control << endl;
             if (!setup) {
                 tie(cell,px,py) = object_goals_[cont_control];
                 goals_output_.target_pose.header.frame_id = "map";
@@ -101,7 +108,7 @@ int main(int argc, char **argv){
                     setup = true;
                 }
             } else {
-                if (object_cleaned_from_map_) {
+                if (object_cleaned_from_map_ && object_demarked_from_map_) {
                     tie(cell,px,py) = object_goals_[cont_control];
                     goals_output_.target_pose.header.frame_id = "map";
                     goals_output_.target_pose.header.stamp = ros::Time::now();

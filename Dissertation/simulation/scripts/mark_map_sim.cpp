@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>  
+#include <map>
 
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include <tf/transform_listener.h>
@@ -50,6 +51,17 @@ vector<tuple<int,float,float>> object_goals_;
 bool finished_marking_ = false;
 bool mission_finished_ = false;
 int count_objects_ = 0;
+
+float ROBOT_POSE_[3];
+float CAMERA_POSE_[3];
+const float ANGLE_INCREASE = 0.002811917;
+const int MAX_BEAMS = 540;
+const float MAX_RANGE_CAM_DEPTH = 2.5;
+const float HFOV_RAD = 1.5184351666666667;
+vector<std::string> box_class;
+bool already_scanned_ = false;
+
+const map<std::string, int> DARKNET_CLASSES = {{"person", 160},{"vase", 110},{"bicycle", 130},{"suitcase", 240},{"unkwon", 80}};
 
 std::tuple<int,int> odom2cell(float odom_pose_x, float odom_pose_y){
     int i = odom_pose_x/grid_map_.info.resolution - grid_map_.info.origin.position.x/grid_map_.info.resolution;
@@ -112,6 +124,32 @@ void read_file(){
     }
 }
 
+void robot_pos_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& odom_msg){
+    ROBOT_POSE_[0] = odom_msg->pose.pose.position.x;
+    ROBOT_POSE_[1] = odom_msg->pose.pose.position.y;
+    Quaternionf q;
+    q.x() = odom_msg->pose.pose.orientation.x;
+    q.y() = odom_msg->pose.pose.orientation.y;
+    q.z() = odom_msg->pose.pose.orientation.z;
+    q.w() = odom_msg->pose.pose.orientation.w;
+    auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
+    ROBOT_POSE_[2] = euler[2];
+}
+
+void basefootprintToCameraTF(){
+    tf::TransformListener tf_listerner;
+    tf::StampedTransform tf_trans;
+
+    try {
+        tf_listerner.waitForTransform("pioneer_tf/base_link","pioneer_tf/camera_realsense",ros::Time::now(),ros::Duration(3.0));
+        tf_listerner.lookupTransform("pioneer_tf/base_link","pioneer_tf/camera_realsense",ros::Time::now(),tf_trans);
+        CAMERA_POSE_[0] = ROBOT_POSE_[0] + tf_trans.getOrigin().x();
+        CAMERA_POSE_[1] = ROBOT_POSE_[1] + tf_trans.getOrigin().y();
+    }catch(tf2::TransformException &ex){
+        ROS_WARN("%s",ex.what());
+    } 
+}
+
 void map_update(float pos_x, float pos_y, int cell_value){
     int width, heigth;
     
@@ -151,6 +189,105 @@ void copy_map(){
     }
 }
 
+//HIMM FOR IMAGE SCAN
+//Later: Change the name of the function to clarify what it is doing.
+void himm_inc(int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_cell_y){
+    int delta_x, delta_y, precision, precision2, xy2, x, y, xf, step_x, step_y;
+    
+    delta_x = laser_cell_x - robot_cell_x;
+    delta_y = laser_cell_y - robot_cell_y;
+
+    x = robot_cell_x;
+    y = robot_cell_y;
+
+    if (delta_x < 0) {
+        delta_x = -delta_x;
+        step_x = -1;
+    } else {
+        step_x = 1;
+    }
+
+    if (delta_y < 0) {
+        delta_y = -delta_y;
+        step_y = -1;
+    } else {
+        step_y = 1;
+    }
+
+    if (abs(delta_x) > abs(delta_y)) {
+        precision = 2 * delta_y - delta_x;
+        precision2 = 2 * delta_y;
+        xy2 = 2 * (delta_y - delta_x);
+
+        while(x != laser_cell_x){
+
+            x += step_x;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                y += step_y;
+                precision += xy2;
+            }
+            // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
+            //     map_[x][y] = 0;
+            // }
+            if (map_[x][y] != 0 || map_[x][y] != 255 || map_[x][y] != 100) {
+                map_[x][y] = 0;
+            }
+            // //---------------TESTE
+            // map_[x][y] = 100;       
+        }
+    } else {
+        precision = 2 * delta_x - delta_y;
+        precision2 = 2 * delta_x;
+        xy2 = 2 * (delta_x - delta_y);
+
+        while(y != laser_cell_y){
+            y += step_y;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                x += step_x;
+                precision += xy2;
+            }
+            
+            // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
+            //     map_[x][y] = 0;
+            // } 
+            if (map_[x][y] != 0 || map_[x][y] != 255 || map_[x][y] != 100) {
+                map_[x][y] = 0;
+            } 
+            // //---------------TESTE
+            // map_[x][y] = 100;           
+        }
+    }    
+}
+
+void scanForObejctsInMap(){
+    int cell_x, cell_y;
+    int odom_y,odom_x;
+    float laser_x, laser_y,robot_rad;
+    float beta = HFOV_RAD/2;
+
+    tie(cell_x, cell_y) = odom2cell(CAMERA_POSE_[0], CAMERA_POSE_[1]);
+
+    for (int ang = 0; ang < MAX_BEAMS; ang++) {
+        robot_rad = remainder(ROBOT_POSE_[2]+((ang*ANGLE_INCREASE)-beta),2.0*M_PI);
+        laser_x = (cos(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        laser_y = (sin(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        tie(odom_x,odom_y) = odom2cell(CAMERA_POSE_[0]+laser_x,CAMERA_POSE_[1]+laser_y);
+        if ((odom_x >= 0 && odom_x < grid_map_.info.width) && (odom_y >= 0 && odom_y < grid_map_.info.height)) {
+            himm_inc(cell_x,cell_y,odom_x,odom_y);
+        }
+    }
+}
+
+// std::string a(){
+//     return 
+// }
+
 void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     grid_map_.header.frame_id = map_msg->header.frame_id;
     grid_map_.header.seq = map_msg->header.seq;
@@ -178,6 +315,14 @@ void found_object_callback(const darknet_ros_msgs::ObjectCount& count_msg){
     count_objects_ = count_msg.count;
 }
 
+void darknet_bounding_boxes_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
+
+    box_class.clear();
+    for (int x = 0; x < msg->bounding_boxes.size(); x++){
+        box_class.push_back(msg->bounding_boxes[x].Class);
+    }
+}
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "mark_map_sim");
@@ -195,10 +340,15 @@ int main(int argc, char **argv) {
     ros::Subscriber mission_finished_sub = node.subscribe("/reached_mission_goal",1000,finished_mission_callback);
     ros::Subscriber dkn_object_sub = node.subscribe("/darknet_ros/found_object", 1000, found_object_callback);
     ros::Subscriber marked_map_sub = node.subscribe("/map_marked", 1, marked_map_callback);
+    ros::Subscriber dark_sub = node.subscribe("/darknet_ros/bounding_boxes", 1000, darknet_bounding_boxes_callback);
+    ros::Subscriber odom_sub = node.subscribe("/pioneer/amcl_pose", 1000, robot_pos_callback);
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_marked",10);
+    ros::Publisher object_demarked_pub = node.advertise<std_msgs::Bool>("/object_demarked_from_map",10);
 
     ros::Rate rate(10);
+
+    int object_cont_control;
     
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
@@ -218,16 +368,55 @@ int main(int argc, char **argv) {
                 grid_update();
                 marked_map_.data = grid_map_.data;
                 map_pub.publish(marked_map_);
-                if (marked_map_sub_.info.height > 0) {
+                if (marked_map_.data.size() > 0) {
                     finished_marking_ = true;
+                    object_cont_control = 0;
+                    cout << "FINISHED MARKING THE OBJECTS IN MAP!!!!!!" << endl;
                 }
             } else {
                 if (mission_finished_) {
                     cout << "SO PRA SABER SE FOI!!!!!!!!!!!!" << endl;
-                    /*
-                        if objects_count <= 0
-                            scanForObjectsInMap()
-                    */
+                    tie(cell,px,py) = object_goals_[object_cont_control];
+
+                    if (count_objects_ <= 0) {
+                        basefootprintToCameraTF();
+                        scanForObejctsInMap();
+                        std_msgs::Bool object_demarked;
+                        object_demarked.data = true;
+                        object_demarked_pub.publish(object_demarked);
+                        object_cont_control++;
+                    } else {
+                        /*
+                            Verificar se o objeto que está sendo analisado no arquivo
+                            é o mesmo que sendo visto nesta posição ou mais além.
+                                                       
+                        */
+                        if (!already_scanned_) {
+                            for (int x = 0; x < box_class.size(); x++) {
+                                cout << "BOX_CLASS[" << x << "]: " << box_class[x] << endl;
+                                if (DARKNET_CLASSES.find(box_class[x]) != DARKNET_CLASSES.end()) {
+                                    if (cell != DARKNET_CLASSES.at(box_class[x])) {
+                                        cout << "TESTE DO FIND: ACHEEIIIIIII OS VALORES QUE EU NAO QUERIA E TENHO QUE APAGAR DO MAPA" << endl;
+                                        basefootprintToCameraTF();
+                                        scanForObejctsInMap();
+                                    }
+                                }
+                            } 
+                            
+                            cout << "TEM OBJETOS NESSA POSICAO!!!" << endl;
+                            // cout << "TESTE DO FIND: " <<  << endl;
+                            std_msgs::Bool object_demarked;
+                            object_demarked.data = true;
+                            object_demarked_pub.publish(object_demarked);
+                            object_cont_control++;
+                            already_scanned_ = true;
+                            grid_update();
+                            marked_map_.data = grid_map_.data;
+                            map_pub.publish(marked_map_);
+                        }
+                    }
+                } else {
+                    already_scanned_ = false;
                 }
             }
         }

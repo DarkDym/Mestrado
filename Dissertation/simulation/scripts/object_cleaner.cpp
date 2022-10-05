@@ -68,6 +68,8 @@ int main(int argc, char **argv){
     while(ros::ok()){
 
         if (!move_base_client_.isServerConnected()){
+            finished_mission_topic_.data = false;
+            mission_finished_pub.publish(finished_mission_topic_);
             ros::spinOnce();
             rate.sleep();
         } else {
