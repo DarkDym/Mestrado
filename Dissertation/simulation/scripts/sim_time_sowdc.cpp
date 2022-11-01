@@ -28,39 +28,78 @@ vector<tuple<int,float,float>> object_goals_;
 void mission_goals(){
     tuple<float,float> inv_goals;
     float input_goal_x, input_goal_y;
-    fulllog_file_ << "-----------GOALS--------------" << endl;    
+    // fulllog_file_ << "-----------GOALS--------------" << endl;    
 
-    inv_goals = make_tuple(16.83527374267578,-4.076648712158203);
+    // inv_goals = make_tuple(16.83527374267578,-4.076648712158203);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[0];
+    // fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // inv_goals = make_tuple(16.635780334472656,2.5355117321014404);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[1];
+    // fulllog_file_ << "GOAL 1: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // inv_goals = make_tuple(10.314708709716797,43.58147430419922);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[2];
+    // fulllog_file_ << "GOAL 2: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // inv_goals = make_tuple(13.89610767364502,2.775299072265625);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[3];
+    // fulllog_file_ << "GOAL 3: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // inv_goals = make_tuple(13.953405380249023,43.73188781738281);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[4];
+    // fulllog_file_ << "GOAL 4: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // inv_goals = make_tuple(12.793737411499023,2.642454147338867);
+    // goals.emplace_back(inv_goals);
+    // tie(input_goal_x,input_goal_y) = goals[5];
+    // fulllog_file_ << "GOAL 5: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+
+    // fulllog_file_ << "-----------GOALS--------------" << endl;
+
+    inv_goals = make_tuple(3.0571606159210205,6.464037895202637);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[0];
-    fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
-    inv_goals = make_tuple(16.635780334472656,2.5355117321014404);
+    inv_goals = make_tuple(7.30134391784668,12.985001564025879);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[1];
-    fulllog_file_ << "GOAL 1: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
-    inv_goals = make_tuple(10.314708709716797,43.58147430419922);
+    inv_goals = make_tuple(1.979628562927246,18.99486541748047);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[2];
-    fulllog_file_ << "GOAL 2: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
-
-    inv_goals = make_tuple(13.89610767364502,2.775299072265625);
+    
+    inv_goals = make_tuple(-0.04924583435058594,8.970008850097656);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[3];
-    fulllog_file_ << "GOAL 3: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
-    inv_goals = make_tuple(13.953405380249023,43.73188781738281);
+    inv_goals = make_tuple(10.125747680664062,2.951190948486328);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[4];
-    fulllog_file_ << "GOAL 4: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
-    inv_goals = make_tuple(12.793737411499023,2.642454147338867);
+    inv_goals = make_tuple(10.06579303741455,-7.0252604484558105);
     goals.emplace_back(inv_goals);
-    tie(input_goal_x,input_goal_y) = goals[5];
-    fulllog_file_ << "GOAL 5: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
 
-    fulllog_file_ << "-----------GOALS--------------" << endl;
+    inv_goals = make_tuple(16.586750030517578,-6.57015323638916);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(25.265361785888672,-11.598235130310059);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(28.645061492919922,-20.9417667388916);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(15.961433410644531,-15.847126007080078);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(11.151702880859375,-6.412162780761719);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(9.609451293945312,0.26978492736816406);
+    goals.emplace_back(inv_goals);
+
+    inv_goals = make_tuple(1.9898185729980469,5.972867488861084);
+    goals.emplace_back(inv_goals);
 
 }
 

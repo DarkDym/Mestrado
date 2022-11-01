@@ -35,6 +35,13 @@
 using namespace std;
 using namespace Eigen;
 
+typedef struct OBJECT_SCANNED{
+    int OBJECT_CLASS_VALUE;
+    int OBJECT_WEIGHT_VALUE;
+    int OBJECT_CELL_X;
+    int OBJECT_CELL_Y;
+};
+
 const int VASE_VALUE = 110;
 const int BICYCLE_VALUE = 130;
 const int PERSON_VALUE = 160;
@@ -284,6 +291,102 @@ void scanForObejctsInMap(){
     }
 }
 
+//****************************************************Adicionado 1/11 ****************************************************
+/*
+    Precisa ser compilado e testado. Até o momento somente foi adicionado
+    e condicionado para funcionar de acordo com o objetivo de retirar o 
+    objeto que está sendo observado e o que está sendo lido do arquivo do 
+    mapa.
+*/
+
+void clean_specific_cell_from_matrix(int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_cell_y, int cell_value){
+    int delta_x, delta_y, precision, precision2, xy2, x, y, xf, step_x, step_y;
+    
+    delta_x = laser_cell_x - robot_cell_x;
+    delta_y = laser_cell_y - robot_cell_y;
+
+    x = robot_cell_x;
+    y = robot_cell_y;
+
+    if (delta_x < 0) {
+        delta_x = -delta_x;
+        step_x = -1;
+    } else {
+        step_x = 1;
+    }
+
+    if (delta_y < 0) {
+        delta_y = -delta_y;
+        step_y = -1;
+    } else {
+        step_y = 1;
+    }
+
+    if (abs(delta_x) > abs(delta_y)) {
+        precision = 2 * delta_y - delta_x;
+        precision2 = 2 * delta_y;
+        xy2 = 2 * (delta_y - delta_x);
+
+        while(x != laser_cell_x){
+
+            x += step_x;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                y += step_y;
+                precision += xy2;
+            }
+        
+            if (map_[x][y] == cell_value) {
+                map_[x][y] = 0;
+            }
+            // //---------------TESTE
+            // map_[x][y] = 100;       
+        }
+    } else {
+        precision = 2 * delta_x - delta_y;
+        precision2 = 2 * delta_x;
+        xy2 = 2 * (delta_x - delta_y);
+
+        while(y != laser_cell_y){
+            y += step_y;
+            
+            if (precision < 0) {
+                precision += precision2;
+            } else {
+                x += step_x;
+                precision += xy2;
+            }
+            
+            if (map_[x][y] == cell_value) {
+                map_[x][y] = 0;
+            } 
+            // //---------------TESTE
+            // map_[x][y] = 100;           
+        }
+    }    
+}
+
+void scanForObejctsInMap(int cell_value){
+    int cell_x, cell_y;
+    int odom_y,odom_x;
+    float laser_x, laser_y,robot_rad;
+    float beta = HFOV_RAD/2;
+
+    tie(cell_x, cell_y) = odom2cell(CAMERA_POSE_[0], CAMERA_POSE_[1]);
+
+    for (int ang = 0; ang < MAX_BEAMS; ang++) {
+        robot_rad = remainder(ROBOT_POSE_[2]+((ang*ANGLE_INCREASE)-beta),2.0*M_PI);
+        laser_x = (cos(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        laser_y = (sin(robot_rad) * MAX_RANGE_CAM_DEPTH);
+        tie(odom_x,odom_y) = odom2cell(CAMERA_POSE_[0]+laser_x,CAMERA_POSE_[1]+laser_y);
+        if ((odom_x >= 0 && odom_x < grid_map_.info.width) && (odom_y >= 0 && odom_y < grid_map_.info.height)) {
+            clean_specific_cell_from_matrix(cell_x,cell_y,odom_x,odom_y,cell_value);
+        }
+    }
+}
+
 // std::string a(){
 //     return 
 // }
@@ -398,7 +501,7 @@ int main(int argc, char **argv) {
                                     if (cell != DARKNET_CLASSES.at(box_class[x])) {
                                         cout << "TESTE DO FIND: ACHEEIIIIIII OS VALORES QUE EU NAO QUERIA E TENHO QUE APAGAR DO MAPA" << endl;
                                         basefootprintToCameraTF();
-                                        scanForObejctsInMap();
+                                        scanForObejctsInMap(cell);                                        
                                     }
                                 }
                             } 
