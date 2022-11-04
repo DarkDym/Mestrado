@@ -35,12 +35,12 @@
 using namespace std;
 using namespace Eigen;
 
-typedef struct OBJECT_SCANNED{
+typedef struct {
     int OBJECT_CLASS_VALUE;
     int OBJECT_WEIGHT_VALUE;
     int OBJECT_CELL_X;
     int OBJECT_CELL_Y;
-};
+}OBJECT_SCANNED;
 
 const int VASE_VALUE = 110;
 const int BICYCLE_VALUE = 130;
@@ -293,7 +293,7 @@ void scanForObejctsInMap(){
 
 //****************************************************Adicionado 1/11 ****************************************************
 /*
-    Precisa ser compilado e testado. Até o momento somente foi adicionado
+    Precisa ser testado. Até o momento somente foi adicionado
     e condicionado para funcionar de acordo com o objetivo de retirar o 
     objeto que está sendo observado e o que está sendo lido do arquivo do 
     mapa.

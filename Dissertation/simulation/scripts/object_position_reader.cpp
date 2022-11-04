@@ -89,7 +89,7 @@ int main(int argc, char **argv){
     float px,py;
 
     while(ros::ok()){
-        while(cont_control < object_goals_.size()){
+        while(cont_control < object_goals_.size()-1){
             cout << "OBJETO QUE VAI SER ANALISADO: " << cont_control << endl;
             if (!setup) {
                 tie(cell,px,py) = object_goals_[cont_control];
