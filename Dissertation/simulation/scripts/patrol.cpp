@@ -176,7 +176,6 @@ int main(int argc, char **argv){
                             finished_mission_pub.publish(ros_mission_finished_);
                             //----------------------------------------------------------------------------------------------------------
 
-                            // move_base_client_.sendGoal(goals_output);
                             index_++;
                             if (index_ > 13) {
                                 index_ = 0;

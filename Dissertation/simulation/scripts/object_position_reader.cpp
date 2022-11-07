@@ -80,7 +80,8 @@ int main(int argc, char **argv){
     ros::Subscriber start_clean_object_from_map_sub = node.subscribe("/start_clean_object_from_map",10,start_clean_object_from_map_callback);
     ros::Subscriber object_demarked_from_map_sub = node.subscribe("/object_demarked_from_map",10,object_demarked_from_map_callback);
     
-    ros::Publisher new_object_to_remove_sub = node.advertise<move_base_msgs::MoveBaseGoal>("/objects_goal_to_remove",1);
+    ros::Publisher new_object_to_remove_pub = node.advertise<move_base_msgs::MoveBaseGoal>("/objects_goal_to_remove",1);
+    ros::Publisher all_objects_analyzed_pub = node.advertise<std_msgs::Bool>("/all_objects_analyzed",10);
 
     ros::Rate rate(10);
 
@@ -88,9 +89,11 @@ int main(int argc, char **argv){
     int cell;
     float px,py;
 
+    cout << "QUANTIDADE DE GOALS: " << object_goals_.size() << endl;
+
     while(ros::ok()){
-        while(cont_control < object_goals_.size()-1){
-            cout << "OBJETO QUE VAI SER ANALISADO: " << cont_control << endl;
+        while(cont_control < object_goals_.size()){
+            // cout << "OBJETO QUE VAI SER ANALISADO: " << cont_control << endl;
             if (!setup) {
                 tie(cell,px,py) = object_goals_[cont_control];
                 goals_output_.target_pose.header.frame_id = "map";
@@ -102,12 +105,13 @@ int main(int argc, char **argv){
                 goals_output_.target_pose.pose.orientation.y = 0.00;
                 goals_output_.target_pose.pose.orientation.z = 0.25;
                 goals_output_.target_pose.pose.orientation.w = 0.95;
-                new_object_to_remove_sub.publish(goals_output_);
+                new_object_to_remove_pub.publish(goals_output_);
                 if (start_object_cleaned_from_map_) {
                     cont_control++;
                     setup = true;
                 }
             } else {
+                // cout << "object_cleaned_from_map_: " << object_cleaned_from_map_ << " | object_demarked_from_map_:" << object_demarked_from_map_ << endl;
                 if (object_cleaned_from_map_ && object_demarked_from_map_) {
                     tie(cell,px,py) = object_goals_[cont_control];
                     goals_output_.target_pose.header.frame_id = "map";
@@ -119,14 +123,22 @@ int main(int argc, char **argv){
                     goals_output_.target_pose.pose.orientation.y = 0.00;
                     goals_output_.target_pose.pose.orientation.z = 0.25;
                     goals_output_.target_pose.pose.orientation.w = 0.95;
-                    new_object_to_remove_sub.publish(goals_output_);
+                    new_object_to_remove_pub.publish(goals_output_);
                     cont_control++;
                     object_cleaned_from_map_ = false;
                 }
             }
             ros::spinOnce();
             rate.sleep();  
-        }     
+        }
+        std_msgs::Bool all_objects;
+        all_objects.data = true;
+        all_objects_analyzed_pub.publish(all_objects);
+        // if (cont_control < object_goals_.size()) {
+            // cout << "OS GOALS DO ARQUIVO FORAM FINALIZADOS!!!!!" << endl;
+            // cout << "QUANTIDADE DE GOALS: " << object_goals_.size() << endl;
+            // cout << "CONT_CONTROL: " << cont_control << endl;
+        // }    
         ros::spinOnce();
         rate.sleep();   
     }

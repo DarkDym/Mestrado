@@ -67,6 +67,7 @@ const float MAX_RANGE_CAM_DEPTH = 2.5;
 const float HFOV_RAD = 1.5184351666666667;
 vector<std::string> box_class;
 bool already_scanned_ = false;
+bool all_objects_analyzed_ = false;
 
 const map<std::string, int> DARKNET_CLASSES = {{"person", 160},{"vase", 110},{"bicycle", 130},{"suitcase", 240},{"unkwon", 80}};
 
@@ -236,9 +237,6 @@ void himm_inc(int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_ce
                 y += step_y;
                 precision += xy2;
             }
-            // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
-            //     map_[x][y] = 0;
-            // }
             if (map_[x][y] != 0 || map_[x][y] != 255 || map_[x][y] != 100) {
                 map_[x][y] = 0;
             }
@@ -260,9 +258,6 @@ void himm_inc(int robot_cell_x, int robot_cell_y, int laser_cell_x, int laser_ce
                 precision += xy2;
             }
             
-            // if (map_[x][y] == SUITCASE_VALUE || map_[x][y] == PERSON_VALUE || map_[x][y] == BICYCLE_VALUE || map_[x][y] == VASE_VALUE) {
-            //     map_[x][y] = 0;
-            // } 
             if (map_[x][y] != 0 || map_[x][y] != 255 || map_[x][y] != 100) {
                 map_[x][y] = 0;
             } 
@@ -289,6 +284,21 @@ void scanForObejctsInMap(){
             himm_inc(cell_x,cell_y,odom_x,odom_y);
         }
     }
+}
+
+//****************************************************Adicionado 7/11 ****************************************************
+/*
+    É necessário realizar uma mudança na forma de analisar o
+    peso de cada objeto que é verificado pelo sistema.
+*/
+int verify_dinamyc(int cell_value){
+    if (cell_value == 110) {
+        return 0;
+    } else if (cell_value == 160 || cell_value == 120) {
+        return 1;
+    } else {
+        return 2;
+    }    
 }
 
 //****************************************************Adicionado 1/11 ****************************************************
@@ -387,9 +397,6 @@ void scanForObejctsInMap(int cell_value){
     }
 }
 
-// std::string a(){
-//     return 
-// }
 
 void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     grid_map_.header.frame_id = map_msg->header.frame_id;
@@ -426,6 +433,10 @@ void darknet_bounding_boxes_callback(const darknet_ros_msgs::BoundingBoxes::Cons
     }
 }
 
+void all_objects_analyzed_callback(const std_msgs::Bool& all_objects_msg){
+    all_objects_analyzed_ = all_objects_msg.data;
+}
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "mark_map_sim");
@@ -433,7 +444,6 @@ int main(int argc, char **argv) {
 
     init_map();
     open_file();
-    cout << "SO PRA TESTAR SE TA FUNCIONANDO: " << endl;
     read_file();
     int cell;
     float px,py;
@@ -445,13 +455,14 @@ int main(int argc, char **argv) {
     ros::Subscriber marked_map_sub = node.subscribe("/map_marked", 1, marked_map_callback);
     ros::Subscriber dark_sub = node.subscribe("/darknet_ros/bounding_boxes", 1000, darknet_bounding_boxes_callback);
     ros::Subscriber odom_sub = node.subscribe("/pioneer/amcl_pose", 1000, robot_pos_callback);
+    ros::Subscriber all_objects_analyzed_sub = node.subscribe("/all_objects_analyzed", 1, all_objects_analyzed_callback);  
 
     ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map_marked",10);
     ros::Publisher object_demarked_pub = node.advertise<std_msgs::Bool>("/object_demarked_from_map",10);
 
     ros::Rate rate(10);
 
-    int object_cont_control;
+    int object_cont_control,cont=0;
     
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
@@ -471,51 +482,56 @@ int main(int argc, char **argv) {
                 grid_update();
                 marked_map_.data = grid_map_.data;
                 map_pub.publish(marked_map_);
-                if (marked_map_.data.size() > 0) {
+                if (marked_map_sub_.info.height > 0) {
                     finished_marking_ = true;
                     object_cont_control = 0;
                     cout << "FINISHED MARKING THE OBJECTS IN MAP!!!!!!" << endl;
                 }
             } else {
                 if (mission_finished_) {
-                    cout << "SO PRA SABER SE FOI!!!!!!!!!!!!" << endl;
-                    tie(cell,px,py) = object_goals_[object_cont_control];
+                    if (object_cont_control <= object_goals_.size()-1) {
+                        tie(cell,px,py) = object_goals_[object_cont_control];
 
-                    if (count_objects_ <= 0) {
-                        basefootprintToCameraTF();
-                        scanForObejctsInMap();
-                        std_msgs::Bool object_demarked;
-                        object_demarked.data = true;
-                        object_demarked_pub.publish(object_demarked);
-                        object_cont_control++;
-                    } else {
-                        /*
-                            Verificar se o objeto que está sendo analisado no arquivo
-                            é o mesmo que sendo visto nesta posição ou mais além.
-                                                       
-                        */
-                        if (!already_scanned_) {
-                            for (int x = 0; x < box_class.size(); x++) {
-                                cout << "BOX_CLASS[" << x << "]: " << box_class[x] << endl;
-                                if (DARKNET_CLASSES.find(box_class[x]) != DARKNET_CLASSES.end()) {
-                                    if (cell != DARKNET_CLASSES.at(box_class[x])) {
-                                        cout << "TESTE DO FIND: ACHEEIIIIIII OS VALORES QUE EU NAO QUERIA E TENHO QUE APAGAR DO MAPA" << endl;
-                                        basefootprintToCameraTF();
-                                        scanForObejctsInMap(cell);                                        
-                                    }
-                                }
-                            } 
-                            
-                            cout << "TEM OBJETOS NESSA POSICAO!!!" << endl;
-                            // cout << "TESTE DO FIND: " <<  << endl;
+                        if (count_objects_ <= 0) {
+                            basefootprintToCameraTF();
+                            scanForObejctsInMap();
                             std_msgs::Bool object_demarked;
                             object_demarked.data = true;
                             object_demarked_pub.publish(object_demarked);
                             object_cont_control++;
-                            already_scanned_ = true;
-                            grid_update();
-                            marked_map_.data = grid_map_.data;
-                            map_pub.publish(marked_map_);
+                        } else {
+                            /*
+                                Verificar se o objeto que está sendo analisado no arquivo
+                                é o mesmo que sendo visto nesta posição ou mais além.
+                                                        
+                            */
+                            if (!already_scanned_) {
+                                for (int x = 0; x < box_class.size(); x++) {
+                                    cout << "BOX_CLASS[" << x << "]: " << box_class[x] << endl;
+                                    if (DARKNET_CLASSES.find(box_class[x]) != DARKNET_CLASSES.end()) {
+                                        if (cell != DARKNET_CLASSES.at(box_class[x])) {
+                                            int vcell = verify_dinamyc(cell);
+                                            if (vcell == 1) {
+                                                basefootprintToCameraTF();
+                                                scanForObejctsInMap(cell);
+                                            }                                                                                    
+                                        }
+                                    }
+                                } 
+                                
+                                std_msgs::Bool object_demarked;
+                                object_demarked.data = true;
+                                object_demarked_pub.publish(object_demarked);
+                                object_cont_control++;
+                                already_scanned_ = true;
+                                grid_update();
+                                marked_map_.data = grid_map_.data;
+                                map_pub.publish(marked_map_);
+                            }
+
+                            if (all_objects_analyzed_ && object_cont_control <= object_goals_.size()-1) {
+                                object_cont_control++;
+                            }
                         }
                     }
                 } else {

@@ -8,7 +8,6 @@
 #include <cv_bridge/cv_bridge.h>
 #include <vector>
 #include <fstream>
-// #include <string>
 
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include <tf/transform_listener.h>
@@ -82,7 +81,6 @@ sensor_msgs::PointCloud2 depthCloudROS;
 //----------------------------------------------------------------------------------------------------------
 bool mission_finished_;
 std_msgs::Bool ros_finished_marking_;
-// std::vector<std::tuple<int,int,int,int>> box_objects_;
 vector<vector<int> > box_teste;
 vector<std::string> box_class;
 bool all_objects_marked_ = false;
@@ -102,16 +100,8 @@ void copy_map(){
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
             if (map_[x][y] != SUITCASE_VALUE && map_[x][y] != PERSON_VALUE && map_[x][y] != VASE_VALUE && map_[x][y] != BICYCLE_VALUE) {
-                // cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
                 map_[x][y] = grid_map_.data[index];
             }
-            // else{
-            //     cout << "------------------------------------------------------------------------------" << endl;
-            //     cout << "COPY_MAP" << endl;
-            //     cout << "&&&&&&&&&&&&&&&&&&&&&AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-            //     cout << "VALOR QUE TA DENRTO DA COISA: " << map_[x][y] << endl;
-            //     cout << "------------------------------------------------------------------------------" << endl;
-            // }
         }
     }
 }
@@ -192,7 +182,6 @@ float meanDepthValue(int x_i, int x_f, int y_i, int y_f, cv_bridge::CvImageConst
 }
 //--------------------------------------------------------------------------------------------------------------
 void checkGridForValue(){
-    // cout << "ENTREI NA VERIFICACAO!!!!!" << endl;
     for(int x = 0; x < map_width; x++){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
@@ -210,15 +199,7 @@ void grid_update(){
         int multi = x * map_width;
         for(int y = 0; y < map_height; y++){
             int index = y + multi;
-            // if (map_[x][y] != SUITCASE_VALUE || map_[x][y] != PERSON_VALUE) {
-                grid_map_.data[index] = map_[x][y];
-            // }else{
-            //     cout << "------------------------------------------------------------------------------" << endl;
-            //     cout << "GRID_UPDATE" << endl;
-            //     cout << "*****************AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-            //     cout << "VALOR DO QUE EU COMPAREI: " << map_[x][y] << endl;
-            //     cout << "------------------------------------------------------------------------------" << endl;
-            // }
+            grid_map_.data[index] = map_[x][y];
         }
     }
 }
@@ -236,8 +217,6 @@ void write_object_in_file(int cell_value, float pos_x, float pos_y){
         objects_map_file << cell_value << ";" << pos_x << ";" << pos_y << endl;
         objects_map_file.close();
     }else{
-        // objects_map_file << "-------------------------------------------------" << endl;
-        // objects_map_file.close();
         cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO OU TODOS OS OBJETOS JA FORAM MARCADOS NO ARQUIVO!" << endl;
     }
 }
@@ -498,13 +477,6 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
                 if (grid_map_.data[x] != SUITCASE_VALUE || grid_map_.data[x] != PERSON_VALUE || grid_map_.data[x] != VASE_VALUE || grid_map_.data[x] != BICYCLE_VALUE) {
                     grid_map_.data[x] = map_msg->data[x];
                 }
-                // else{
-                //     cout << "------------------------------------------------------------------------------" << endl;
-                //     cout << "GRID_CALLBACK" << endl;
-                //     cout << "AQUI TEM ALGUM OBJETO DA CLASSE QUE ESTOU COLOCANDO NO MAPA!!!!!!!!!!!!!!!!!!!!!!!!11" << endl;
-                //     cout << "VALOR QUE TA NA VARIAVEL: " << grid_map_.data[x] << endl;
-                //     cout << "------------------------------------------------------------------------------" << endl;
-                // }
             }
         }
     }
@@ -625,8 +597,6 @@ int main(int argc, char **argv){
     ros::Rate rate(10);
     
     while(ros::ok()){
-        // int c = 0;
-        // cout << "ZEREI O CONTADOR!!!" << endl;
         basefootprintToCameraTF();
         if (cv_ptr_){
             // checkGridForValue();
@@ -635,8 +605,6 @@ int main(int argc, char **argv){
                     copy_map();
                     boundToSemanticMap();
                     if (can_publish) {
-                        // cout << "Entrei aqui, o valor do contador eh: " << c << endl;
-                        // c++;
                         grid_update();
                         
                         map_pub.publish(grid_map_);

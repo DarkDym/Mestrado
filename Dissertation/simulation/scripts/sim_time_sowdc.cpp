@@ -124,7 +124,6 @@ void init_file(std::string arq_name){
     name_stream << "./sim_time_" << arq_name << ".txt";
     std::string file_name = name_stream.str();
     objects_map_file_.open(file_name,ios::app);
-    // return objects_map_file;
 }
 
 void init_fulllog_file(std::string arq_name){
@@ -133,7 +132,6 @@ void init_fulllog_file(std::string arq_name){
     name_stream << "./full_log_" << arq_name << ".txt";
     std::string file_name = name_stream.str();
     fulllog_file_.open(file_name,ios::app);
-    // return objects_map_file;
 }
 
 void open_file(){
@@ -183,8 +181,6 @@ void write_in_file(int index, int last_index, std::chrono::steady_clock::time_po
             objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
             fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
         }
-        
-        // objects_map_file.close();
     }else{
         cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
     }
