@@ -68,6 +68,8 @@ const float HFOV_RAD = 1.5184351666666667;
 vector<std::string> box_class;
 bool already_scanned_ = false;
 bool all_objects_analyzed_ = false;
+fstream yolo_file_;
+vector<tuple<string,int,int,int>> yolo_objects_;
 
 const map<std::string, int> DARKNET_CLASSES = {{"person", 160},{"vase", 110},{"bicycle", 130},{"suitcase", 240},{"unkwon", 80}};
 
@@ -85,6 +87,23 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
 
 int matrix2vectorIndex(int cell_x, int cell_y, int map_width_){
     return cell_x + cell_y * map_width_; 
+}
+
+void open_object_file(){
+    yolo_file_.open("./src/Mestrado/Dissertation/simulation/config/yolo_object_weights.txt");
+    if (yolo_file_.is_open()) {
+        cout << "FILE yolo_object_weights OPENED SUCCEFULLY!" << endl;
+    } else {
+        cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
+    }
+}
+
+void trash_file(string file_name){
+    if (remove(file_name.c_str()) != 0) {
+        cout << "ERRO AO TENTAR DELETAR O ARQUIVO!!!" << endl;
+    } else {
+        cout << "ARQUIVO" << file_name << " DELETADO COM SUCESSO!!!" << endl;
+    }
 }
 
 void open_file(){
@@ -129,6 +148,32 @@ void read_file(){
         object_goals_.emplace_back(aux_goals);
         cell_value = 0;
         aux_pos.clear();
+    }
+}
+
+void read_yolo_file(){
+    string line, line_aux, obj_name;
+    bool first_cell = false;
+    tuple<string,int,int,int> obj_info;
+    vector<int> aux_values;
+    int aux;
+    while(getline(yolo_file_,line)){
+        stringstream st(line);
+        while(getline(st, line_aux, ';')){
+            cout << line_aux << endl;
+            if (!first_cell) {
+                obj_name = line_aux;
+                first_cell = true;
+            } else {
+                aux = stoi(line_aux);
+                aux_values.emplace_back(aux);
+            }
+        }
+        cout << "----------------------" << endl;
+        first_cell = false;
+        obj_info = make_tuple(obj_name,aux_values[0],aux_values[1],aux_values[2]);
+        yolo_objects_.emplace_back(obj_info);
+        aux_values.clear();
     }
 }
 
@@ -292,13 +337,23 @@ void scanForObejctsInMap(){
     peso de cada objeto que é verificado pelo sistema.
 */
 int verify_dinamyc(int cell_value){
-    if (cell_value == 110) {
-        return 0;
-    } else if (cell_value == 160 || cell_value == 120) {
-        return 1;
-    } else {
-        return 2;
-    }    
+    string obj_name;
+    int obj_value, obj_cclean, obj_dynamic;
+    int obj_unkwon = 2;
+    for (int x = 0; x < yolo_objects_.size(); x++) {
+        tie(obj_name,obj_value,obj_cclean,obj_dynamic) = yolo_objects_[x];
+        if (cell_value == obj_value) {
+            return obj_cclean;
+        }
+    }
+    return obj_unkwon;
+    // if (cell_value == 110) {
+    //     return 0;
+    // } else if (cell_value == 160 || cell_value == 120) {
+    //     return 1;
+    // } else {
+    //     return 2;
+    // }    
 }
 
 //****************************************************Adicionado 1/11 ****************************************************
@@ -447,6 +502,9 @@ int main(int argc, char **argv) {
     read_file();
     int cell;
     float px,py;
+    open_object_file();
+    read_yolo_file();
+    trash_file("./teste.txt");
     
 
     ros::Subscriber grid_map = node.subscribe("/map", 1, grid_callback);
@@ -506,16 +564,27 @@ int main(int argc, char **argv) {
                                                         
                             */
                             if (!already_scanned_) {
+                                int control_obj = 0;
                                 for (int x = 0; x < box_class.size(); x++) {
                                     cout << "BOX_CLASS[" << x << "]: " << box_class[x] << endl;
                                     if (DARKNET_CLASSES.find(box_class[x]) != DARKNET_CLASSES.end()) {
+                                        //Colocar uma flag de controle, para que o cell seja comparado com todos os possíveis objetos que foram detectados.
                                         if (cell != DARKNET_CLASSES.at(box_class[x])) {
-                                            int vcell = verify_dinamyc(cell);
-                                            if (vcell == 1) {
-                                                basefootprintToCameraTF();
-                                                scanForObejctsInMap(cell);
-                                            }                                                                                    
+                                            control_obj++;
+                                            // int vcell = verify_dinamyc(cell);
+                                            // if (vcell == 1) {
+                                            //     basefootprintToCameraTF();
+                                            //     scanForObejctsInMap(cell);
+                                            // }                                                                                    
                                         }
+                                    }
+                                }
+
+                                if (control_obj == box_class.size()-1) {
+                                    int vcell = verify_dinamyc(cell);
+                                    if (vcell == 1) {
+                                        basefootprintToCameraTF();
+                                        scanForObejctsInMap(cell);
                                     }
                                 } 
                                 
