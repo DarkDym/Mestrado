@@ -54,6 +54,7 @@ void read_file(){
         cell_value = 0;
         aux_pos.clear();
     }
+    objects_file_.close();
 }
 
 void clean_object_from_map_callback(const std_msgs::Bool& clean_object_msg){

@@ -167,6 +167,7 @@ void read_file(){
         cell_value = 0;
         aux_pos.clear();
     }
+    objects_file_.close();
 }
 
 void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time){

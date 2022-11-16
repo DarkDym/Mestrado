@@ -149,6 +149,7 @@ void read_file(){
         cell_value = 0;
         aux_pos.clear();
     }
+    objects_file_.close();
 }
 
 void read_yolo_file(){
@@ -492,6 +493,73 @@ void all_objects_analyzed_callback(const std_msgs::Bool& all_objects_msg){
     all_objects_analyzed_ = all_objects_msg.data;
 }
 
+void erase_object_from_file(int index){
+    int cont = 0;
+    string line, delete_line;
+    cout << "VOU RETIRAR A LINHA: " << index << endl;
+    open_file();
+    ofstream temp_file;
+    temp_file.open("./temp_file.txt", ios::app);
+    while(getline(objects_file_, line)){
+        cout << "O QUE TEM NAS LINHAS: " << line << endl;
+        // std::string id(line.begin(), line.end());
+        // cout << "VERIFICANDO O ID DE CADA LINHA PRA VER SE DEU CERTO: " << id << endl;
+        if (cont != index) {
+            cont++;
+        } else {
+            cout << "CONT: " << cont << " | INDEX: " << index << " | LINE: " << line << endl;
+            temp_file << line << endl;
+            cont++;
+        }
+        
+        // if (cont == index) {
+        //     delete_line = line;
+        //     line.replace(line.find(delete_line), delete_line.length(), "");
+        // }
+    }
+    temp_file.close();
+    objects_file_.close();
+    // trash_file("./objects_in_map.txt");
+    // rename("./temp_file.txt", "./objects_in_map.txt");
+}
+
+void compare_files(){
+    string line, delete_line;
+    open_file();
+    fstream temp_file;
+    temp_file.open("./temp_file.txt", ios::in);
+    ofstream comp_diff_file;
+    comp_diff_file.open("./comp_file.txt");
+
+    bool cmp_flag = false;
+
+    while(getline(objects_file_, line)){
+        while(getline(temp_file, delete_line)){
+            if (line.compare(delete_line) != 0) {
+                cmp_flag = true;
+            } else {
+                cmp_flag = false;
+                break;
+            }
+        }
+
+        if (cmp_flag) {
+            comp_diff_file << line << endl;
+            cmp_flag = false;
+        }
+
+        temp_file.clear();
+        temp_file.seekp(0, ios::beg);
+    }
+    objects_file_.close();
+    temp_file.close();
+    comp_diff_file.close();
+    trash_file("./objects_in_map.txt");
+    trash_file("./temp_file.txt");
+    rename("./comp_file.txt", "./objects_in_map.txt");
+
+}
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "mark_map_sim");
@@ -521,6 +589,7 @@ int main(int argc, char **argv) {
     ros::Rate rate(10);
 
     int object_cont_control,cont=0;
+    bool cmp_flag = false;
     
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
@@ -544,30 +613,43 @@ int main(int argc, char **argv) {
                     finished_marking_ = true;
                     object_cont_control = 0;
                     cout << "FINISHED MARKING THE OBJECTS IN MAP!!!!!!" << endl;
+                    cout << "-----------------------------------------" << endl;
                 }
             } else {
                 if (mission_finished_) {
                     if (object_cont_control <= object_goals_.size()-1) {
                         tie(cell,px,py) = object_goals_[object_cont_control];
 
+                        cout << "***************" << endl;
+                        cout << "OBJECT_CONT_CONTROL: " << object_cont_control << " | ALREADY_SCANNED: " << already_scanned_ << " | BOX_CLASS_SIZE: " << box_class.size() << endl;
+
                         if (count_objects_ <= 0) {
+                            cout << "NAO ENCONTREI NENHUM OBJETO! O VALUE DA CELL E: " << cell << endl;
                             basefootprintToCameraTF();
                             scanForObejctsInMap();
+                            erase_object_from_file(object_cont_control);
                             std_msgs::Bool object_demarked;
                             object_demarked.data = true;
                             object_demarked_pub.publish(object_demarked);
                             object_cont_control++;
+                            grid_update();
+                            marked_map_.data = grid_map_.data;
+                            map_pub.publish(marked_map_);
                         } else {
                             /*
                                 Verificar se o objeto que está sendo analisado no arquivo
                                 é o mesmo que sendo visto nesta posição ou mais além.
                                                         
                             */
+                            
                             if (!already_scanned_) {
                                 int control_obj = 0;
+                                cout << "SO PRA VER O QUE TEM NO BOX_CLASS: " << box_class.size() << endl;
                                 for (int x = 0; x < box_class.size(); x++) {
                                     cout << "BOX_CLASS[" << x << "]: " << box_class[x] << endl;
+                                    
                                     if (DARKNET_CLASSES.find(box_class[x]) != DARKNET_CLASSES.end()) {
+                                        cout << "DARKNET_CLASSES AT BOX_CLASS[X]: " << DARKNET_CLASSES.at(box_class[x]) << endl;
                                         //Colocar uma flag de controle, para que o cell seja comparado com todos os possíveis objetos que foram detectados.
                                         if (cell != DARKNET_CLASSES.at(box_class[x])) {
                                             control_obj++;
@@ -577,16 +659,24 @@ int main(int argc, char **argv) {
                                             //     scanForObejctsInMap(cell);
                                             // }                                                                                    
                                         }
+                                    } else {
+                                        control_obj++;
                                     }
                                 }
-
-                                if (control_obj == box_class.size()-1) {
+                                
+                                cout << "-----------------------------------------" << endl;
+                                cout << "BOX_CLASS SIZE: " << box_class.size() << " | CONTROL_OBJECT: " << control_obj << endl;
+                                if (control_obj == box_class.size()) {
                                     int vcell = verify_dinamyc(cell);
+                                    //Se o tipo de dinamicidade é igual a 1, então o objeto pode ser movido e deve ser limpo do arquivo construido pelo Husky
+                                    //object_cont_control
                                     if (vcell == 1) {
                                         basefootprintToCameraTF();
                                         scanForObejctsInMap(cell);
+                                        erase_object_from_file(object_cont_control);
                                     }
-                                } 
+                                }
+                                cout << "-----------------------------------------" << endl; 
                                 
                                 std_msgs::Bool object_demarked;
                                 object_demarked.data = true;
@@ -598,10 +688,20 @@ int main(int argc, char **argv) {
                                 map_pub.publish(marked_map_);
                             }
 
-                            if (all_objects_analyzed_ && object_cont_control <= object_goals_.size()-1) {
+                            if (all_objects_analyzed_ && object_cont_control < object_goals_.size()-1) {
+                                cout << "ADICIONANDO CONT_CONTROL" << endl;
                                 object_cont_control++;
                             }
                         }
+                    }
+                    cout << "##############################################" << endl;
+                    cout << "OBJECT_CONT_CONTROL: " << object_cont_control << endl;
+                    cout << "##############################################" << endl;
+                    if (!cmp_flag && object_cont_control >= object_goals_.size()) {
+                        cout << "-----------------------------------------" << endl;
+                        cout << "TERMINEI DE VERIFICAR TODOS OS GOALS" << endl;
+                        compare_files();
+                        cmp_flag = true;
                     }
                 } else {
                     already_scanned_ = false;
