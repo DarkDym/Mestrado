@@ -16,6 +16,7 @@ find_package(catkin REQUIRED
     pioneer_description
     pioneer_gazebo
     pioneer_control
+    # OpenVDB
 )
 
 # set(CMAKE_PREFIX_PATH "/home/phi/m_explore_ws/devel/")

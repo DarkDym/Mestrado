@@ -21,7 +21,8 @@
     <depend>gazebo_ros</depend>
     <depend>gazebo_ros_control</depend>
     <depend>controller_manager</depend>
-    <depend>velocity_controller</depend>
+    <!-- <depend>velocity_controller</depend> -->
+    <!-- <depend>OpenVDB</depend> -->
 
     <build_export_depend>roscpp</build_export_depend>
     <build_export_depend>rospy</build_export_depend>
