@@ -21,4 +21,4 @@
   - {name: static_layer, type: "costmap_2d::StaticLayer"}
   - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
   - {name: voxel_layer2, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
-  # - {name: lane_layer, type: "costmap_2d::StaticLayer"}
+  - {name: lane_layer, type: "costmap_2d::StaticLayer"}

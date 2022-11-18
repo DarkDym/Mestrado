@@ -7513,6 +7513,22 @@
                 <time>60.0</time>
                 <pose>-6 -4 0 0 0 0</pose>
              </waypoint>
+             <waypoint>
+                <time>65.0</time>
+                <pose>-6 -4 0 0 0 1.58</pose>
+             </waypoint>
+             <waypoint>
+                <time>70.0</time>
+                <pose>-6 4 0 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>75.0</time>
+                <pose>-6 4 0 0 0 -1.58</pose>
+             </waypoint>
+             <waypoint>
+                <time>80.0</time>
+                <pose>-6 -4 0 0 0 0</pose>
+             </waypoint>
           </trajectory>
         </script>
       </actor>

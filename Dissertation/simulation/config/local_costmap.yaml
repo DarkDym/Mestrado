@@ -9,7 +9,7 @@
   plugins:
   - {name: obstacles_layer, type: "costmap_2d::ObstacleLayer"}
   - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
-  # - {name: lane_layer, type: "costmap_2d::StaticLayer"}
+  - {name: lane_layer, type: "costmap_2d::StaticLayer"}
   # - {name: voxel_layer2, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
   # - {name: voxel_layer, type: "costmap_2d::VoxelLayer"}
 
