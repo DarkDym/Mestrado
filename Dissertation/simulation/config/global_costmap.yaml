@@ -13,12 +13,12 @@
   lane_layer:
     enabled: true
     map_topic: lane_map
-    subscribe_to_updates: false
+    subscribe_to_updates: true
     trinary_costmap: false
     lethal_cost_threshold: 255
 
   plugins:
   - {name: static_layer, type: "costmap_2d::StaticLayer"}
   - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
-  - {name: voxel_layer2, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+  # - {name: voxel_layer2, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
   - {name: lane_layer, type: "costmap_2d::StaticLayer"}

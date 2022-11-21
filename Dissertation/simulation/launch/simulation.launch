@@ -18,7 +18,9 @@
     <node if="$(arg run_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find dissertation_simulation)/config/husky.rviz" required="true"/>
 
     <group if="$(arg navigating)">
-        <node pkg="map_server" type="map_server" name="map_server" args="$(find dissertation_simulation)/worlds/$(arg map_name).yaml"/> 
+        <node pkg="map_server" type="map_server" name="map_server" args="$(find dissertation_simulation)/worlds/$(arg map_name).yaml">
+            <remap from="map" to="/map"/>
+        </node>  
         <node pkg="map_server" type="map_server" name="lane_map" args="$(find dissertation_simulation)/worlds/$(arg map_name)_lane.yaml">
             <remap from="map" to="/lane_map"/>
         </node>    
