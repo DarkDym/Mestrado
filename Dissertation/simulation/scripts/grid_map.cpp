@@ -30,7 +30,7 @@ float laser_pose[2];
 vector<float> laser_reads;
 sensor_msgs::LaserScan laser_reads_;
 float map_resolution = 0.05;
-float map_origin_x = -107.00;
+float map_origin_x = -100.00;
 float map_origin_y = -100.00;
 int map_height = 4000;
 int map_width = 4000;

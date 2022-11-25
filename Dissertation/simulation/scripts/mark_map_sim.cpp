@@ -560,6 +560,18 @@ void compare_files(){
 
 }
 
+// void person_count(){
+//     /*
+//         --> RECEBER A CONTAGEM DE OBJETOS IDENTIFICADOS PELA YOLO;
+//         --> VERIFICAR SE EXISTE MAIS DO QUE X OBJETOS QUE SÃO PERSON;
+//         --> VERIFICAR SE A QUANTIDADE É MAIOR OU IGUAL A X;
+//         --> SE VERDADEIRO, REALIZAR UMA BUSCA POR PAREDES EM TODAS AS DIREÇÕES;
+//         --> ACHANDO AS PAREDES, REALIZAR O FECHAMENTO DAS MESMAS;
+//         --> REALIZAR UM NOVO GOAL ATRAS DA BARREIRA PARA VERIFICAR SE O MÉTODO FUNCIONA;
+//     */
+    
+// }
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "mark_map_sim");

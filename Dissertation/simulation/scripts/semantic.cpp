@@ -19,6 +19,7 @@
 #include "darknet_ros_msgs/BoundingBox.h"
 #include "darknet_ros_msgs/ObjectCount.h"
 #include "nav_msgs/OccupancyGrid.h"
+#include "map_msgs/OccupancyGridUpdate.h"
 #include "nav_msgs/Odometry.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
@@ -39,6 +40,8 @@ typedef struct {
 } Point3D;
 
 nav_msgs::OccupancyGrid grid_map_;
+nav_msgs::OccupancyGrid lane_map_;
+map_msgs::OccupancyGridUpdate lane_map_update_;
 cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
 std::vector<Point3D> depthCloud_;
@@ -48,7 +51,7 @@ int IMG_WIDTH, IMG_HEIGTH;
 const int map_width = 4000;
 const int map_height = 4000;
 const float map_resolution = 0.05;
-const float map_origin_x = -107.00;
+const float map_origin_x = -100.00;
 const float map_origin_y = -100.00; 
 
 const float HFOV_RAD = 1.5184351666666667;
@@ -84,6 +87,10 @@ std_msgs::Bool ros_finished_marking_;
 vector<vector<int> > box_teste;
 vector<std::string> box_class;
 bool all_objects_marked_ = false;
+bool is_crowd_ = false;
+bool setup_lane_map_ = true;
+bool t_lane_ = true;
+int map_custom_[4000][4000];
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -105,6 +112,39 @@ void copy_map(){
         }
     }
 }
+
+//Funções custom são utilizadas para a alteração do lane_map, está com esse nome pois estava tentando fazer genérica
+//contudo neste momento não sei como posso fazer. Irei manter não-genérico para realizar os testes necessários o quanto antes.
+void init_map_custom(){
+    for (int x = 0; x < 4000; x++) {
+        for (int y = 0; y < 4000; y++) {
+            map_custom_[x][y] = -1;
+        }
+    }
+}
+
+void copy_map_custom(){
+    for(int x = 0; x < map_width; x++){
+        int multi = x * map_width;
+        for(int y = 0; y < map_height; y++){
+            int index = y + multi;
+            // if (map_custom_[x][y] != PERSON_VALUE){
+                map_custom_[x][y] = lane_map_.data[index];
+            // }
+        }
+    }
+}
+
+void grid_update_custom(){
+    for(int x = 0; x < map_width; x++){
+        int multi = x * map_width;
+        for(int y = 0; y < map_height; y++){
+            int index = y + multi;
+            lane_map_.data[index] = map_custom_[x][y];
+        }
+    }
+}
+//---------------------------------------------------------------------------------------------------------------------------------
 
 std::tuple<int,int> odom2cell(float odom_pose_x, float odom_pose_y){
     int i = odom_pose_x/map_resolution - map_origin_x/map_resolution;
@@ -221,13 +261,93 @@ void write_object_in_file(int cell_value, float pos_x, float pos_y){
     }
 }
 
+/*
+    ADICIONADO 24/11/22
+    ESTAVA DENTRO DO MARK_MAP_SIM.CPP, CONTUDO COMO O HUSKY É QUE REALIZA A MARCAÇÃO
+    FOI TRANSFERIDO PARA ESTE ARQUIVO.
+*/
+void person_count(int cell_x, int cell_y){
+    /*
+        --> RECEBER A CONTAGEM DE OBJETOS IDENTIFICADOS PELA YOLO;
+        --> VERIFICAR SE EXISTE MAIS DO QUE X OBJETOS QUE SÃO PERSON;
+        --> VERIFICAR SE A QUANTIDADE É MAIOR OU IGUAL A X;
+        --> SE VERDADEIRO, REALIZAR UMA BUSCA POR PAREDES EM TODAS AS DIREÇÕES;
+        --> ACHANDO AS PAREDES, REALIZAR O FECHAMENTO DAS MESMAS;
+        --> REALIZAR UM NOVO GOAL ATRAS DA BARREIRA PARA VERIFICAR SE O MÉTODO FUNCIONA;
+    */
+    int corridor_threshold = 100;
+    bool first_cell = false, blank_cell = false;
+    int cell_corridor_x1 = 0, cell_corridor_x2 = 0;
+
+    // cout << "ESTOU DENTRO DO PERSON_COUNT" << endl;
+    // for (int x = cell_x - 3; x < cell_x + 3; x++) {
+    //     for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
+        
+        
+    //         if ((y >= 0 && y < map_height) && (x >= 0 && x < map_width)) {
+    //             map_custom_[x][y] = 100;
+    //         }
+    //     }
+        // if (map_custom_[x][cell_y] == 100 && !first_cell && !blank_cell) {
+        //     first_cell = true;lane_map_update_ FIRST CELL: " << matrix2vectorIndex(x,cell_y,4000) << endl;
+        //     cell_corridor_x1 = x-1;
+        //     blank_cell = true; 2451 2793
+        // }
+    // }
+    // if (cell_corridor_x1 == 0 || cell_corridor_x2 == 0) {
+    //     cout << "ALGUNS DOS IFS NAO PASSOU | x1: " << cell_corridor_x1 << " | x2: " << cell_corridor_x2 << endl;
+    // }
+
+    for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
+        // map_custom_[cell_x][y] = 180;
+        if (map_custom_[cell_x][y] == 100 && !first_cell && !blank_cell) {
+            cell_corridor_x1 = y;
+            first_cell = true;
+        }
+
+        if (map_custom_[cell_x][y] == 0 && !blank_cell) {
+            if ((map_custom_[cell_x][y-1] != 0) && (map_custom_[cell_x][y+1] == 0)) {
+                blank_cell = true;
+            }
+        }
+
+        if (map_custom_[cell_x][y] == 100 && first_cell && blank_cell) {
+            cell_corridor_x2 = y;
+            break;
+        }
+
+    }
+
+    cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
+    if (cell_corridor_x1 == 0) {
+        cell_corridor_x1 = corridor_threshold;
+    } else {
+        if (cell_corridor_x2 == 0) {
+            cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
+        }
+    }
+    
+
+    if (cell_corridor_x1 < cell_corridor_x2) {
+        for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+            map_custom_[cell_x][x] = 100;
+        }
+    } else {
+        for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+            map_custom_[cell_x][x] = 100;
+        }
+    }
+    
+}
+
 void map_update(float pos_x, float pos_y, int cell_value){
     int width, heigth;
     
     width = grid_map_.info.width;
     heigth = grid_map_.info.height;
 
-    write_object_in_file(cell_value,pos_x,pos_y);
+    //Comentado temporariamente, descomentar depois de fazer os testes
+    // write_object_in_file(cell_value,pos_x,pos_y);
 
     int cell_x, cell_y;
 
@@ -242,6 +362,20 @@ void map_update(float pos_x, float pos_y, int cell_value){
             }
         }
     }
+
+    
+        // VOU ADICIONAR O PERSON_COUNT() AQUI, POIS O INDICE DA CELULA
+        // JÁ ESTÁ DISPONÍVEL NESTA FUNÇÃO;
+        if (is_crowd_) {
+            if (cell_value == PERSON_VALUE) {
+                // cout << "ENTREI, VOU CHAMAR O PERSON_COUNT" << endl;
+                // cout << "CELL_X: " << cell_x << " | CELL_Y: " << cell_y << " | CELL_VALUE: " << cell_value << endl;
+                //MUDAR O NOME DESSA FUNCAO DEPOIS
+                person_count(cell_x, cell_y);
+            }
+        }
+        
+    
 
     can_publish = true;
 }
@@ -407,7 +541,23 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
 }
 
 void boundToSemanticMap(){
-    cout << "QUANTIDADE DE OBJETOS A SER ANALISADOS: " << box_teste.size() << endl;
+    // cout << "QUANTIDADE DE OBJETOS A SER ANALISADOS: " << box_teste.size() << endl;
+    /*
+    TESTE PARA VER SE TEM VÁRIAS PESSOAS NO LOCAL QUE O ROBÔ ESTA VERIFICANDO
+    */
+    // cout << "REALIZANDO A VERIFICACAO DA QUANTIDADE DE PESSOAS" << endl;
+    int p_count = 0;
+    for (int x = 0; x < box_teste.size(); x++) {
+        if (box_class[x] == "person") {
+            p_count++;
+        }
+    }
+    // cout << "QUANTIDADE DE PESSOAS QUE FORAM ACHADAS: " << p_count << endl; 
+
+    if (p_count > 2) {
+        is_crowd_ = true;
+    }
+    //******************************************************************************************************
     for (int x = 0; x < box_teste.size(); x++) {
 
         int object_pos_x = 0, object_pos_y = 0;
@@ -553,16 +703,39 @@ void finished_mission_callback(const std_msgs::Bool& finished_mission_msg){
 }
 //----------------------------------------------------------------------------------------------------------
 
+void lane_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
+    lane_map_.header.frame_id = map_msg->header.frame_id;
+    lane_map_.header.seq = map_msg->header.seq;
+    lane_map_.header.stamp = map_msg->header.stamp;
+    lane_map_.info.resolution = map_msg->info.resolution;
+    lane_map_.info.origin = map_msg->info.origin;
+    lane_map_.info.height = map_msg->info.height;
+    lane_map_.info.width = map_msg->info.width;
+    if (setup_lane_map_) {
+        lane_map_.data = map_msg->data;
+        copy_map_custom();
+        setup_lane_map_ = false;
+    } else {
+        if (!can_publish){
+            for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
+                lane_map_.data[x] = map_msg->data[x];
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv){
 
     ros::init(argc, argv, "semantic");
     ros::NodeHandle node;
 
     init_map();
+    init_map_custom();
 
     ros::Subscriber odom_sub = node.subscribe("/husky1/odometry/filtered", 1000, robot_pos_callback);
     ros::Subscriber dark_sub = node.subscribe("/darknet_ros/bounding_boxes", 1000, darknet_callback);
     ros::Subscriber grid_map = node.subscribe("/map_out", 1, grid_callback);
+    ros::Subscriber lane_map_sub = node.subscribe("/lane_map",1,lane_map_callback);
     ros::Subscriber depth_img = node.subscribe("/husky1/realsense/depth/image_rect_raw", 1000, depth_img_callback);
     ros::Subscriber cam_info_sub = node.subscribe("/husky1/realsense/color/camera_info", 1, caminfo_callback);
     ros::Subscriber point_cloud_sub = node.subscribe("/husky1/realsense/depth/color/points", 1, point_cloud_callback);
@@ -594,6 +767,12 @@ int main(int argc, char **argv){
     ros::Publisher stop_mission_pub = node.advertise<std_msgs::Bool>("/stop_mission",10);
     ros::Publisher resume_mission_pub = node.advertise<std_msgs::Bool>("resume_mission",10);
 
+    //ADICIONADO 24/11/22 | 25/11/22
+    //TESTE DE BLOQUEIO NO MAPA
+    ros::Publisher lane_map_pub = node.advertise<nav_msgs::OccupancyGrid>("/lane_map",10);
+    
+    //-------------------------------------------------------------------------------
+
     ros::Rate rate(10);
     
     while(ros::ok()){
@@ -603,11 +782,19 @@ int main(int argc, char **argv){
             if (mission_finished_){    
                 if (count_objects_ > 0) {
                     copy_map();
+                    copy_map_custom();
                     boundToSemanticMap();
                     if (can_publish) {
-                        grid_update();
-                        
+                        grid_update();                        
                         map_pub.publish(grid_map_);
+                        /*
+                            ********************************ADICIONADO 24/11/22********************************
+                            REALIZANDO A PUBLICAÇÃO DOS BLOQUEIOS DENTRO DO LANE_MAP
+                        */
+                        grid_update_custom();
+                        lane_map_pub.publish(lane_map_);
+                        //**************************************************************************************************
+
                         can_publish = false;
                         //**************************************************************************************************
                         //FOR TEST PURPOSES, NEED TO BE EXCLUDED LATER
@@ -625,9 +812,12 @@ int main(int argc, char **argv){
                     }
                 } else {
                     copy_map();
+                    copy_map_custom();
                     scanForObejctsInMap();
-                    grid_update();   
+                    grid_update(); 
+                    grid_update_custom();  
                     map_pub.publish(grid_map_);
+                    lane_map_pub.publish(lane_map_);
                     ros_finished_marking_.data = true;
                     finished_marking_pub.publish(ros_finished_marking_);
                 }

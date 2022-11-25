@@ -37,7 +37,7 @@
         <include file="$(find dissertation_simulation)/launch/husky_bringup.launch">
         <!-- <include file="$(find dissertation_simulation)/launch/pioneer_bringup.launch"> -->
             <arg name="model" value="$(arg robot1_name)"/>
-            <arg name="init_pose" value="-x 0.00 -y 0.00 -Y 0.0"/>
+            <arg name="init_pose" value="-x 0.00 -y 3.00 -Y 0.0"/>
             <arg name="ipx" value="16.95"/>
             <arg name="ipy" value="-6.63"/>
             <arg name="navigating" value="$(arg navigating)"/>
