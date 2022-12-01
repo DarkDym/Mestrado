@@ -88,6 +88,8 @@ vector<vector<int> > box_teste;
 vector<std::string> box_class;
 bool all_objects_marked_ = false;
 bool is_crowd_ = false;
+bool already_mark_crowd_ = false;
+bool crowd_published_ = false;
 bool setup_lane_map_ = true;
 bool t_lane_ = true;
 int map_custom_[4000][4000];
@@ -319,24 +321,60 @@ void person_count(int cell_x, int cell_y){
     }
 
     cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
-    if (cell_corridor_x1 == 0) {
-        cell_corridor_x1 = corridor_threshold;
-    } else {
-        if (cell_corridor_x2 == 0) {
-            cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
+    if (cell_corridor_x1 != 0 && cell_corridor_x2 == 0) {
+        cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
+        
+        if (cell_corridor_x1 < cell_corridor_x2) {
+            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
+        } else {
+            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
+        }
+    } else if (cell_corridor_x1 == 0 && cell_corridor_x2 != 0) {
+        cell_corridor_x1 = cell_corridor_x2 - corridor_threshold;
+        
+        if (cell_corridor_x1 < cell_corridor_x2) {
+            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
+        } else {
+            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
+        }
+    } else if (cell_corridor_x1 != 0 && cell_corridor_x2 != 0) {
+        if (cell_corridor_x1 < cell_corridor_x2) {
+            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
+        } else {
+            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                map_custom_[cell_x][x] = 100;
+            }
         }
     }
-    
 
-    if (cell_corridor_x1 < cell_corridor_x2) {
-        for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
-            map_custom_[cell_x][x] = 100;
-        }
-    } else {
-        for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
-            map_custom_[cell_x][x] = 100;
-        }
-    }
+    // if (cell_corridor_x1 == 0) {
+    //     cell_corridor_x1 = corridor_threshold;
+    // } else {
+    //     if (cell_corridor_x2 == 0) {
+    //         cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
+    //     }
+    // }
+    cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
+    already_mark_crowd_ = true;
+    // if (cell_corridor_x1 < cell_corridor_x2) {
+    //     for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+    //         map_custom_[cell_x][x] = 100;
+    //     }
+    // } else {
+    //     for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+    //         map_custom_[cell_x][x] = 100;
+    //     }
+    // }
     
 }
 
@@ -541,23 +579,7 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
 }
 
 void boundToSemanticMap(){
-    // cout << "QUANTIDADE DE OBJETOS A SER ANALISADOS: " << box_teste.size() << endl;
-    /*
-    TESTE PARA VER SE TEM VÁRIAS PESSOAS NO LOCAL QUE O ROBÔ ESTA VERIFICANDO
-    */
-    // cout << "REALIZANDO A VERIFICACAO DA QUANTIDADE DE PESSOAS" << endl;
-    int p_count = 0;
-    for (int x = 0; x < box_teste.size(); x++) {
-        if (box_class[x] == "person") {
-            p_count++;
-        }
-    }
-    // cout << "QUANTIDADE DE PESSOAS QUE FORAM ACHADAS: " << p_count << endl; 
-
-    if (p_count > 2) {
-        is_crowd_ = true;
-    }
-    //******************************************************************************************************
+    
     for (int x = 0; x < box_teste.size(); x++) {
 
         int object_pos_x = 0, object_pos_y = 0;
@@ -595,6 +617,33 @@ void boundToSemanticMap(){
         } 
     }
     all_objects_marked_ = true;
+}
+
+void person_verification(){
+    // cout << "QUANTIDADE DE OBJETOS A SER ANALISADOS: " << box_teste.size() << endl;
+    /*
+    TESTE PARA VER SE TEM VÁRIAS PESSOAS NO LOCAL QUE O ROBÔ ESTA VERIFICANDO
+    */
+    // cout << "REALIZANDO A VERIFICACAO DA QUANTIDADE DE PESSOAS" << endl;
+    int p_count = 0;
+    for (int x = 0; x < box_teste.size(); x++) {
+        if (box_class[x] == "person") {
+            p_count++;
+        }
+    }
+    // cout << "QUANTIDADE DE PESSOAS QUE FORAM ACHADAS: " << p_count << endl; 
+
+    if (p_count > 2) {
+        is_crowd_ = true;
+        if (!crowd_published_) {
+            already_mark_crowd_ = false;
+        }
+    } else {
+        is_crowd_ = false;
+        already_mark_crowd_ = false;
+        crowd_published_ = false;
+    }
+    //******************************************************************************************************
 }
 
 void robot_pos_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
@@ -779,10 +828,21 @@ int main(int argc, char **argv){
         basefootprintToCameraTF();
         if (cv_ptr_){
             // checkGridForValue();
+            person_verification();
+            if (is_crowd_ && !already_mark_crowd_) {
+                copy_map_custom();
+                boundToSemanticMap();
+                if (can_publish) {
+                    grid_update_custom();
+                    lane_map_pub.publish(lane_map_);
+                    can_publish = false;
+                    crowd_published_ = true;
+                }
+            }
             if (mission_finished_){    
                 if (count_objects_ > 0) {
                     copy_map();
-                    copy_map_custom();
+                    // copy_map_custom();
                     boundToSemanticMap();
                     if (can_publish) {
                         grid_update();                        
@@ -791,8 +851,8 @@ int main(int argc, char **argv){
                             ********************************ADICIONADO 24/11/22********************************
                             REALIZANDO A PUBLICAÇÃO DOS BLOQUEIOS DENTRO DO LANE_MAP
                         */
-                        grid_update_custom();
-                        lane_map_pub.publish(lane_map_);
+                        // grid_update_custom();
+                        // lane_map_pub.publish(lane_map_);
                         //**************************************************************************************************
 
                         can_publish = false;

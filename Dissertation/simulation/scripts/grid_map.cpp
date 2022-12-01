@@ -85,14 +85,20 @@ void grid_map_callback(const nav_msgs::OccupancyGridConstPtr& map_msg){
 }
 
 std::tuple<int,int> odom2cell(float odom_pose_x, float odom_pose_y){
-    int i = odom_pose_x/map_resolution - map_origin_x/map_resolution;
-    int j = odom_pose_y/map_resolution - map_origin_y/map_resolution;
+    // int i = odom_pose_x/map_resolution - map_origin_x/map_resolution;
+    // int j = odom_pose_y/map_resolution - map_origin_y/map_resolution;
+
+    int i = odom_pose_x/map_out_.info.resolution - map_out_.info.origin.position.x/map_out_.info.resolution;
+    int j = odom_pose_y/map_out_.info.resolution - map_out_.info.origin.position.y/map_out_.info.resolution;
     return std::make_tuple(j,i);
 }
 
 std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
-    float x = (cell_value_x + map_origin_x/map_resolution) * map_resolution;
-    float y = (cell_value_y + map_origin_y/map_resolution) * map_resolution;
+    // float x = (cell_value_x + map_origin_x/map_resolution) * map_resolution;
+    // float y = (cell_value_y + map_origin_y/map_resolution) * map_resolution;
+
+    float x = (cell_value_x + map_out_.info.origin.position.x/map_out_.info.resolution) * map_out_.info.resolution;
+    float y = (cell_value_y + map_out_.info.origin.position.y/map_out_.info.resolution) * map_out_.info.resolution;
     return std::make_tuple(x,y);
 }
 
