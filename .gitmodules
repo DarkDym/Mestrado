@@ -1,0 +1,2 @@
+[submodule "darknet_ros"]
+	url = git@github.com:DarkDym/darknet_ros.git
