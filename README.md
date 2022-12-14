@@ -49,4 +49,4 @@ The application of this research is divided in two major components:
 
 ## Possible References
 
-@INPROCEEDINGS{9486598,  author={Qiu, Houhan and Lin, Zhicheng and Li, Jun},  booktitle={2021 36th Youth Academic Annual Conference of Chinese Association of Automation (YAC)},   title={Semantic Map Construction via Multi-sensor Fusion},   year={2021},  volume={},  number={},  pages={495-500},  doi={10.1109/YAC53711.2021.9486598}}
+ - H. Qiu, Z. Lin and J. Li, "Semantic Map Construction via Multi-sensor Fusion," 2021 36th Youth Academic Annual Conference of Chinese Association of Automation (YAC), 2021, pp. 495-500, doi: 10.1109/YAC53711.2021.9486598.

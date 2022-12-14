@@ -93,6 +93,9 @@ bool crowd_published_ = false;
 bool setup_lane_map_ = true;
 bool t_lane_ = true;
 int map_custom_[4000][4000];
+int p_cont_ = 0;
+int p_cont_aux_ = 0;
+vector<tuple<int,int>> person_barrier_; 
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -534,6 +537,26 @@ void check_object_position(float depth, int object_pos_x, int object_pos_y, int 
 
     std::tie(object_x,object_y) = cloudTransform(object_pos_x,object_pos_y);
 
+    //--------------------------ADICIONADO 14/12-----------------------------------------------
+    //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
+    if (cell_value == PERSON_VALUE) {
+        tuple<int,int> pos;    
+        int cell_x = 0, cell_y = 0;
+        tie(cell_x, cell_y) = odom2cell(object_x, object_y);
+        pos = make_tuple(cell_x,cell_y);
+        if (p_cont_aux_ == 0) {
+            p_cont_aux_++;
+            //salva posicao
+            person_barrier_.emplace_back(pos);
+        } else if (p_cont_aux_ == p_cont_-1) {
+            //salva posicao
+            person_barrier_.emplace_back(pos);
+        } else {
+            p_cont_aux_++;
+        }
+    }
+    //-----------------------------------------------------------------------------------------
+
     map_update(object_x,object_y, cell_value);
 }
 
@@ -600,7 +623,7 @@ void boundToSemanticMap(){
                             cout << "CLASS: " << box_class[x] << endl;
                             if (box_class[x] == "suitcase") {            
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,SUITCASE_VALUE);
-                            } else if (box_class[x] == "person") {
+                            } else if (box_class[x] == "person") {                                
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,PERSON_VALUE);
                             } else if (box_class[x] == "vase") {
                                 check_object_position(meanDepth,object_pos_x,object_pos_y,VASE_VALUE);
@@ -632,6 +655,8 @@ void person_verification(){
         }
     }
     // cout << "QUANTIDADE DE PESSOAS QUE FORAM ACHADAS: " << p_count << endl; 
+
+    p_cont_ = p_count;
 
     if (p_count > 2) {
         is_crowd_ = true;
