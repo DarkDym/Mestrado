@@ -41,6 +41,7 @@ typedef struct {
 
 nav_msgs::OccupancyGrid grid_map_;
 nav_msgs::OccupancyGrid lane_map_;
+nav_msgs::OccupancyGrid crowd_layer_map_;
 map_msgs::OccupancyGridUpdate lane_map_update_;
 cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
@@ -67,7 +68,7 @@ const float ANGLE_INCREASE = 0.002811917;
 const int MAX_BEAMS = 540;
 const int MAX_RANGE_CAM_DEPTH = 15;
 
-float ROBOT_POSE_[3];
+float ROBOT_POSE_[3] = {0,0,0};
 bool can_publish = false;
 int map_[4000][4000];
 
@@ -95,7 +96,9 @@ bool t_lane_ = true;
 int map_custom_[4000][4000];
 int p_cont_ = 0;
 int p_cont_aux_ = 0;
-vector<tuple<int,int>> person_barrier_; 
+vector<tuple<int,int>> person_barrier_;
+int crowd_temporal_layer_map_[4000][4000];
+vector<tuple<int,int>> vertex_;
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -127,6 +130,36 @@ void init_map_custom(){
         }
     }
 }
+
+//---------------------------------ADICIONADO 15/12/22-------------------------------------------
+/*
+ESTAS FUNCOES FORAM COMPILADAS E TESTADAS, CONTUDO É NECESSÁRIO REALIZAR A LIMPEZA DOS
+CÓDIGOS E MODIFICAR OS NOMES DE AMBAS. AINDA É NECESSÁRIO VERIFICAR UMA FORMA DE FAZER
+ESTAS FUNÇÕES DE FORMA GENÉRICA, POR HORA AINDA MANTENHO ELAS ESPECIFICAS PARA CADA MAPA
+QUE É CRIADO NO SISTEMA.
+*/
+void init_crowd_temporal_map_custom(){
+    for (int x = 0; x < 4000; x++) {
+        for (int y = 0; y < 4000; y++) {
+            crowd_temporal_layer_map_[x][y] = -1;
+        }
+    }
+    crowd_layer_map_.info.height = 4000;
+    crowd_layer_map_.info.width = 4000;
+    crowd_layer_map_.info.resolution = 0.05;
+    crowd_layer_map_.info.origin.position.x = map_origin_x;
+    crowd_layer_map_.info.origin.position.y = map_origin_y;
+}
+void grid_update_crowd_temporal_custom(){
+    for(int x = 0; x < map_width; x++){
+        int multi = x * map_width;
+        for(int y = 0; y < map_height; y++){
+            int index = y + multi;
+            crowd_layer_map_.data[index] = crowd_temporal_layer_map_[x][y];
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------
 
 void copy_map_custom(){
     for(int x = 0; x < map_width; x++){
@@ -303,6 +336,11 @@ void person_count(int cell_x, int cell_y){
     //     cout << "ALGUNS DOS IFS NAO PASSOU | x1: " << cell_corridor_x1 << " | x2: " << cell_corridor_x2 << endl;
     // }
 
+    //Colocar o valor das células armazenadas dentro das variáveis cell_
+    tie(cell_x,cell_y) = person_barrier_[0];
+    cout << "QNT QUE A LINHA ACIMA FOI EXECUTADA: " << p_cont_aux_ << endl;
+    // person_barrier_.erase(person_barrier_.begin());
+
     for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
         // map_custom_[cell_x][y] = 180;
         if (map_custom_[cell_x][y] == 100 && !first_cell && !blank_cell) {
@@ -323,7 +361,7 @@ void person_count(int cell_x, int cell_y){
 
     }
 
-    cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
+    // cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
     if (cell_corridor_x1 != 0 && cell_corridor_x2 == 0) {
         cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
         
@@ -360,6 +398,20 @@ void person_count(int cell_x, int cell_y){
         }
     }
 
+    /*
+        CELL_X = POSICAO Y DO MAPA;
+        CELL_CORRIDOR_X1 E 2 = POSICAO X DO MAPA;
+        COMBINANDO PODE-SE OBTER O VERTICE1 E 2 E 3. GERANDO COMO CONSEQUENCIA O VERTICE 4;
+        (cell_corridor_x1,cell_x);(cell_corridor_x2,cell_x)        
+    */
+    tuple<int,int> corridor_aux;
+    if (p_cont_aux_ == 1 || p_cont_aux_ == 0) {
+        corridor_aux = make_tuple(cell_corridor_x1,cell_x);
+        vertex_.emplace_back(corridor_aux);
+        corridor_aux = make_tuple(cell_corridor_x2,cell_x);
+        vertex_.emplace_back(corridor_aux);
+    }
+
     // if (cell_corridor_x1 == 0) {
     //     cell_corridor_x1 = corridor_threshold;
     // } else {
@@ -367,7 +419,7 @@ void person_count(int cell_x, int cell_y){
     //         cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
     //     }
     // }
-    cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
+    cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << " | CELL_X: " << cell_x << endl;
     already_mark_crowd_ = true;
     // if (cell_corridor_x1 < cell_corridor_x2) {
     //     for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
@@ -547,10 +599,15 @@ void check_object_position(float depth, int object_pos_x, int object_pos_y, int 
         if (p_cont_aux_ == 0) {
             p_cont_aux_++;
             //salva posicao
-            person_barrier_.emplace_back(pos);
+            // person_barrier_.emplace_back(pos);
+            person_barrier_.emplace(person_barrier_.begin(),pos);
+            cout << "POS PERSON 1: [ " << cell_x << " ; " << cell_y << " ]" << endl; 
         } else if (p_cont_aux_ == p_cont_-1) {
             //salva posicao
-            person_barrier_.emplace_back(pos);
+            // person_barrier_.emplace_back(pos);
+            person_barrier_.emplace(person_barrier_.begin(),pos);
+            cout << "POS PERSON 2: [ " << cell_x << " ; " << cell_y << " ]" << endl;
+            p_cont_aux_ = 0;
         } else {
             p_cont_aux_++;
         }
@@ -601,6 +658,57 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
     }
 }
 
+//--------------------------ADICIONADO 15/12/22--------------------------------------------
+//--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
+//------------------------CTL = CROWD_TEMPORAL_LAYER---------------------------------------
+/*
+    ESTA FUNCAO FOI COMPILADA E TESTADA BREVEMENTE. É NECESSÁRIO REALIZAR MAIS TESTES.
+    ALÉM DE MODIFICAR O FUNCIONAMENTO DA MARCAÇAO EM FUNÇÃO DO TEMPO E DA QUANTIDADE DE PESSOAS.
+*/
+void ctl_draw(){
+    int vertex1_x,vertex1_y,vertex2_x,vertex2_y,vertex3_x,vertex3_y;
+
+    tie(vertex1_x,vertex1_y) = vertex_[0];
+    tie(vertex2_x,vertex2_y) = vertex_[1];
+    tie(vertex3_x,vertex3_y) = vertex_[vertex_.size()-1];
+
+    int aux;
+
+    cout << "VERTEX2_Y: " << vertex2_y << " | VERTEX3_Y: " << vertex3_y << " | VERTEX1_X: " << vertex1_x << " | VERTEX2_X: " << vertex2_x << endl;  
+
+    for (int y = vertex2_y; y < vertex3_y; y++) {
+        for (int x = vertex1_x; x < vertex2_x; x++) {
+            //Posteriormente adicionar cores diferentes que estejam em função do tempo.
+            //REALIZAR UM CALCULO PELA QUANTIDADE DE PESSOAS TALVEZ?
+            // cout << "ANTES DO CORE DUMPED!!!!" << endl;
+            crowd_temporal_layer_map_[y][x] = 150;
+            // cout << "FOI AQUI QUE DEU CORE DUMPED!!!!" << endl;
+        }
+    }
+
+    /*
+        --> GUARDAR O VERTEX2_Y PARA POSTERIOR ANALISE DO LOCAL;
+        --> ATRIBUIR UM TEMPO PARA ESTA MARCACAO NO MAPA;
+        --> MANTER INFORMACAO DA QUANTIDADE DE PESSOAS QUE HAVIA NO LOCAL;
+    */
+}
+//-----------------------------------------------------------------------------------------
+
+/*
+FUNCAO PARA VERIFICAR O TEMPO DECORRIDO DE UMA AREA DO CTL;
+ESTA FUNCAO PODE SER MANTIDA TANTO NO HUSKY QUANTO NO PIONEER.
+OBS: PARA O PIONEER REALIZAR ESTA FUNCAO, E NECESSARIO QUE O MAP SEJA ENVIADO PARA ELE ATRAVES DOS TOPICOS.
+void ctl_time_verification(){
+    --> verificar todas as entradas de ctl do vetor;
+    --> fazer a diferença do tempo atual para o tempo da marcacao;
+    --> se tempo maior que Tau, obtem a posicao do local;
+        --> manda o robo para o local designado;
+        --> verifica se o local possui um numero maior ou igual x de pessoas;
+            --> caso true: modifica o tempo pelo tempo atual;
+            --> caso false: limpa a marcação e limpa a posicao do vetor;
+}
+*/
+
 void boundToSemanticMap(){
     
     for (int x = 0; x < box_teste.size(); x++) {
@@ -640,6 +748,12 @@ void boundToSemanticMap(){
         } 
     }
     all_objects_marked_ = true;
+    //--------------------------ADICIONADO 15/12/22--------------------------------------------
+    //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
+    ctl_draw();
+    vertex_.clear();
+    person_barrier_.clear();
+    //-----------------------------------------------------------------------------------------
 }
 
 void person_verification(){
@@ -787,6 +901,11 @@ void lane_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     lane_map_.info.width = map_msg->info.width;
     if (setup_lane_map_) {
         lane_map_.data = map_msg->data;
+        //------------------------ADICIONADO 15/12/22------------------------------
+        //PARA QUE O MAPA NÃO ESTEJA VAZIO NO INICIO DO PROGRAMA, COLOQUEI AS INFORMAÇÕES
+        //DO LANE_MAP, MAS ESTAS INFORMAÇÕES SÃO ZERADAS ASSIM QUE O CTL_MAP É INICIALIZADO
+        crowd_layer_map_.data = map_msg->data;
+        //-------
         copy_map_custom();
         setup_lane_map_ = false;
     } else {
@@ -805,6 +924,7 @@ int main(int argc, char **argv){
 
     init_map();
     init_map_custom();
+    init_crowd_temporal_map_custom();
 
     ros::Subscriber odom_sub = node.subscribe("/husky1/odometry/filtered", 1000, robot_pos_callback);
     ros::Subscriber dark_sub = node.subscribe("/darknet_ros/bounding_boxes", 1000, darknet_callback);
@@ -844,7 +964,10 @@ int main(int argc, char **argv){
     //ADICIONADO 24/11/22 | 25/11/22
     //TESTE DE BLOQUEIO NO MAPA
     ros::Publisher lane_map_pub = node.advertise<nav_msgs::OccupancyGrid>("/lane_map",10);
-    
+
+    //ADICIONADO 15/12/22
+    //TESTE DO CROWD_TEMPORAL_LAYER
+    ros::Publisher crowd_temporal_layer_map_pub = node.advertise<nav_msgs::OccupancyGrid>("/crowd_temporal_layer",10);
     //-------------------------------------------------------------------------------
 
     ros::Rate rate(10);
@@ -854,12 +977,19 @@ int main(int argc, char **argv){
         if (cv_ptr_){
             // checkGridForValue();
             person_verification();
-            if (is_crowd_ && !already_mark_crowd_) {
+            if (is_crowd_ && !already_mark_crowd_ && mission_finished_) {
                 copy_map_custom();
                 boundToSemanticMap();
                 if (can_publish) {
                     grid_update_custom();
                     lane_map_pub.publish(lane_map_);
+                    //---------------------------------------ADICIONADO 15/12/22--------------------------
+                    //TESTE DO FUNCIONAMENTO DO CROWD TEMPORAL LAYER
+                    // cout << "AAAAAAAANTES" << endl;
+                    grid_update_crowd_temporal_custom();
+                    crowd_temporal_layer_map_pub.publish(crowd_layer_map_);
+                    // cout << "DDDDDDDDDDDDDDDEPOIS" << endl;
+                    //-------------------------------------------------------------------------------------
                     can_publish = false;
                     crowd_published_ = true;
                 }
