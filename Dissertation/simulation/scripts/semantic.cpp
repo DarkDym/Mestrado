@@ -99,6 +99,7 @@ int p_cont_aux_ = 0;
 vector<tuple<int,int>> person_barrier_;
 int crowd_temporal_layer_map_[4000][4000];
 vector<tuple<int,int>> vertex_;
+vector<tuple<int,int,std::chrono::system_clock::time_point,int,bool>> ctl_tau_;
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -691,6 +692,9 @@ void ctl_draw(){
         --> ATRIBUIR UM TEMPO PARA ESTA MARCACAO NO MAPA;
         --> MANTER INFORMACAO DA QUANTIDADE DE PESSOAS QUE HAVIA NO LOCAL;
     */
+    tuple<int,int,std::chrono::system_clock::time_point,int,bool> tau;
+    tau = make_tuple((vertex2_x-vertex1_x)/2,vertex2_y,std::chrono::system_clock::now(),p_cont_,true);
+    ctl_tau_.emplace_back(tau);
 }
 //-----------------------------------------------------------------------------------------
 
@@ -698,7 +702,9 @@ void ctl_draw(){
 FUNCAO PARA VERIFICAR O TEMPO DECORRIDO DE UMA AREA DO CTL;
 ESTA FUNCAO PODE SER MANTIDA TANTO NO HUSKY QUANTO NO PIONEER.
 OBS: PARA O PIONEER REALIZAR ESTA FUNCAO, E NECESSARIO QUE O MAP SEJA ENVIADO PARA ELE ATRAVES DOS TOPICOS.
+*/
 void ctl_time_verification(){
+    /*
     --> verificar todas as entradas de ctl do vetor;
     --> fazer a diferença do tempo atual para o tempo da marcacao;
     --> se tempo maior que Tau, obtem a posicao do local;
@@ -706,8 +712,44 @@ void ctl_time_verification(){
         --> verifica se o local possui um numero maior ou igual x de pessoas;
             --> caso true: modifica o tempo pelo tempo atual;
             --> caso false: limpa a marcação e limpa a posicao do vetor;
+
+    //--------------------------ADICIONADO 16/12/22---------------------------------
+    
+        TESTE COM A ATRIBUIÇÃO DE TEMPO EM CADA MARCAÇÃO DO CTL
+
+        COMPILADO E TESTADO! NECESSÁRIO ALGUNS AJUSTES, PARA QUE A POSIÇÃO
+        SEJA ENVIADA PARA A FILA DE OBJETIVOS DO ROBÔ DEPOIS QUE O TEMPO MAXIMO
+        FOR ATINGIDO PARA CADA MARCAÇÃO.
+
+        AJUSTES NECESSÁRIOS:
+            --> AJUSTAR O GOAL PARA O ROBO;
+            --> PUBLICAR NA LISTA DE GOALS DO ROBO;
+            --> IMPLEMENTAR UM SISTEMA DE PRIORIDADE, POIS O ROBO SÓ VAI FAZER O QUE FOI PREVIAMENTE CARREGADO
+                OU DEVE SER ENVIADO PARA O PIONEER, JÁ QUE O PIONEER ESTA COM O SISTEMA PRONTO PARA RECEBER GOALS
+                ESPECIFICOS DO SISTEMA VIA TOPICOS.
+    */
+
+    int tau_threshold = 120; 
+    if (!ctl_tau_.empty()) {
+        for (int i = 0; i < ctl_tau_.size(); i++) {
+            int x,y,cont;
+            bool to_analyze;
+            std::chrono::system_clock::time_point tempo;
+            std::chrono::system_clock::time_point tempo_now;
+            tempo_now = std::chrono::system_clock::now();
+            tie(x,y,tempo,cont,to_analyze) = ctl_tau_[i];
+            std::chrono::duration<double> e_sec = tempo_now - tempo;
+            if ((e_sec.count() > tau_threshold) && to_analyze) {
+                cout << "******************TESTE DO QUE FOI ARMAZENADO******************" << endl;
+                cout << "CELL_X DO CTL: " << x << " | CELL_Y: " << y << " | QNT DE PESSOAS: " << cont << endl;
+                cout << "TEMPO SALVO: " << e_sec.count() << endl;
+                cout << "***************************************************************" << endl;
+                ctl_tau_.at(i) = make_tuple(x,y,tempo,cont,false);
+            }
+        }
+    }
+    //------------------------------------------------------------------------------
 }
-*/
 
 void boundToSemanticMap(){
     
@@ -1040,6 +1082,7 @@ int main(int argc, char **argv){
                 ros_finished_marking_.data = false;
                 finished_marking_pub.publish(ros_finished_marking_);
                 all_objects_marked_ = false;
+                ctl_time_verification();
             }
             
         }
