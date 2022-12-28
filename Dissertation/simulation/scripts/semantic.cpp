@@ -31,6 +31,7 @@
 #include <librealsense2/rs.hpp>
 
 #include <opencv2/highgui/highgui.hpp>
+#include <algorithm>
 
 using namespace std;
 using namespace Eigen;
@@ -42,7 +43,6 @@ typedef struct {
 nav_msgs::OccupancyGrid grid_map_;
 nav_msgs::OccupancyGrid lane_map_;
 nav_msgs::OccupancyGrid crowd_layer_map_;
-map_msgs::OccupancyGridUpdate lane_map_update_;
 cv_bridge::CvImageConstPtr cv_ptr_;
 cv_bridge::CvImagePtr img_out_;
 std::vector<Point3D> depthCloud_;
@@ -69,6 +69,8 @@ const int MAX_BEAMS = 540;
 const int MAX_RANGE_CAM_DEPTH = 15;
 
 float ROBOT_POSE_[3] = {0,0,0};
+float AMCL_POSE_[3] = {0,0,0};
+const float ANGLE_LIMITS_MARK_[4] = {1.10,2.35,-2.0,-0.5};
 bool can_publish = false;
 int map_[4000][4000];
 
@@ -98,8 +100,13 @@ int p_cont_ = 0;
 int p_cont_aux_ = 0;
 vector<tuple<int,int>> person_barrier_;
 int crowd_temporal_layer_map_[4000][4000];
-vector<tuple<int,int>> vertex_;
-vector<tuple<int,int,std::chrono::system_clock::time_point,int,bool>> ctl_tau_;
+vector<tuple<int,int,bool>> vertex_;
+vector<tuple<int,int,std::chrono::system_clock::time_point,int,bool,int>> ctl_tau_;
+bool both_zero = false;
+bool is_edge = false;
+vector<tuple<int,int>> person_pos_;
+vector<float> person_pos_x_aux_;
+vector<float> person_pos_y_aux_;
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -338,66 +345,215 @@ void person_count(int cell_x, int cell_y){
     // }
 
     //Colocar o valor das células armazenadas dentro das variáveis cell_
-    tie(cell_x,cell_y) = person_barrier_[0];
+    // tie(cell_x,cell_y) = person_barrier_[0];
     cout << "QNT QUE A LINHA ACIMA FOI EXECUTADA: " << p_cont_aux_ << endl;
     // person_barrier_.erase(person_barrier_.begin());
 
-    for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
-        // map_custom_[cell_x][y] = 180;
-        if (map_custom_[cell_x][y] == 100 && !first_cell && !blank_cell) {
-            cell_corridor_x1 = y;
-            first_cell = true;
-        }
+    cout << "AMCL_ANGLE_POSE: " << AMCL_POSE_[2] << endl;
+    
 
-        if (map_custom_[cell_x][y] == 0 && !blank_cell) {
-            if ((map_custom_[cell_x][y-1] != 0) && (map_custom_[cell_x][y+1] == 0)) {
-                blank_cell = true;
+    if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[1]) || (AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[2] && AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[3])) {
+        // map_custom_[cell_x - corridor_threshold][cell_y] = 125;
+        cout << "&&&&&&&&&&&&&&&&&&&&&&&&SO PRA SABER QUE ESTOU AQUI" << endl;
+        for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
+            // map_custom_[cell_x][y] = 180;
+            if (map_custom_[cell_x][y] == 100 && !first_cell && !blank_cell) {
+                cell_corridor_x1 = y;
+                first_cell = true;
             }
-        }
 
-        if (map_custom_[cell_x][y] == 100 && first_cell && blank_cell) {
-            cell_corridor_x2 = y;
-            break;
-        }
+            if (map_custom_[cell_x][y] == 0 && !blank_cell) {
+                if ((map_custom_[cell_x][y-1] != 0) && (map_custom_[cell_x][y+1] == 0)) {
+                    blank_cell = true;
+                }
+            }
 
+            if (map_custom_[cell_x][y] == 100 && first_cell && blank_cell) {
+                cell_corridor_x2 = y;
+                both_zero = false;
+                break;
+            }
+
+        }
+    } else if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
+        // map_custom_[cell_x - corridor_threshold][cell_y] = 140;
+        cout << "@@@@@@@@@@@@@@@@@@@VALOR DO CELL: [ " << cell_x << " | " << cell_x - corridor_threshold << " ]" << endl; 
+        for (int y = cell_x - corridor_threshold; y < cell_x + corridor_threshold; y++) {
+            // map_custom_[y][cell_y] = 220;
+            if (map_custom_[y][cell_y] == 100 && !first_cell && !blank_cell) {
+                cell_corridor_x1 = y;
+                first_cell = true;
+                // map_custom_[y][cell_y] = 180;
+            }
+
+            if (map_custom_[y][cell_y] == 0 && !blank_cell) {
+                if ((map_custom_[y+1][cell_y] != 0) && (map_custom_[y-1][cell_y] == 0)) {
+                    blank_cell = true;
+                    // map_custom_[y][cell_y] = 150;
+                }
+            }
+
+            if (map_custom_[y][cell_y] == 100 && first_cell && blank_cell) {
+                cell_corridor_x2 = y;
+                both_zero = true;
+                // map_custom_[y][cell_y] = 110;
+                break;
+            }
+
+            // map_custom_[y][cell_y] = 150;
+
+        }
     }
 
-    // cout << "CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
-    if (cell_corridor_x1 != 0 && cell_corridor_x2 == 0) {
-        cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
-        
-        if (cell_corridor_x1 < cell_corridor_x2) {
-            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
-                map_custom_[cell_x][x] = 100;
+    // for (int y = cell_y - corridor_threshold; y < cell_y + corridor_threshold; y++) {
+    //     // map_custom_[cell_x][y] = 180;
+    //     if (map_custom_[cell_x][y] == 100 && !first_cell && !blank_cell) {
+    //         cell_corridor_x1 = y;
+    //         first_cell = true;
+    //     }
+
+    //     if (map_custom_[cell_x][y] == 0 && !blank_cell) {
+    //         if ((map_custom_[cell_x][y-1] != 0) && (map_custom_[cell_x][y+1] == 0)) {
+    //             blank_cell = true;
+    //         }
+    //     }
+
+    //     if (map_custom_[cell_x][y] == 100 && first_cell && blank_cell) {
+    //         cell_corridor_x2 = y;
+    //         both_zero = false;
+    //         break;
+    //     }
+
+    // }
+
+    
+    cout << "!@@!@!@!@!@!@!@!@!@!@!@!@ | CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << " !@!@!@!@@!@!@!@!@" << endl;
+    if (cell_corridor_x1 == 0 && cell_corridor_x2 == 0) {
+        cout << "@*!&@*!&@*!&@*!&@*!&@*&!@ NAO ERA PRA ENTRAR AQUI" << endl;
+        first_cell = false;
+        blank_cell = false;
+        // map_custom_[cell_x - corridor_threshold][cell_y] = 140;
+        for (int y = cell_x - corridor_threshold; y < cell_x + corridor_threshold; y++) {
+            // map_custom_[y][cell_y] = 220;
+            if (map_custom_[y][cell_y] == 100 && !first_cell && !blank_cell) {
+                cell_corridor_x1 = y;
+                first_cell = true;
             }
-        } else {
-            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
-                map_custom_[cell_x][x] = 100;
+
+            if (map_custom_[y][cell_y] == 0 && !blank_cell) {
+                if ((map_custom_[y-1][cell_y] != 0) && (map_custom_[y+1][cell_y] == 0)) {
+                    blank_cell = true;
+                }
+            }
+
+            if (map_custom_[y][cell_y] == 100 && first_cell && blank_cell) {
+                cell_corridor_x2 = y;
+                both_zero = true;
+                break;
+            }
+
+        }
+    } else {
+        both_zero = false;
+    }
+
+    cout << "AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII | CELL_CORRIDOR_X1: " << cell_corridor_x1 << " | CELL_CORRIDOR_X2: " << cell_corridor_x2 << endl;
+    if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
+        cout << "####################AMBOS OS CEEL_CORRIDORS ERAM ZERO!!!!!!!!!!!!!!!!!!" << endl;
+        if (cell_corridor_x1 != 0 && cell_corridor_x2 == 0) {
+            blank_cell = false;
+            for (int y = cell_corridor_x1 + 1; y < cell_corridor_x1 + (2*corridor_threshold); y++) {
+                if (map_custom_[y][cell_y] == 0 && !blank_cell) {
+                    if ((map_custom_[y-1][cell_y] != 0) && (map_custom_[y+1][cell_y] == 0)) {
+                        blank_cell = true;
+                    }
+                }
+
+                if (map_custom_[y][cell_y] == 100 && blank_cell) {
+                    cell_corridor_x2 = y;
+                    both_zero = true;
+                    break;
+                }
+            }
+
+            if (cell_corridor_x2 == 0) {
+                cell_corridor_x2 = cell_corridor_x1 - corridor_threshold;
+            }
+
+            // cell_corridor_x2 = cell_corridor_x1 - corridor_threshold;
+            
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
+            } else {
+                // map_custom_[cell_corridor_x2][cell_y] = 120;
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
+            }
+        } else if (cell_corridor_x1 == 0 && cell_corridor_x2 != 0) {
+            cell_corridor_x1 = cell_corridor_x2 + corridor_threshold;
+            
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
+            } else {
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
+            }
+        } else if (cell_corridor_x1 != 0 && cell_corridor_x2 != 0) {
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
+            } else {
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[x][cell_y] = 100;
+                }
             }
         }
-    } else if (cell_corridor_x1 == 0 && cell_corridor_x2 != 0) {
-        cell_corridor_x1 = cell_corridor_x2 - corridor_threshold;
-        
-        if (cell_corridor_x1 < cell_corridor_x2) {
-            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
-                map_custom_[cell_x][x] = 100;
+    } else if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[1]) || (AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[2] && AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[3])) {
+        cout << "***********SO UM DOS CEEL_CORRIDORS ERAM ZERO!!!!!!!!!!!!!!!!!!" << endl;
+        if (cell_corridor_x1 != 0 && cell_corridor_x2 == 0) {
+            cell_corridor_x2 = cell_corridor_x1 + corridor_threshold;
+            
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
+            } else {
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
             }
-        } else {
-            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
-                map_custom_[cell_x][x] = 100;
+        } else if (cell_corridor_x1 == 0 && cell_corridor_x2 != 0) {
+            cell_corridor_x1 = cell_corridor_x2 - corridor_threshold;
+            
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
+            } else {
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
             }
-        }
-    } else if (cell_corridor_x1 != 0 && cell_corridor_x2 != 0) {
-        if (cell_corridor_x1 < cell_corridor_x2) {
-            for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
-                map_custom_[cell_x][x] = 100;
-            }
-        } else {
-            for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
-                map_custom_[cell_x][x] = 100;
+        } else if (cell_corridor_x1 != 0 && cell_corridor_x2 != 0) {
+            if (cell_corridor_x1 < cell_corridor_x2) {
+                for (int x = cell_corridor_x1; x < cell_corridor_x2; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
+            } else {
+                for (int x = cell_corridor_x2; x < cell_corridor_x1; x++) {
+                    map_custom_[cell_x][x] = 100;
+                }
             }
         }
     }
+    
 
     /*
         CELL_X = POSICAO Y DO MAPA;
@@ -405,13 +561,25 @@ void person_count(int cell_x, int cell_y){
         COMBINANDO PODE-SE OBTER O VERTICE1 E 2 E 3. GERANDO COMO CONSEQUENCIA O VERTICE 4;
         (cell_corridor_x1,cell_x);(cell_corridor_x2,cell_x)        
     */
-    tuple<int,int> corridor_aux;
-    if (p_cont_aux_ == 1 || p_cont_aux_ == 0) {
-        corridor_aux = make_tuple(cell_corridor_x1,cell_x);
-        vertex_.emplace_back(corridor_aux);
-        corridor_aux = make_tuple(cell_corridor_x2,cell_x);
-        vertex_.emplace_back(corridor_aux);
+    tuple<int,int,bool> corridor_aux;
+    if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
+        // if (p_cont_aux_ == 1 || p_cont_aux_ == 0) {
+        cout << "SALVANDO OS VERTEX!!!!!!!!!        CELL_y: " << cell_y << "CELL_C1|2: [" << cell_corridor_x1 << " ; " << cell_corridor_x2 << " ]" << endl;
+            corridor_aux = make_tuple(cell_y,cell_corridor_x1,both_zero);
+            vertex_.emplace_back(corridor_aux);
+            corridor_aux = make_tuple(cell_y,cell_corridor_x2,both_zero);
+            vertex_.emplace_back(corridor_aux);
+        // }
+    } else {
+        // if (p_cont_aux_ == 1 || p_cont_aux_ == 0) {
+        cout << "SALVANDO OS VERTEX!!!!!!!!!        CELL_X: " << cell_x << "CELL_C1|2: [" << cell_corridor_x1 << " ; " << cell_corridor_x2 << " ]" << endl;
+            corridor_aux = make_tuple(cell_corridor_x1,cell_x,both_zero);
+            vertex_.emplace_back(corridor_aux);
+            corridor_aux = make_tuple(cell_corridor_x2,cell_x,both_zero);
+            vertex_.emplace_back(corridor_aux);
+        // }
     }
+    
 
     // if (cell_corridor_x1 == 0) {
     //     cell_corridor_x1 = corridor_threshold;
@@ -431,6 +599,8 @@ void person_count(int cell_x, int cell_y){
     //         map_custom_[cell_x][x] = 100;
     //     }
     // }
+
+    // is_edge = false;
     
 }
 
@@ -465,7 +635,15 @@ void map_update(float pos_x, float pos_y, int cell_value){
                 // cout << "ENTREI, VOU CHAMAR O PERSON_COUNT" << endl;
                 // cout << "CELL_X: " << cell_x << " | CELL_Y: " << cell_y << " | CELL_VALUE: " << cell_value << endl;
                 //MUDAR O NOME DESSA FUNCAO DEPOIS
-                person_count(cell_x, cell_y);
+                if (is_edge) {
+                    for (int x = 0; x < person_pos_.size(); x++) {
+                        int cx,cy;
+                        tie(cx,cy) = person_pos_[x];
+                        person_count(cx, cy);
+                    }
+                    is_edge = false;
+                    // person_count(cell_x, cell_y);
+                }
             }
         }
         
@@ -593,25 +771,44 @@ void check_object_position(float depth, int object_pos_x, int object_pos_y, int 
     //--------------------------ADICIONADO 14/12-----------------------------------------------
     //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
     if (cell_value == PERSON_VALUE) {
-        tuple<int,int> pos;    
-        int cell_x = 0, cell_y = 0;
-        tie(cell_x, cell_y) = odom2cell(object_x, object_y);
-        pos = make_tuple(cell_x,cell_y);
-        if (p_cont_aux_ == 0) {
-            p_cont_aux_++;
-            //salva posicao
-            // person_barrier_.emplace_back(pos);
-            person_barrier_.emplace(person_barrier_.begin(),pos);
-            cout << "POS PERSON 1: [ " << cell_x << " ; " << cell_y << " ]" << endl; 
-        } else if (p_cont_aux_ == p_cont_-1) {
-            //salva posicao
-            // person_barrier_.emplace_back(pos);
-            person_barrier_.emplace(person_barrier_.begin(),pos);
-            cout << "POS PERSON 2: [ " << cell_x << " ; " << cell_y << " ]" << endl;
-            p_cont_aux_ = 0;
-        } else {
-            p_cont_aux_++;
-        }
+    //     tuple<int,int> pos;    
+    //     int cell_x = 0, cell_y = 0;
+    //     tie(cell_x, cell_y) = odom2cell(object_x, object_y);
+    //     pos = make_tuple(cell_x,cell_y);
+    //     float e_diff_p1, e_diff_p2;
+    //     e_diff_p1 = (AMCL_POSE_[0] - object_x);
+    //     e_diff_p2 = (AMCL_POSE_[1] - object_y);
+    //     float eucli_diff = sqrt((pow(e_diff_p1,2)+pow(e_diff_p2,2)));
+        cout << "POS_ROBOT : [ " << AMCL_POSE_[0] << " ; " << AMCL_POSE_[1] << " ]" << endl; 
+        cout << "POS_ODOM : [ " << object_x << " ; " << object_y << " ]" << endl;
+    //     cout << "E_DIFF_P1: " << e_diff_p1 << " | E_DIFF_P2: " << e_diff_p2 << endl;
+    //     cout << "EUCLIDEAN DIFF BETWEEN ROBOT AND OBJECT: " << eucli_diff << endl;
+    //     if (eucli_diff < 7.5) {
+    //         if (p_cont_aux_ == 0) {
+    //             p_cont_aux_++;
+    //             //salva posicao
+    //             // person_barrier_.emplace_back(pos);
+                
+    //                 person_barrier_.emplace(person_barrier_.begin(),pos);
+    //                 cout << "POS_CELL PERSON 1: [ " << cell_x << " ; " << cell_y << " ]" << endl; 
+    //                 cout << "POS_ODOM PERSON 1: [ " << object_x << " ; " << object_y << " ]" << endl;
+    //                 is_edge = true;
+                
+                
+    //         } else if (p_cont_aux_ == p_cont_-1) {
+    //             //salva posicao
+    //             // person_barrier_.emplace_back(pos);
+    //             // if (eucli_diff < 5) {
+    //                 person_barrier_.emplace(person_barrier_.begin(),pos);
+    //                 cout << "POS_CELL PERSON 2: [ " << cell_x << " ; " << cell_y << " ]" << endl;
+    //                 cout << "POS_ODOM PERSON 2: [ " << object_x << " ; " << object_y << " ]" << endl;
+    //                 // p_cont_aux_ = 0;
+    //                 is_edge = true;
+    //             // }
+    //         } else {
+    //             p_cont_aux_++;
+    //         }
+    //     }
     }
     //-----------------------------------------------------------------------------------------
 
@@ -659,6 +856,44 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
     }
 }
 
+//--------------------------ADICIONADO 19/12/22--------------------------------------------
+int limit_verification(int alpha){
+    int x,y,cont,alpha_aux,gama = 5;
+    bool to_analyze,is_used=false;
+    std::chrono::system_clock::time_point tempo;
+    
+    int maior = 0;
+
+    for (int i = 0; i < ctl_tau_.size(); i++) {
+        for (int j = 0; j < ctl_tau_.size(); j++) {
+            tie(x,y,tempo,cont,to_analyze,alpha_aux) = ctl_tau_[i];
+            if (alpha_aux > maior) {
+                maior = alpha_aux;
+            }    
+        }
+    }
+
+    for (int i = 0; i < ctl_tau_.size(); i++) {
+        tie(x,y,tempo,cont,to_analyze,alpha_aux) = ctl_tau_[i];
+        if (alpha == alpha_aux) {
+            is_used = true;
+            break;
+        }
+    }
+
+    if (!is_used) {
+        return alpha;
+    } else {
+        if ((alpha+gama) > 240) {
+            alpha = 240;
+            return alpha;
+        } else {
+            return (alpha+gama);
+        }
+    }
+}
+//-----------------------------------------------------------------------------------------
+
 //--------------------------ADICIONADO 15/12/22--------------------------------------------
 //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
 //------------------------CTL = CROWD_TEMPORAL_LAYER---------------------------------------
@@ -668,32 +903,96 @@ void darknet_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr& msg){
 */
 void ctl_draw(){
     int vertex1_x,vertex1_y,vertex2_x,vertex2_y,vertex3_x,vertex3_y;
+    bool bz1,bz2,bz3;
 
-    tie(vertex1_x,vertex1_y) = vertex_[0];
-    tie(vertex2_x,vertex2_y) = vertex_[1];
-    tie(vertex3_x,vertex3_y) = vertex_[vertex_.size()-1];
+    tie(vertex1_x,vertex1_y,bz1) = vertex_[0];
+    tie(vertex2_x,vertex2_y,bz2) = vertex_[3];
+    tie(vertex3_x,vertex3_y,bz3) = vertex_[vertex_.size()-1];
 
-    int aux;
+    int aux, alpha, beta=100;
 
-    cout << "VERTEX2_Y: " << vertex2_y << " | VERTEX3_Y: " << vertex3_y << " | VERTEX1_X: " << vertex1_x << " | VERTEX2_X: " << vertex2_x << endl;  
+    // cout << "VERTEX2_Y: " << vertex2_y << " | VERTEX3_Y: " << vertex3_y << " | VERTEX1_X: " << vertex1_x << " | VERTEX2_X: " << vertex2_x << endl;  
+    cout << "VERTEX_1: [" << vertex1_x << " ; " << vertex1_y << " ] | VERTEX_2: [" << vertex2_x << " ; " << vertex2_y << " ]" << endl; 
 
-    for (int y = vertex2_y; y < vertex3_y; y++) {
-        for (int x = vertex1_x; x < vertex2_x; x++) {
-            //Posteriormente adicionar cores diferentes que estejam em função do tempo.
-            //REALIZAR UM CALCULO PELA QUANTIDADE DE PESSOAS TALVEZ?
-            // cout << "ANTES DO CORE DUMPED!!!!" << endl;
-            crowd_temporal_layer_map_[y][x] = 150;
-            // cout << "FOI AQUI QUE DEU CORE DUMPED!!!!" << endl;
+    if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
+        int lim_11,lim_12,lim_21,lim_22;
+        
+        if (vertex1_y < vertex2_y) {
+            lim_11 = vertex1_y;
+            lim_12 = vertex2_y;
+        } else {
+            lim_12 = vertex1_y;
+            lim_11 = vertex2_y;
+        }
+
+        if (vertex1_x < vertex2_x) {
+            lim_21 = vertex1_x;
+            lim_22 = vertex2_x;
+        } else {
+            lim_22 = vertex1_x;
+            lim_21 = vertex2_x;
+        }
+
+        cout << "LIM_1: [" << lim_11 << " ; " << lim_12 << " ] | LIM_2: [ " << lim_21 << " ; " << lim_22 << " ]" << endl; 
+
+        for (int y = lim_11; y < lim_12; y++) {
+            for (int x = lim_21; x < lim_22; x++) {
+                //Posteriormente adicionar cores diferentes que estejam em função do tempo.
+                //REALIZAR UM CALCULO PELA QUANTIDADE DE PESSOAS TALVEZ?
+                //--------------------------------ADICIONADO 19/12/22---------------------------------
+                alpha = (p_cont_ * ctl_tau_.size()) + beta;
+                alpha = limit_verification(alpha);
+                crowd_temporal_layer_map_[y][x] = alpha;
+                //------------------------------------------------------------------------------------
+                // cout << "ANTES DO CORE DUMPED!!!!" << endl;
+                // crowd_temporal_layer_map_[y][x] = 150;
+                // cout << "FOI AQUI QUE DEU CORE DUMPED!!!!" << endl;
+            }
+        }
+    } else {
+        int lim_11,lim_12,lim_21,lim_22;
+        
+        if (vertex1_y < vertex2_y) {
+            lim_11 = vertex1_y;
+            lim_12 = vertex2_y;
+        } else {
+            lim_12 = vertex1_y;
+            lim_11 = vertex2_y;
+        }
+
+        if (vertex1_x < vertex2_x) {
+            lim_21 = vertex1_x;
+            lim_22 = vertex2_x;
+        } else {
+            lim_22 = vertex1_x;
+            lim_21 = vertex2_x;
+        }
+
+        cout << "LIM_1: [" << lim_11 << " ; " << lim_12 << " ] | LIM_2: [ " << lim_21 << " ; " << lim_22 << " ]" << endl; 
+
+        for (int y = lim_11; y < lim_12; y++) {
+            for (int x = lim_21; x < lim_22; x++) {
+                //Posteriormente adicionar cores diferentes que estejam em função do tempo.
+                //REALIZAR UM CALCULO PELA QUANTIDADE DE PESSOAS TALVEZ?
+                //--------------------------------ADICIONADO 19/12/22---------------------------------
+                alpha = (p_cont_ * ctl_tau_.size()) + beta;
+                alpha = limit_verification(alpha);
+                crowd_temporal_layer_map_[y][x] = alpha;
+                //------------------------------------------------------------------------------------
+                // cout << "ANTES DO CORE DUMPED!!!!" << endl;
+                // crowd_temporal_layer_map_[y][x] = 150;
+                // cout << "FOI AQUI QUE DEU CORE DUMPED!!!!" << endl;
+            }
         }
     }
-
+    
     /*
         --> GUARDAR O VERTEX2_Y PARA POSTERIOR ANALISE DO LOCAL;
         --> ATRIBUIR UM TEMPO PARA ESTA MARCACAO NO MAPA;
         --> MANTER INFORMACAO DA QUANTIDADE DE PESSOAS QUE HAVIA NO LOCAL;
     */
-    tuple<int,int,std::chrono::system_clock::time_point,int,bool> tau;
-    tau = make_tuple((vertex2_x-vertex1_x)/2,vertex2_y,std::chrono::system_clock::now(),p_cont_,true);
+    tuple<int,int,std::chrono::system_clock::time_point,int,bool,int> tau;
+    tau = make_tuple(vertex2_x/2,vertex2_y,std::chrono::system_clock::now(),p_cont_,true,alpha);
     ctl_tau_.emplace_back(tau);
 }
 //-----------------------------------------------------------------------------------------
@@ -732,26 +1031,158 @@ void ctl_time_verification(){
     int tau_threshold = 120; 
     if (!ctl_tau_.empty()) {
         for (int i = 0; i < ctl_tau_.size(); i++) {
-            int x,y,cont;
+            int x,y,cont,alpha;
             bool to_analyze;
             std::chrono::system_clock::time_point tempo;
             std::chrono::system_clock::time_point tempo_now;
             tempo_now = std::chrono::system_clock::now();
-            tie(x,y,tempo,cont,to_analyze) = ctl_tau_[i];
+            tie(x,y,tempo,cont,to_analyze,alpha) = ctl_tau_[i];
             std::chrono::duration<double> e_sec = tempo_now - tempo;
             if ((e_sec.count() > tau_threshold) && to_analyze) {
                 cout << "******************TESTE DO QUE FOI ARMAZENADO******************" << endl;
                 cout << "CELL_X DO CTL: " << x << " | CELL_Y: " << y << " | QNT DE PESSOAS: " << cont << endl;
                 cout << "TEMPO SALVO: " << e_sec.count() << endl;
                 cout << "***************************************************************" << endl;
-                ctl_tau_.at(i) = make_tuple(x,y,tempo,cont,false);
+                ctl_tau_.at(i) = make_tuple(x,y,tempo,cont,false,alpha);
             }
         }
     }
     //------------------------------------------------------------------------------
 }
 
+//-------------------------------------------------------ADICIONADO 27/12/22----------------------------------------
+/*
+    COPIA DA FUNCAO boundToSemanticMap() para verificar todos os objetos person que tem no ambiente.
+    Assim que todos os objetos forem obtidos, verificar qual o objeto mais proximo e o mais distante.
+
+    Copia da função check_object_position() para verificar e armazenar as posições dos objetos pessoas encontrados no ambiente.
+*/
+void check_object_position_copy(float depth, int object_pos_x, int object_pos_y, int cell_value){
+
+    float object_x, object_y;
+
+    std::tie(object_x,object_y) = cloudTransform(object_pos_x,object_pos_y);
+
+    tuple<int,int> pos;    
+    int cell_x = 0, cell_y = 0;
+    tie(cell_x, cell_y) = odom2cell(object_x, object_y);
+    // pos = make_tuple(cell_x,cell_y);
+
+    // person_pos_.emplace_back(pos);
+    // person_pos_x_aux_.emplace_back(cell_x);
+    // person_pos_y_aux_.emplace_back(cell_y);
+
+    float e_diff_p1, e_diff_p2;
+    e_diff_p1 = (AMCL_POSE_[0] - object_x);
+    e_diff_p2 = (AMCL_POSE_[1] - object_y);
+    float eucli_diff = sqrt((pow(e_diff_p1,2)+pow(e_diff_p2,2)));
+    cout << "POS_ROBOT : [ " << AMCL_POSE_[0] << " ; " << AMCL_POSE_[1] << " ]" << endl; 
+    cout << "POS_ODOM : [ " << object_x << " ; " << object_y << " ]" << endl;
+    cout << "E_DIFF_P1: " << e_diff_p1 << " | E_DIFF_P2: " << e_diff_p2 << endl;
+    cout << "EUCLIDEAN DIFF BETWEEN ROBOT AND OBJECT: " << eucli_diff << endl;
+    if (eucli_diff < 13) {
+        person_pos_x_aux_.emplace_back(object_x);
+        person_pos_y_aux_.emplace_back(object_y);
+    }
+}
+
+void verifyPersonDistance(){
+    
+    is_edge = true;
+
+    for (int x = 0; x < box_teste.size(); x++) {
+
+        int object_pos_x = 0, object_pos_y = 0;
+        int bound_reduction_scale_x = (box_teste[x][1] - box_teste[x][0])/CROP_SCALE;
+        int bound_reduction_scale_y = (box_teste[x][3] - box_teste[x][2])/CROP_SCALE;
+        object_pos_x = (box_teste[x][1] - bound_reduction_scale_x + box_teste[x][0] + bound_reduction_scale_x)/2;
+        object_pos_y = (box_teste[x][3] - bound_reduction_scale_y + box_teste[x][2] + bound_reduction_scale_y)/2;
+
+        if (object_pos_x < IMG_WIDTH && object_pos_y < IMG_HEIGTH) {
+            if (grid_map_.info.height > 0) {
+                if (cv_ptr_){
+                    float meanDepth = meanDepthValue(box_teste[x][0] + bound_reduction_scale_x, box_teste[x][1] - bound_reduction_scale_x, box_teste[x][2] + bound_reduction_scale_y, box_teste[x][3] - bound_reduction_scale_y,cv_ptr_);
+                    float x_o = meanDepth * ((object_pos_x - cx)/fx);
+                    float y_o = meanDepth * ((object_pos_y - cy)/fy);
+                    if (!isnan(x_o)  && !isnan(y_o)) {
+                        // objectInSemanticMap(object_pos_x,object_pos_y);
+                        // if (!objectInMap_) {
+                        if (box_class[x] == "person") {                                
+                            check_object_position_copy(meanDepth,object_pos_x,object_pos_y,PERSON_VALUE);
+                        }
+                        // }
+                    }
+                }
+            }
+        } 
+    }
+
+    //MUDAR PARA O ODOM, MAIS FACIL DE FAZER O CALCULO!!!!
+    //COLOCAR A VERIFICACAO DE QUAL O ANGULO DO ROBO!!! 
+
+    // tuple<int,int> small,large;
+    float sx,sy,lx,ly;
+    sx = *min_element(person_pos_x_aux_.begin(),person_pos_x_aux_.end());
+    lx  = *max_element(person_pos_x_aux_.begin(),person_pos_x_aux_.end());
+    // tie(sx,sy) = small;
+    // tie(lx,ly) = large;
+    cout << "SMALLEST : [ " << sx << " ; " << sy << " ] | LARGEST: [ " << lx << " ; " << ly << " ]" << endl;
+
+    sy = *min_element(person_pos_y_aux_.begin(),person_pos_y_aux_.end());
+    ly  = *max_element(person_pos_y_aux_.begin(),person_pos_y_aux_.end());
+    // tie(sx,sy) = small;
+    // tie(lx,ly) = large;
+    // cout << "EM Y - SMALLEST : [ " << sx << " ; " << sy << " ] | LARGEST: [ " << lx << " ; " << ly << " ]" << endl;
+    cout << "SMALLEST : [ " << sx << " ; " << sy << " ] | LARGEST: [ " << lx << " ; " << ly << " ]" << endl;
+
+
+    //------------------------------------SO ESTA OPARTE E NECESSARIA
+
+    //COLOCAR A VERIFICACAO DO ANGULO DO ROBO
+    //INVERTER AS VARIAVEIS NAS DUAS SITUACOES
+    if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
+        auto ity = minmax_element(person_pos_x_aux_.begin(), person_pos_x_aux_.end());
+        int min_idy = distance(person_pos_x_aux_.begin(), ity.first);
+        int max_idy = distance(person_pos_x_aux_.begin(), ity.second);    
+        //DAR EMPLACE NO VETOR COM AMBOS OS VALORES
+        int cx,cy;
+        tie(cx,cy) = odom2cell(person_pos_x_aux_[min_idy],person_pos_y_aux_[min_idy]);
+        cout << "################EM RELACAO A X####################" << endl;
+        cout << "MIN QUE EU TENHO: [" << person_pos_x_aux_[min_idy] << " ; " << person_pos_y_aux_[min_idy] << " ]" << endl;
+        cout << "MAX QUE EU TENHO: [" << person_pos_x_aux_[max_idy] << " ; " << person_pos_y_aux_[max_idy] << " ]" << endl;
+        cout << "################EM RELACAO A X####################" << endl;
+        // person_pos_.emplace_back(make_tuple(person_pos_x_aux_[min_idy],person_pos_y_aux_[min_idy]));
+        // person_pos_.emplace_back(make_tuple(person_pos_x_aux_[max_idy],person_pos_y_aux_[max_idy]));
+        person_pos_.emplace_back(make_tuple(cx,cy));
+        tie(cx,cy) = odom2cell(person_pos_x_aux_[max_idy],person_pos_y_aux_[max_idy]);
+        person_pos_.emplace_back(make_tuple(cx,cy));
+    } else {
+        auto itx = minmax_element(person_pos_y_aux_.begin(), person_pos_y_aux_.end());
+        int min_idx = distance(person_pos_y_aux_.begin(), itx.first);
+        int max_idx = distance(person_pos_y_aux_.begin(), itx.second);
+        // person_pos_.emplace_back(make_tuple(person_pos_x_aux_[min_idx],person_pos_y_aux_[min_idx]));
+        // person_pos_.emplace_back(make_tuple(person_pos_x_aux_[max_idx],person_pos_y_aux_[max_idx]));
+        int cx,cy;
+        tie(cx,cy) = odom2cell(person_pos_x_aux_[min_idx],person_pos_y_aux_[min_idx]);
+        cout << "################EM RELACAO A Y####################" << endl;
+        cout << "MIN QUE EU TENHO: [" << person_pos_x_aux_[min_idx] << " ; " << person_pos_y_aux_[min_idx] << " ]" << endl;
+        cout << "MAX QUE EU TENHO: [" << person_pos_x_aux_[max_idx] << " ; " << person_pos_y_aux_[max_idx] << " ]" << endl;
+        cout << "################EM RELACAO A Y####################" << endl;
+        person_pos_.emplace_back(make_tuple(cx,cy));
+        tie(cx,cy) = odom2cell(person_pos_x_aux_[max_idx],person_pos_y_aux_[max_idx]);
+        person_pos_.emplace_back(make_tuple(cx,cy));
+        //DAR EMPLACE NO VETOR COM AMBOS OS VALORES
+    }    
+    //------------------------------------SO ESTA OPARTE E NECESSARIA
+
+    // cout << "TESTE COM O ITERATOR: MAX: " << max_idx << " | MIN: " << min_idx << endl;
+    // cout << "ELEMNETOS: MAX: " << person_pos_x_aux_[max_idx] << " | MIN: " << person_pos_x_aux_[min_idx] << endl;
+}
+//------------------------------------------------------------------------------------------------------------------
+
 void boundToSemanticMap(){
+    
+    verifyPersonDistance();
     
     for (int x = 0; x < box_teste.size(); x++) {
 
@@ -795,6 +1226,9 @@ void boundToSemanticMap(){
     ctl_draw();
     vertex_.clear();
     person_barrier_.clear();
+    person_pos_.clear();
+    person_pos_x_aux_.clear();
+    person_pos_y_aux_.clear();
     //-----------------------------------------------------------------------------------------
 }
 
@@ -808,6 +1242,13 @@ void person_verification(){
     for (int x = 0; x < box_teste.size(); x++) {
         if (box_class[x] == "person") {
             p_count++;
+            //------------------------ADICIONADO 27/12/22--------------------------------
+            // tuple<int,int> pos;    
+            // int cell_x = 0, cell_y = 0;
+            // tie(cell_x, cell_y) = odom2cell(object_x, object_y);
+            // pos = make_tuple(cell_x,cell_y); 
+            // person_pos_.emplace_back(pos);       
+            //---------------------------------------------------------------------------
         }
     }
     // cout << "QUANTIDADE DE PESSOAS QUE FORAM ACHADAS: " << p_count << endl; 
@@ -818,6 +1259,7 @@ void person_verification(){
         is_crowd_ = true;
         if (!crowd_published_) {
             already_mark_crowd_ = false;
+            p_cont_aux_ = 0;
         }
     } else {
         is_crowd_ = false;
@@ -838,6 +1280,24 @@ void robot_pos_callback(const nav_msgs::Odometry::ConstPtr& odom_msg){
     auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
     ROBOT_POSE_[2] = euler[2];
 }
+
+//------------------------------------ADICIONADO 19/12/22-----------------------------------
+/*
+    FOI NECESSÁRIO ADICIONAR AS INFORMAÇÕES DA POSIÇÃO DO AMCL PARA REALIZAR O FECHAMENTO
+    DOS CORREDORES EM RELAÇÃO A ORIENTAÇÃO DO ROBÔ.
+*/
+void amcl_pos_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg){
+    AMCL_POSE_[0] = amcl_msg->pose.pose.position.x;
+    AMCL_POSE_[1] = amcl_msg->pose.pose.position.y;
+    Quaternionf q;
+    q.x() = amcl_msg->pose.pose.orientation.x;
+    q.y() = amcl_msg->pose.pose.orientation.y;
+    q.z() = amcl_msg->pose.pose.orientation.z;
+    q.w() = amcl_msg->pose.pose.orientation.w;
+    auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
+    AMCL_POSE_[2] = euler[2];
+}
+//-----------------------------------------------------------------------------------------
 
 void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     grid_map_.header.frame_id = map_msg->header.frame_id;
@@ -978,6 +1438,16 @@ int main(int argc, char **argv){
     ros::Subscriber dkn_object_sub = node.subscribe("/darknet_ros/found_object", 1000, found_object_callback);
 
     /*
+    --------------------------ADICIONADO 19/12/22-----------------------------------------------------------
+        ADICIONAR SUBSCRIBER DO AMCL E OBTER A ORIENTAÇÃO EM YAW.
+        SERÁ UTILIZADO PARA A VERIFICAÇÃO DE QUAL MEDIDA DEVE SER 
+        UTILIZADA PARA REALIZAR O FECHAMENTO DO CORREDOR.
+    --------------------------------------------------------------------------------------------------------
+    */
+    ros::Subscriber amcl_sub = node.subscribe("/husky1/amcl_pose", 1000, amcl_pos_callback);
+    //---------------------------------------------------------------------------------------------------------
+
+    /*
         ***************************EXPERIMENTAL******************************************************
         Parte experimental para considerar as marcações no semantic_map somente quando chegou no goal.
         Os goals são controlados pelo patrol.cpp, utilizar um par de tópicos, sendo eles: um para mandar o resultado da
@@ -1015,6 +1485,9 @@ int main(int argc, char **argv){
     ros::Rate rate(10);
     
     while(ros::ok()){
+        //------------SOMENTE TESTE, RETIRAR LOGO--------------------
+        // cout << "YAW DO ROBO: " << AMCL_POSE_[2] << endl;
+        //-----------------------------------------------------------
         basefootprintToCameraTF();
         if (cv_ptr_){
             // checkGridForValue();
@@ -1082,8 +1555,9 @@ int main(int argc, char **argv){
                 ros_finished_marking_.data = false;
                 finished_marking_pub.publish(ros_finished_marking_);
                 all_objects_marked_ = false;
-                ctl_time_verification();
+                
             }
+            ctl_time_verification();
             
         }
             ros::spinOnce();
