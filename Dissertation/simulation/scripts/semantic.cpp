@@ -107,6 +107,8 @@ bool is_edge = false;
 vector<tuple<int,int>> person_pos_;
 vector<float> person_pos_x_aux_;
 vector<float> person_pos_y_aux_;
+bool ctl_draw_flag = false;
+std::ofstream ctldraw_log_file_;
 //----------------------------------------------------------------------------------------------------------
 
 void init_map(){
@@ -894,6 +896,17 @@ int limit_verification(int alpha){
 }
 //-----------------------------------------------------------------------------------------
 
+//-----------------------------------------ADICIONADO 02/01/23-----------------------------
+
+void init_file(std::string arq_name){
+
+    std::stringstream name_stream;
+    name_stream << "./ctldraw_" << arq_name << ".txt";
+    std::string file_name = name_stream.str();
+    ctldraw_log_file_.open(file_name,ios::app);
+}
+//-----------------------------------------------------------------------------------------
+
 //--------------------------ADICIONADO 15/12/22--------------------------------------------
 //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
 //------------------------CTL = CROWD_TEMPORAL_LAYER---------------------------------------
@@ -907,11 +920,14 @@ void ctl_draw(){
 
     tie(vertex1_x,vertex1_y,bz1) = vertex_[0];
     tie(vertex2_x,vertex2_y,bz2) = vertex_[3];
-    tie(vertex3_x,vertex3_y,bz3) = vertex_[vertex_.size()-1];
+    // tie(vertex3_x,vertex3_y,bz3) = vertex_[vertex_.size()-1];
 
     int aux, alpha, beta=100;
 
     // cout << "VERTEX2_Y: " << vertex2_y << " | VERTEX3_Y: " << vertex3_y << " | VERTEX1_X: " << vertex1_x << " | VERTEX2_X: " << vertex2_x << endl;  
+    cout << "##########################################################################################################################" << endl;
+    cout << "#################################################CTL_DRAW#################################################################" << endl;
+    cout << "##########################################################################################################################" << endl;
     cout << "VERTEX_1: [" << vertex1_x << " ; " << vertex1_y << " ] | VERTEX_2: [" << vertex2_x << " ; " << vertex2_y << " ]" << endl; 
 
     if ((AMCL_POSE_[2] > ANGLE_LIMITS_MARK_[1] || AMCL_POSE_[2] <= ANGLE_LIMITS_MARK_[2]) || (AMCL_POSE_[2] < ANGLE_LIMITS_MARK_[0] && AMCL_POSE_[2] >= ANGLE_LIMITS_MARK_[3])) {
@@ -934,6 +950,7 @@ void ctl_draw(){
         }
 
         cout << "LIM_1: [" << lim_11 << " ; " << lim_12 << " ] | LIM_2: [ " << lim_21 << " ; " << lim_22 << " ]" << endl; 
+        ctldraw_log_file_ << lim_11 << ";" << lim_12 << ";" << lim_21 << ";" << lim_22 << endl;
 
         for (int y = lim_11; y < lim_12; y++) {
             for (int x = lim_21; x < lim_22; x++) {
@@ -969,6 +986,7 @@ void ctl_draw(){
         }
 
         cout << "LIM_1: [" << lim_11 << " ; " << lim_12 << " ] | LIM_2: [ " << lim_21 << " ; " << lim_22 << " ]" << endl; 
+        ctldraw_log_file_ << lim_11 << ";" << lim_12 << ";" << lim_21 << ";" << lim_22 << endl;
 
         for (int y = lim_11; y < lim_12; y++) {
             for (int x = lim_21; x < lim_22; x++) {
@@ -994,6 +1012,10 @@ void ctl_draw(){
     tuple<int,int,std::chrono::system_clock::time_point,int,bool,int> tau;
     tau = make_tuple(vertex2_x/2,vertex2_y,std::chrono::system_clock::now(),p_cont_,true,alpha);
     ctl_tau_.emplace_back(tau);
+    ctl_draw_flag = true;
+    cout << "##########################################################################################################################" << endl;
+    cout << "##########################################################################################################################" << endl;
+    cout << "##########################################################################################################################" << endl;
 }
 //-----------------------------------------------------------------------------------------
 
@@ -1223,7 +1245,10 @@ void boundToSemanticMap(){
     all_objects_marked_ = true;
     //--------------------------ADICIONADO 15/12/22--------------------------------------------
     //--------------------------NECESSARIO QUE SEJA REALIZADO TESTE DE FUNCIONAMENTO-----------
-    ctl_draw();
+    if (!ctl_draw_flag) {
+        ctl_draw();
+    }
+    
     vertex_.clear();
     person_barrier_.clear();
     person_pos_.clear();
@@ -1427,6 +1452,7 @@ int main(int argc, char **argv){
     init_map();
     init_map_custom();
     init_crowd_temporal_map_custom();
+    init_file((std::string)argv[1]);
 
     ros::Subscriber odom_sub = node.subscribe("/husky1/odometry/filtered", 1000, robot_pos_callback);
     ros::Subscriber dark_sub = node.subscribe("/darknet_ros/bounding_boxes", 1000, darknet_callback);
@@ -1509,6 +1535,11 @@ int main(int argc, char **argv){
                     crowd_published_ = true;
                 }
             }
+
+            if (!mission_finished_ && !already_mark_crowd_ && !can_publish) {
+                ctl_draw_flag = false;
+            }
+
             if (mission_finished_){    
                 if (count_objects_ > 0) {
                     copy_map();
