@@ -4,13 +4,13 @@ robot_base_frame: base_footprint
 footprint: [[-0.5, -0.30], [-0.5, 0.30], [0.5, 0.30], [0.5, -0.30]] #HUSKY FOOTPRINT
 footprint_padding: 0.01
 
-update_frequency: 2.0
+update_frequency: 10.0
 publish_frequency: 2.0
 transform_tolerance: 0.5
 obstacle_range: 5.5
 raytrace_range: 6.0
-width: 15.0
-height: 15.0
+width: 25.0
+height: 25.0
 always_send_full_costmap: true
 
 inflater_layer:

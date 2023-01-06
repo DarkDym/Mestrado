@@ -42,6 +42,8 @@ fstream ctldraw_file_;
 bool enable_ctldraw_ = false;
 bool disable_all_ctldraw_ = false;
 bool already_drawed_ = false;
+//--------------------------ADICIONADO 06/01/23--------------------------------------
+bool enable_patrol_ = true;
 //-----------------------------------------------------------------------------------
 
 void mission_goals(){
@@ -189,14 +191,14 @@ void read_file(){
     objects_file_.close();
 }
 
-void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time){
+void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time, int size){
     if (objects_map_file_.is_open()) {
-        if (last_index < 2 && first_setup) {
-            last_index = 5;
+        if (index < size) {
             std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
             objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
             fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
         } else {
+            last_index = 0;
             std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
             objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
             fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
@@ -221,6 +223,10 @@ void write_in_file(int index, int last_index, std::chrono::steady_clock::time_po
 
 
     AJUSTAR O SISTEMA DE LOOP E LIMPEZA DO CAMINHO DESENHADO NO LANE_MAP
+
+    A --> B
+    160;23.437129974365234;2.652937650680542
+    160;20.03060531616211;43.382686614990234
 */
 
 void init_map(){
@@ -282,7 +288,7 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     grid_map_.info.origin = map_msg->info.origin;
     grid_map_.info.height = map_msg->info.height;
     grid_map_.info.width = map_msg->info.width;
-    cout << "CHEGUEI AQUI NESTE MOMENTO DEPOIS DO GRID_MAP RECEBER AS INFORMACOES" << endl;
+    // cout << "CHEGUEI AQUI NESTE MOMENTO DEPOIS DO GRID_MAP RECEBER AS INFORMACOES" << endl;
 
     lane_map_.header.frame_id = map_msg->header.frame_id;
     lane_map_.header.seq = map_msg->header.seq;
@@ -291,7 +297,7 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     lane_map_.info.origin = map_msg->info.origin;
     lane_map_.info.height = map_msg->info.height;
     lane_map_.info.width = map_msg->info.width;
-    cout << "CHEGUEI AQUI NESTE MOMENTO DEPOIS DO LANE_MAP RECEBER AS INFORMACOES" << endl;
+    // cout << "CHEGUEI AQUI NESTE MOMENTO DEPOIS DO LANE_MAP RECEBER AS INFORMACOES" << endl;
     if (setup_map) {
         grid_map_.data = map_msg->data;
         lane_map_.data = map_msg->data;
@@ -301,11 +307,11 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
         setup_map = false;
     } else {
         // if (!can_publish){
-            for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
+            // for (int x = 0; x < map_msg->info.width*map_msg->info.height; x++) {
                 // if (grid_map_.data[x] != SUITCASE_VALUE || grid_map_.data[x] != PERSON_VALUE || grid_map_.data[x] != VASE_VALUE || grid_map_.data[x] != BICYCLE_VALUE) {
-                    grid_map_.data[x] = map_msg->data[x];
+                    // lane_map_.data[x] = map_msg->data[x];
                 // }
-            }
+            // }
         // }
     }
 }
@@ -360,6 +366,10 @@ void enable_ctldraw_callback(const std_msgs::Bool& ectl_msg){
 void disable_all_ctldraw_callback(const std_msgs::Bool& dctl_msg){
     disable_all_ctldraw_ = dctl_msg.data;
 }
+
+void enable_patrol_callback(const std_msgs::Bool& epatrol_msg){
+    enable_patrol_ = epatrol_msg.data;
+}
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -392,9 +402,11 @@ int main(int argc, char **argv){
     //--------------------------ADICIONADO 03/01/23--------------------------------------
     ros::Subscriber grid_map = node.subscribe("/lane_map", 1, grid_callback);
     ros::Publisher lane_map_pub = node.advertise<nav_msgs::OccupancyGrid>("/lane_map",10);
+    ros::Publisher map_pub = node.advertise<nav_msgs::OccupancyGrid>("/map",10);
 
     ros::Subscriber enable_ctldraw = node.subscribe("/enable_ctldraw", 1, enable_ctldraw_callback);
     ros::Subscriber disable_all_ctldraw = node.subscribe("/disable_all_ctldraw", 1, disable_all_ctldraw_callback);
+    ros::Subscriber enable_patrol_sub = node.subscribe("/enable_patrol", 1, enable_patrol_callback);
     //-----------------------------------------------------------------------------------
 
     ros::Rate rate(10);
@@ -413,115 +425,234 @@ int main(int argc, char **argv){
             rate.sleep();
         } else {
             //--------------------------ADICIONADO 03/01/23--------------------------------------
-            cout << "INICIOOOOOOOOOOO" << endl;
+            // cout << "INICIOOOOOOOOOOO" << endl;
             if (enable_function) {
-                if (enable_ctldraw_) {
-                    if (!already_drawed_) {
-                        cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
-                        enable_ctldraw_obstacles();
-                        grid_update_custom();
-                        int c = 0;
-                        while (c < 10) {
-                            lane_map_pub.publish(lane_map_);
-                            c++;
-                        }
-                        enable_ctldraw_ = false;
-                    } 
-                    // else {
-                    //     clean_map_ = grid_map_;
-                    //     grid_update_clear();
-                    //     lane_map_pub.publish(clean_map_);
-                    //     already_drawed_ = false;
-                    // }
-                }
-                //-----------------------------------------------------------------------------------
-                if (setup) {
-                    tie(input_goal_x,input_goal_y) = goals[index_];
-                    cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    goals_output.target_pose.header.frame_id = "map";
-                    goals_output.target_pose.pose.position.x = input_goal_x;
-                    goals_output.target_pose.pose.position.y = input_goal_y;
-                    goals_output.target_pose.pose.position.z = 0;
-                    goals_output.target_pose.pose.orientation.x = 0.0;
-                    goals_output.target_pose.pose.orientation.y = 0.0;
-                    goals_output.target_pose.pose.orientation.z = 0.25;
-                    goals_output.target_pose.pose.orientation.w = 0.95;
+                if (sim_laps < 10) {
+                    if (enable_patrol_) {
+                        for (int index = 0; index < goals.size(); index++) {
+                            tie(input_goal_x,input_goal_y) = goals[index];
+                            cout << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                            fulllog_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                            goals_output.target_pose.header.frame_id = "map";
+                            goals_output.target_pose.pose.position.x = input_goal_x;
+                            goals_output.target_pose.pose.position.y = input_goal_y;
+                            goals_output.target_pose.pose.position.z = 0;
+                            goals_output.target_pose.pose.orientation.x = 0.0;
+                            goals_output.target_pose.pose.orientation.y = 0.0;
+                            goals_output.target_pose.pose.orientation.z = 0.25;
+                            goals_output.target_pose.pose.orientation.w = 0.95;
 
-                    move_base_client_.sendGoal(goals_output);
-                    last_index = index_;
-                    index_++;
-                    setup = false;
-                    if (!time_started_) {
-                        time_started_ = true;
-                        start_time_ = std::chrono::steady_clock::now();
-                    }
-                    cout << "CHEGUEI AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIII" << endl;
-                } else {
-                    if (move_base_client_.waitForResult()) {
-                        cout << "TO AQUI COM O INDEX: " << index_ << endl;
-                        tie(input_goal_x,input_goal_y) = goals[index_];
-                        
-                        goals_output.target_pose.header.frame_id = "map";
-                        goals_output.target_pose.pose.position.x = input_goal_x;
-                        goals_output.target_pose.pose.position.y = input_goal_y;
-                        goals_output.target_pose.pose.position.z = 0;
-                        goals_output.target_pose.pose.orientation.x = 0.0;
-                        goals_output.target_pose.pose.orientation.y = 0.0;
-                        goals_output.target_pose.pose.orientation.z = 0.25;
-                        goals_output.target_pose.pose.orientation.w = 0.95;
+                            move_base_client_.sendGoal(goals_output);
+                            last_index = index;
+                            // index_++;
+                            setup = false;
+                            if (!time_started_) {
+                                time_started_ = true;
+                                start_time_ = std::chrono::steady_clock::now();
+                            }
 
-                        move_base_client_.sendGoal(goals_output);
-                        if (!time_started_) {
-                            time_started_ = true;
-                            start_time_ = std::chrono::steady_clock::now();
-                        } else {
-                            end_time_ = std::chrono::steady_clock::now();
-                            // time_started_ = false;
-                            std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                            write_in_file(last_index,last_index-1,start_time_,end_time_);
-                            start_time_ = std::chrono::steady_clock::now();
-                        }
-                        cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                        fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                        cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                        fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-
-                        last_index = index_;
-                        if (last_index > 2){
-                            first_setup = true;
-                        }
-                        index_++;
-                        if (index_ > goals.size()-1) {
-                            index_ = 0;
-                            finished_lap = true;
-                        }
-                        if (last_index == goals.size()-1 && finished_lap) {
-                            finished_lap = false;
-                            //--------------------------ADICIONADO 03/01/23--------------------------------------
-                            enable_ctldraw_ = true;
-                            //-----------------------------------------------------------------------------------
-                            if (sim_laps < 10) {
-                                cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                                objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                                fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                                sim_laps++;
-                            } else {
-                                cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                                objects_map_file_.close();
-                                fulllog_file_.close();
+                            if (move_base_client_.waitForResult()) {
+                                if (!time_started_) {
+                                        time_started_ = true;
+                                        start_time_ = std::chrono::steady_clock::now();
+                                    } else {
+                                        end_time_ = std::chrono::steady_clock::now();
+                                        // time_started_ = false;
+                                        std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                                        write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
+                                        start_time_ = std::chrono::steady_clock::now();
+                                    }
+                                    cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                    fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                    cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                             }
                         }
-                        // index_++;
-                        // if (index_ > goals.size()-1) {
-                        //     index_ = 0;
-                        //     finished_lap = true;
-                        // }
-                    }else{
-                        cout << "ESPERAANDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
+                        if (sim_laps % 2 != 0) {
+                            clean_map_ = grid_map_;
+                            grid_update_clear();
+                            lane_map_pub.publish(clean_map_);
+                            already_drawed_ = false;
+                            cout << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            objects_map_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            fulllog_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                        } else {
+                            enable_ctldraw_ = true;
+                            cout << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            objects_map_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            fulllog_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                        }
+                        //-----------------------------------------------------------------------------------
+                        cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                        objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                        fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                        sim_laps++;
+                        if (enable_ctldraw_) {
+                            if (!already_drawed_) {
+                                cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
+                                enable_ctldraw_obstacles();
+                                grid_update_custom();
+                                int c = 0;
+                                while (c < 30) {
+                                    lane_map_pub.publish(lane_map_);
+                                    // map_pub.publish(lane_map_);
+                                    c++;
+                                }
+                                for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                
+                                enable_ctldraw_ = false;
+                            } 
+                            // else {
+                            //     clean_map_ = grid_map_;
+                            //     grid_update_clear();
+                            //     lane_map_pub.publish(clean_map_);
+                            //     already_drawed_ = false;
+                            // }
+                        }
+                        enable_patrol_ = false;
+                    } else {
+                        for (int wait = 0; wait < 20; wait++){rate.sleep();}
+                        enable_patrol_ = true;
                     }
+                } else {
+                    cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                    objects_map_file_.close();
+                    fulllog_file_.close();
                 }
-                cout << "FIMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
+
+                // //-----------------------------------------------------------------------------------
+                // if (setup) {
+                //     tie(input_goal_x,input_goal_y) = goals[index_];
+                //     cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                //     fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                //     goals_output.target_pose.header.frame_id = "map";
+                //     goals_output.target_pose.pose.position.x = input_goal_x;
+                //     goals_output.target_pose.pose.position.y = input_goal_y;
+                //     goals_output.target_pose.pose.position.z = 0;
+                //     goals_output.target_pose.pose.orientation.x = 0.0;
+                //     goals_output.target_pose.pose.orientation.y = 0.0;
+                //     goals_output.target_pose.pose.orientation.z = 0.25;
+                //     goals_output.target_pose.pose.orientation.w = 0.95;
+
+                //     move_base_client_.sendGoal(goals_output);
+                //     last_index = index_;
+                //     index_++;
+                //     setup = false;
+                //     if (!time_started_) {
+                //         time_started_ = true;
+                //         start_time_ = std::chrono::steady_clock::now();
+                //     }
+                // } else {
+                //     if (enable_patrol_) {
+                //         if (move_base_client_.waitForResult()) {
+                //             // if (finished_lap) {
+                //             //     finished_lap = false;
+                //             //     //--------------------------ADICIONADO 03/01/23--------------------------------------
+                //             //     // enable_ctldraw_ = true;
+                //             //     //-----------------------------------------------------------------------------------
+                //             //     if (sim_laps < 10) {
+                //             //         //--------------------------ADICIONADO 05/01/23--------------------------------------
+                //             //         if (sim_laps % 2 == 0) {
+                //             //             clean_map_ = grid_map_;
+                //             //             grid_update_clear();
+                //             //             lane_map_pub.publish(clean_map_);
+                //             //             already_drawed_ = false;
+                //             //         } else {
+                //             //             enable_ctldraw_ = true;
+                //             //         }
+                //             //         //-----------------------------------------------------------------------------------
+                //             //         cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //             //         objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //             //         fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //             //         sim_laps++;
+                //             //     } else {
+                //             //         cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                //             //         objects_map_file_.close();
+                //             //         fulllog_file_.close();
+                //             //     }
+                //             // }
+                //             cout << "TO AQUI COM O INDEX: " << index_ << endl;
+                //             tie(input_goal_x,input_goal_y) = goals[index_];
+                            
+                //             goals_output.target_pose.header.frame_id = "map";
+                //             goals_output.target_pose.pose.position.x = input_goal_x;
+                //             goals_output.target_pose.pose.position.y = input_goal_y;
+                //             goals_output.target_pose.pose.position.z = 0;
+                //             goals_output.target_pose.pose.orientation.x = 0.0;
+                //             goals_output.target_pose.pose.orientation.y = 0.0;
+                //             goals_output.target_pose.pose.orientation.z = 0.25;
+                //             goals_output.target_pose.pose.orientation.w = 0.95;
+
+                //             // int cont = 0;
+                //             // while (cont < 3500) {
+                //                 // cont++;
+                //             // }
+                //             // if (cont >= 3499) {
+                //                 cout << "MANDEI O PROXIMO GOAL" << endl;
+                //                 move_base_client_.sendGoal(goals_output);
+                //             // }
+
+                //             if (!time_started_) {
+                //                 time_started_ = true;
+                //                 start_time_ = std::chrono::steady_clock::now();
+                //             } else {
+                //                 end_time_ = std::chrono::steady_clock::now();
+                //                 // time_started_ = false;
+                //                 std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                //                 write_in_file(last_index,last_index-1,start_time_,end_time_);
+                //                 start_time_ = std::chrono::steady_clock::now();
+                //             }
+                //             cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
+                //             fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
+                //             cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                //             fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+
+                //             last_index = index_;
+                //             if (last_index > 2){
+                //                 first_setup = true;
+                //             }
+                //             index_++;
+                //             if (index_ > goals.size()-1) {
+                //                 index_ = 0;
+                //                 finished_lap = true;
+                //             }
+                //             if (last_index == goals.size()-1 && finished_lap) {
+                //                 finished_lap = false;
+                //                 //--------------------------ADICIONADO 03/01/23--------------------------------------
+                //                 // enable_ctldraw_ = true;
+                //                 //--------------------------ADICIONADO 06/01/23--------------------------------------
+                //                 enable_patrol_ = false;
+                //                 //-----------------------------------------------------------------------------------
+                //                 if (sim_laps < 10) {
+                //                     //--------------------------ADICIONADO 05/01/23--------------------------------------
+                //                     if (sim_laps % 2 == 0) {
+                //                         clean_map_ = grid_map_;
+                //                         grid_update_clear();
+                //                         lane_map_pub.publish(clean_map_);
+                //                         already_drawed_ = false;
+                //                     } else {
+                //                         enable_ctldraw_ = true;
+                //                     }
+                //                     //-----------------------------------------------------------------------------------
+                //                     cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //                     objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //                     fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                //                     sim_laps++;
+                //                 } else {
+                //                     cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                //                     objects_map_file_.close();
+                //                     fulllog_file_.close();
+                //                 }
+                //             }
+                //             // index_++;
+                //             // if (index_ > goals.size()-1) {
+                //             //     index_ = 0;
+                //             //     finished_lap = true;
+                //             // }
+                //         }
+                //     }
+                // }
+                // cout << "FIMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
             } 
             //--------------------------ADICIONADO 03/01/23--------------------------------------
             // else {
@@ -535,7 +666,7 @@ int main(int argc, char **argv){
             //-----------------------------------------------------------------------------------
         }
         }else{
-            cout << "AINDA NAO RECEBI O MAPA" << endl;
+            // cout << "AINDA NAO RECEBI O MAPA" << endl;
         }
         ros::spinOnce();
         rate.sleep();
