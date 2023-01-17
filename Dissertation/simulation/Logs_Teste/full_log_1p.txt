@@ -1,0 +1,186 @@
+-----------GOALS--------------
+GOAL 0: [18.03 | 3.07425]
+GOAL 0: [19.4976 | 43.8322]
+GOAL 0: [18.03 | 3.07425]
+GOAL 0: [18.03 | 3.07425]
+-----------GOALS--------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 10[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 94[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 141[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 0 ------------------------------------
+----------------------------------- END OF LAP: 0 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 5[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 93[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 93[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 1 ------------------------------------
+----------------------------------- END OF LAP: 1 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 3[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 97[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 126[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 2 ------------------------------------
+----------------------------------- END OF LAP: 2 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 4[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 85[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 91[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 3 ------------------------------------
+----------------------------------- END OF LAP: 3 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 2[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 89[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 102[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 4 ------------------------------------
+----------------------------------- END OF LAP: 4 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 4[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 89[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 89[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 5 ------------------------------------
+----------------------------------- END OF LAP: 5 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 2[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 85[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 87[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 6 ------------------------------------
+----------------------------------- END OF LAP: 6 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 4[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 85[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 88[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 7 ------------------------------------
+----------------------------------- END OF LAP: 7 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 3[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 96[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 88[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 8 ------------------------------------
+----------------------------------- END OF LAP: 8 ------------------------------------
+GOAL [-1 -> 0] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [-1-> 0] | Time elapsed = 4[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR husky1: [ 18.4976 | 42.8322 ] 
+GOAL [0-> 1] | Time elapsed = 86[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [1-> 2] | Time elapsed = 89[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR husky1: [ 17.03 | 2.07425 ] 
+GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 9 ------------------------------------
+----------------------------------- END OF LAP: 9 ------------------------------------

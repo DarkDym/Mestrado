@@ -14,6 +14,10 @@
 //--------------------------ADICIONADO 03/01/23--------------------------------------
 #include "nav_msgs/OccupancyGrid.h"
 //-----------------------------------------------------------------------------------
+//--------------------------ADICIONADO 17/01/23--------------------------------------
+#include "gazebo_msgs/PerformanceMetrics.h"
+#include "rosgraph_msgs/Clock.h"
+//-----------------------------------------------------------------------------------
 
 using namespace std::chrono;
 using namespace std;
@@ -44,6 +48,10 @@ bool disable_all_ctldraw_ = false;
 bool already_drawed_ = false;
 //--------------------------ADICIONADO 06/01/23--------------------------------------
 bool enable_patrol_ = true;
+//-----------------------------------------------------------------------------------
+
+//--------------------------ADICIONADO 17/01/23--------------------------------------
+int gazebo_secs_ = 0;
 //-----------------------------------------------------------------------------------
 
 void mission_goals(){
@@ -372,6 +380,19 @@ void enable_patrol_callback(const std_msgs::Bool& epatrol_msg){
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 
+//--------------------------ADICIONADO 17/01/23--------------------------------------
+void gazebo_sim_time_callback(const gazebo_msgs::PerformanceMetrics::ConstPtr& time_msg){
+    cout << "####[GAZEBO TIME]#### || " << time_msg->header.seq << endl;
+    cout << "####[GAZEBO TIME]#### || " << time_msg->sensors[0] << endl;
+    cout << "####[GAZEBO TIME]#### || " << time_msg->header.stamp.sec << endl;
+    gazebo_secs_ = time_msg->header.stamp.sec;
+}
+
+void clock_callback(const rosgraph_msgs::Clock::ConstPtr& time_msg){
+    cout << "###[CLOCK]### || " << time_msg->clock.sec;
+}
+//-----------------------------------------------------------------------------------
+
 
 int main(int argc, char **argv){
     
@@ -409,6 +430,10 @@ int main(int argc, char **argv){
     ros::Subscriber enable_patrol_sub = node.subscribe("/enable_patrol", 1, enable_patrol_callback);
     //-----------------------------------------------------------------------------------
 
+    //--------------------------ADICIONADO 17/01/23--------------------------------------
+    ros::Subscriber gazebo_sim_time_sub = node.subscribe("/gazebo/performance_metrics", 1000, gazebo_sim_time_callback);
+    //-----------------------------------------------------------------------------------
+
     ros::Rate rate(10);
 
     float input_goal_x, input_goal_y;
@@ -417,6 +442,7 @@ int main(int argc, char **argv){
     int sim_laps = 0;
     bool finished_lap = false;
     bool enable_function = true;
+    int gt_start, gt_end = 0;
 
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
@@ -427,7 +453,7 @@ int main(int argc, char **argv){
             //--------------------------ADICIONADO 03/01/23--------------------------------------
             // cout << "INICIOOOOOOOOOOO" << endl;
             if (enable_function) {
-                if (sim_laps < 10) {
+                if (sim_laps < 20) {
                     if (enable_patrol_) {
                         for (int index = 0; index < goals.size(); index++) {
                             tie(input_goal_x,input_goal_y) = goals[index];
@@ -439,8 +465,8 @@ int main(int argc, char **argv){
                             goals_output.target_pose.pose.position.z = 0;
                             goals_output.target_pose.pose.orientation.x = 0.0;
                             goals_output.target_pose.pose.orientation.y = 0.0;
-                            goals_output.target_pose.pose.orientation.z = 0.25;
-                            goals_output.target_pose.pose.orientation.w = 0.95;
+                            goals_output.target_pose.pose.orientation.z = 0.70;
+                            goals_output.target_pose.pose.orientation.w = 0.70;
 
                             move_base_client_.sendGoal(goals_output);
                             last_index = index;
@@ -449,23 +475,47 @@ int main(int argc, char **argv){
                             if (!time_started_) {
                                 time_started_ = true;
                                 start_time_ = std::chrono::steady_clock::now();
+                                //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                gt_start = gazebo_secs_; 
+                                //-----------------------------------------------------------------------------------
                             }
+
+                            //--------------------------ADICIONADO 17/01/23--------------------------------------
+                            cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                            gt_start = gazebo_secs_;
+                            //-----------------------------------------------------------------------------------
 
                             if (move_base_client_.waitForResult()) {
                                 if (!time_started_) {
-                                        time_started_ = true;
-                                        start_time_ = std::chrono::steady_clock::now();
-                                    } else {
-                                        end_time_ = std::chrono::steady_clock::now();
-                                        // time_started_ = false;
-                                        std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                                        write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
-                                        start_time_ = std::chrono::steady_clock::now();
-                                    }
-                                    cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
-                                    fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
-                                    cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                                    fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    time_started_ = true;
+                                    start_time_ = std::chrono::steady_clock::now();
+                                    //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                    cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                    gt_start = gazebo_secs_;
+                                    //-----------------------------------------------------------------------------------
+                                } else {
+                                    ros::spinOnce();
+                                    rate.sleep();
+                                    end_time_ = std::chrono::steady_clock::now();
+                                    //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                    cout << "[END] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                    gt_end = gazebo_secs_;
+                                    cout << "[ELAPSED TIME] | SIMULATION TIME DIFF: " << gt_end - gt_start << endl;
+                                    //-----------------------------------------------------------------------------------
+                                    // time_started_ = false;
+                                    std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                                    write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
+                                    start_time_ = std::chrono::steady_clock::now();
+                                    // //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                    // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                    // gt_start = gazebo_secs_;
+                                    // //-----------------------------------------------------------------------------------
+                                }
+                                cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                             }
                         }
                         if (sim_laps % 2 != 0) {
