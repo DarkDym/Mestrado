@@ -1,0 +1,200 @@
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 12[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 11[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 110[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 104[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 146[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 135[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 0 ------------------------------------
+----------------------------------- END OF LAP: 0 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 81[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 1 ------------------------------------
+----------------------------------- END OF LAP: 1 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 99[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 92[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 146[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 135[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+----------------------------------- NB: 2 ------------------------------------
+----------------------------------- END OF LAP: 2 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 85[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 79[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 81[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 74[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+----------------------------------- WB: 3 ------------------------------------
+----------------------------------- END OF LAP: 3 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 100[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 92[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 108[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 100[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 4 ------------------------------------
+----------------------------------- END OF LAP: 4 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 84[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 5 ------------------------------------
+----------------------------------- END OF LAP: 5 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 118[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 109[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 81[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+----------------------------------- NB: 6 ------------------------------------
+----------------------------------- END OF LAP: 6 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 82[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 7 ------------------------------------
+----------------------------------- END OF LAP: 7 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 159[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 143[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 96[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 85[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 8 ------------------------------------
+----------------------------------- END OF LAP: 8 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 85[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 85[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 9 ------------------------------------
+----------------------------------- END OF LAP: 9 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 122[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 110[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 10 ------------------------------------
+----------------------------------- END OF LAP: 10 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 81[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 84[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 11 ------------------------------------
+----------------------------------- END OF LAP: 11 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 133[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 120[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 80[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 73[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 12 ------------------------------------
+----------------------------------- END OF LAP: 12 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 82[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 86[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 13 ------------------------------------
+----------------------------------- END OF LAP: 13 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 213[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 192[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 86[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 79[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 14 ------------------------------------
+----------------------------------- END OF LAP: 14 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 85[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 15 ------------------------------------
+----------------------------------- END OF LAP: 15 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 90[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 82[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 110[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 100[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 16 ------------------------------------
+----------------------------------- END OF LAP: 16 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 83[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 84[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 17 ------------------------------------
+----------------------------------- END OF LAP: 17 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 98[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 90[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 132[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 119[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- NB: 18 ------------------------------------
+----------------------------------- END OF LAP: 18 ------------------------------------
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 79[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 79[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+----------------------------------- WB: 19 ------------------------------------
+----------------------------------- END OF LAP: 19 ------------------------------------

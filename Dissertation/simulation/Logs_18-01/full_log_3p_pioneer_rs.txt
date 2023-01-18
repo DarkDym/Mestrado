@@ -1,0 +1,446 @@
+-----------GOALS--------------
+GOAL 0: [18.03 | 3.07425]
+GOAL 0: [19.4976 | 43.8322]
+GOAL 0: [18.03 | 3.07425]
+GOAL 0: [18.03 | 3.07425]
+-----------GOALS--------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 11[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 10[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 117[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 106[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 140[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 124[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 0 ------------------------------------
+----------------------------------- END OF LAP: 0 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 87[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 74[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 88[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 1 ------------------------------------
+----------------------------------- END OF LAP: 1 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 3[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 133[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 108[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 174[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 139[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 2 ------------------------------------
+----------------------------------- END OF LAP: 2 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 91[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 74[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 92[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 3 ------------------------------------
+----------------------------------- END OF LAP: 3 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 3[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 105[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 87[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 103[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 85[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 4 ------------------------------------
+----------------------------------- END OF LAP: 4 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 91[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 76[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 91[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 75[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 5 ------------------------------------
+----------------------------------- END OF LAP: 5 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 3[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 193[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 157[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 98[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 81[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 6 ------------------------------------
+----------------------------------- END OF LAP: 6 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 93[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 77[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 90[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 75[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 7 ------------------------------------
+----------------------------------- END OF LAP: 7 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 3[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 180[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 147[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 96[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 79[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 8 ------------------------------------
+----------------------------------- END OF LAP: 8 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 90[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 74[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 94[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 78[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 9 ------------------------------------
+----------------------------------- END OF LAP: 9 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 3[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 123[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 112[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 94[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 81[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 10 ------------------------------------
+----------------------------------- END OF LAP: 10 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 92[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 77[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 89[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 75[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 1[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 11 ------------------------------------
+----------------------------------- END OF LAP: 11 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 130[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 110[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 93[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 79[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 12 ------------------------------------
+----------------------------------- END OF LAP: 12 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 1[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 89[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 91[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 78[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 13 ------------------------------------
+----------------------------------- END OF LAP: 13 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 110[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 92[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 109[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 92[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 14 ------------------------------------
+----------------------------------- END OF LAP: 14 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 92[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 78[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 92[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 77[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 15 ------------------------------------
+----------------------------------- END OF LAP: 15 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 179[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 149[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 96[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 81[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 16 ------------------------------------
+----------------------------------- END OF LAP: 16 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 89[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 90[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 76[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 17 ------------------------------------
+----------------------------------- END OF LAP: 17 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 2[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 113[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 95[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 150[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 126[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- NB: 18 ------------------------------------
+----------------------------------- END OF LAP: 18 ------------------------------------
+GOAL [-1 -> 0] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 4[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+GOAL [0 -> 1] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [0 -> 1] FOR pioneer: [ 18.4976 | 42.8322 ] 
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 89[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 75[s]
+LAST_INDEX: 1 INDEX_: 2
+GOAL [1 -> 2] FOR HUSKY: [ 18.4976 | 42.8322 ] 
+GOAL [1 -> 2] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 90[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 76[s]
+LAST_INDEX: 2 INDEX_: 3
+GOAL [2 -> 3] FOR HUSKY: [ 17.03 | 2.07425 ] 
+GOAL [2 -> 3] FOR pioneer: [ 17.03 | 2.07425 ] 
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+GOAL [3 -> 4] FOR HUSKY: [ 17.03 | 2.07425 ] 
+----------------------------------- WB: 19 ------------------------------------
+----------------------------------- END OF LAP: 19 ------------------------------------

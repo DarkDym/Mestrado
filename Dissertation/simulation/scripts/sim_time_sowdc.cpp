@@ -202,14 +202,31 @@ void read_file(){
 void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time, int size){
     if (objects_map_file_.is_open()) {
         if (index < size) {
-            std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
-            objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
-            fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            std::cout << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            objects_map_file_ << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            fulllog_file_ << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
         } else {
             last_index = 0;
-            std::cout << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
-            objects_map_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
-            fulllog_file_ << "GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            std::cout << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            objects_map_file_ << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+            fulllog_file_ << "[REAL TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count() << "[s]" << std::endl;
+        }
+    }else{
+        cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
+    }
+}
+
+void write_in_file_stime(int index, int last_index, int start_time, int end_time, int size){
+    if (objects_map_file_.is_open()) {
+        if (index < size) {
+            std::cout << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << (end_time - start_time) << "[s]" << std::endl;
+            objects_map_file_ << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << end_time - start_time << "[s]" << std::endl;
+            fulllog_file_ << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << end_time - start_time << "[s]" << std::endl;
+        } else {
+            last_index = 0;
+            std::cout << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << end_time - start_time << "[s]" << std::endl;
+            objects_map_file_ << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << end_time - start_time << "[s]" << std::endl;
+            fulllog_file_ << "[SIMULATION TIME] | GOAL [" << last_index << "-> " << index << "]" << " | Time elapsed = " << end_time - start_time << "[s]" << std::endl;
         }
     }else{
         cout << "POR ALGUM MOTIVO O ARQUIVO NAO PODE SER ABERTO" << endl;
@@ -383,7 +400,7 @@ void enable_patrol_callback(const std_msgs::Bool& epatrol_msg){
 //--------------------------ADICIONADO 17/01/23--------------------------------------
 void gazebo_sim_time_callback(const gazebo_msgs::PerformanceMetrics::ConstPtr& time_msg){
     cout << "####[GAZEBO TIME]#### || " << time_msg->header.seq << endl;
-    cout << "####[GAZEBO TIME]#### || " << time_msg->sensors[0] << endl;
+    // cout << "####[GAZEBO TIME]#### || " << time_msg->sensors[0] << endl;
     cout << "####[GAZEBO TIME]#### || " << time_msg->header.stamp.sec << endl;
     gazebo_secs_ = time_msg->header.stamp.sec;
 }
@@ -506,6 +523,7 @@ int main(int argc, char **argv){
                                     // time_started_ = false;
                                     std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
                                     write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
+                                    write_in_file_stime(last_index,last_index-1,gt_start,gt_end,goals.size());
                                     start_time_ = std::chrono::steady_clock::now();
                                     // //--------------------------ADICIONADO 17/01/23--------------------------------------
                                     // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
