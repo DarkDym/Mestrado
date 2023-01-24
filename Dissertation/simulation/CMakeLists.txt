@@ -42,6 +42,8 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
+# set(HEADER_FILES scripts/a_star.hpp)
+
 add_executable(tag_listener scripts/path_fromtag.cpp)
 target_link_libraries(tag_listener ${catkin_LIBRARIES} )
 
@@ -71,6 +73,9 @@ target_link_libraries(mark_map_sim ${catkin_LIBRARIES})
 
 add_executable(object_position_reader scripts/object_position_reader.cpp)
 target_link_libraries(object_position_reader ${catkin_LIBRARIES})
+
+add_executable(sim_time_sowdc_mod scripts/sim_time_sowdc_mod.cpp)
+target_link_libraries(sim_time_sowdc_mod ${catkin_LIBRARIES})
 
 # install roslaunch files
 install(DIRECTORY launch/

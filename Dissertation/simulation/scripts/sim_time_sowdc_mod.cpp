@@ -21,9 +21,36 @@
 //--------------------------ADICIONADO 20/01/23--------------------------------------
 #include "nav_msgs/Path.h"
 //-----------------------------------------------------------------------------------
+//--------------------------ADICIONADO 24/01/23--------------------------------------
+// #include "a_star.hpp"
+#include <bits/stdc++.h>
+// #include "nav_msgs/OccupancyGrid.h"
+
+#define ROW 4000
+#define COL 4000
+//-----------------------------------------------------------------------------------
 
 using namespace std::chrono;
 using namespace std;
+
+//--------------------------ADICIONADO 24/01/23--------------------------------------
+// Creating a shortcut for int, int pair type
+typedef pair<int, int> Pair;
+
+// Creating a shortcut for pair<int, pair<int, int>> type
+typedef pair<double, pair<int, int> > pPair;
+
+// A structure to hold the necessary parameters
+struct cell {
+	// Row and Column index of its parent
+	// Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+	int parent_i, parent_j;
+	// f = g + h
+	double f, g, h;
+};
+
+float vertex1_x_,vertex1_y_,vertex2_x_,vertex2_y_;
+//-----------------------------------------------------------------------------------
 
 vector<tuple<float,float>> goals;
 int index_ = 0;
@@ -59,6 +86,631 @@ int gazebo_secs_ = 0;
 
 //--------------------------ADICIONADO 20/01/23--------------------------------------
 nav_msgs::Path global_path_;
+nav_msgs::Path test_path_;
+geometry_msgs::Pose pose_path_;
+//-----------------------------------------------------------------------------------
+
+
+//--------------------------ADICIONADO 24/01/23--------------------------------------
+int grid_a[4000][4000];
+bool closedList[4000][4000];
+cell cellDetails[4000][4000];
+
+
+std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
+    float x = (cell_value_x + grid_map_.info.origin.position.x/grid_map_.info.resolution) * grid_map_.info.resolution;
+    float y = (cell_value_y + grid_map_.info.origin.position.y/grid_map_.info.resolution) * grid_map_.info.resolution;
+    return std::make_tuple(x,y);
+}
+
+// A Utility Function to check whether given cell (row, col)
+// is a valid cell or not.
+bool isValid(int row, int col){
+    // cout << "VALIDATION OF CEL AND ROW VALUES" << endl;
+	// Returns true if row number and column number
+	// is in range
+	return (row >= 0) && (row < 4000) && (col >= 0)
+		&& (col < 4000);
+}
+
+// A Utility Function to check whether the given cell is
+// blocked or not
+bool isUnBlocked(int row, int col){
+    // cout << "VERIFICATION OF CELL" << endl;
+	// Returns true if the cell is not blocked else false
+	if (grid_a[row][col] == 0)
+		return true;
+	else
+		return false;
+}
+
+// A Utility Function to check whether destination cell has
+// been reached or not
+bool isDestination(int row, int col, Pair dest){
+	if (row == dest.first && col == dest.second)
+		return true;
+	else
+		return false;
+}
+
+// A Utility Function to calculate the 'h' heuristics.
+double calculateHValue(int row, int col, Pair dest){
+	// Return using the distance formula
+	return ((double)sqrt(
+		(row - dest.first) * (row - dest.first)
+		+ (col - dest.second) * (col - dest.second)));
+}
+
+// A Utility Function to trace the path from the source
+// to destination
+void tracePath(Pair dest){
+	printf("\nThe Path is ");
+	int row = dest.first;
+	int col = dest.second;
+
+	stack<Pair> Path;
+
+	while (!(cellDetails[row][col].parent_i == row
+			&& cellDetails[row][col].parent_j == col)) {
+		Path.push(make_pair(row, col));
+		int temp_row = cellDetails[row][col].parent_i;
+		int temp_col = cellDetails[row][col].parent_j;
+		row = temp_row;
+		col = temp_col;
+	}
+
+	Path.push(make_pair(row, col));
+	geometry_msgs::PoseStamped ps;
+    while (!Path.empty()) {
+		pair<int, int> p = Path.top();
+		Path.pop();
+        float px,py;
+        tie(px,py) = cell2odom(p.second, p.first);
+        // cout << "-> (" << px << "," << py << ") ";
+        pose_path_.position.x = px;
+        pose_path_.position.y = py;
+        ps.pose = pose_path_;
+        ps.header.frame_id = "map";
+        test_path_.poses.emplace_back(ps);
+        test_path_.header.frame_id = "map";
+		// printf("-> (%d,%d) ", p.first, p.second);
+	}
+
+	return;
+}
+
+// A Function to find the shortest path between
+// a given source cell to a destination cell according
+// to A* Search Algorithm
+int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
+    
+    cout << "INSIDE A STAR SEARCH!!!!!!!!!!!!!" << endl;
+    for (int x = 0; x < 4000; x++) {
+        for (int y = 0; y < 4000; y++) {
+            grid_a[x][y] = -1;
+        }
+    }
+
+    for(int x = 0; x < 4000; x++){
+        int multi = x * 4000;
+        for(int y = 0; y < 4000; y++){
+            int index = y + multi;
+            grid_a[x][y] = grid_map_.data[index];
+        }
+    }
+    
+    Pair src = make_pair(srcx,srcy);
+    Pair dest = make_pair(gx,gy);
+
+	// If the source is out of range
+	if (isValid(src.first, src.second) == false) {
+		printf("Source is invalid\n");
+		return 0;
+	}
+
+	// If the destination is out of range
+	if (isValid(dest.first, dest.second) == false) {
+		printf("Destination is invalid\n");
+		return 0;
+	}
+
+	// Either the source or the destination is blocked
+	if (isUnBlocked(src.first, src.second) == false || isUnBlocked(dest.first, dest.second)	== false) {
+		printf("Source or the destination is blocked\n");
+		return 0;
+	}
+
+	// If the destination cell is the same as source cell
+	if (isDestination(src.first, src.second, dest) == true) {
+		printf("We are already at the destination\n");
+		return 0;
+	}
+
+	// Create a closed list and initialise it to false which
+	// means that no cell has been included yet This closed
+	// list is implemented as a boolean 2D array
+	memset(closedList, false, sizeof(closedList));
+
+	// Declare a 2D array of structure to hold the details
+	// of that cell
+	
+
+	int i, j;
+
+	for (i = 0; i < 4000; i++) {
+		for (j = 0; j < 4000; j++) {
+			cellDetails[i][j].f = FLT_MAX;
+			cellDetails[i][j].g = FLT_MAX;
+			cellDetails[i][j].h = FLT_MAX;
+			cellDetails[i][j].parent_i = -1;
+			cellDetails[i][j].parent_j = -1;
+		}
+	}
+
+	// Initialising the parameters of the starting node
+	i = src.first, j = src.second;
+	cellDetails[i][j].f = 0.0;
+	cellDetails[i][j].g = 0.0;
+	cellDetails[i][j].h = 0.0;
+	cellDetails[i][j].parent_i = i;
+	cellDetails[i][j].parent_j = j;
+
+	/*
+	Create an open list having information as-
+	<f, <i, j>>
+	where f = g + h,
+	and i, j are the row and column index of that cell
+	Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+	This open list is implemented as a set of pair of
+	pair.*/
+	set<pPair> openList;
+
+	// Put the starting cell on the open list and set its
+	// 'f' as 0
+	openList.insert(make_pair(0.0, make_pair(i, j)));
+
+	// We set this boolean value as false as initially
+	// the destination is not reached.
+	bool foundDest = false;
+
+	while (!openList.empty()) {
+		pPair p = *openList.begin();
+
+		// Remove this vertex from the open list
+		openList.erase(openList.begin());
+
+		// Add this vertex to the closed list
+		i = p.second.first;
+		j = p.second.second;
+		closedList[i][j] = true;
+
+		/*
+		Generating all the 8 successor of this cell
+
+			N.W N N.E
+			\ | /
+				\ | /
+			W----Cell----E
+				/ | \
+				/ | \
+			S.W S S.E
+
+		Cell-->Popped Cell (i, j)
+		N --> North	 (i-1, j)
+		S --> South	 (i+1, j)
+		E --> East	 (i, j+1)
+		W --> West		 (i, j-1)
+		N.E--> North-East (i-1, j+1)
+		N.W--> North-West (i-1, j-1)
+		S.E--> South-East (i+1, j+1)
+		S.W--> South-West (i+1, j-1)*/
+
+		// To store the 'g', 'h' and 'f' of the 8 successors
+		double gNew, hNew, fNew;
+
+		//----------- 1st Successor (North) ------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i - 1, j) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i - 1, j, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i - 1][j].parent_i = i;
+				cellDetails[i - 1][j].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i - 1][j] == false
+					&& isUnBlocked(i - 1, j)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i - 1, j, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i - 1][j].f == FLT_MAX
+					|| cellDetails[i - 1][j].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i - 1, j)));
+
+					// Update the details of this cell
+					cellDetails[i - 1][j].f = fNew;
+					cellDetails[i - 1][j].g = gNew;
+					cellDetails[i - 1][j].h = hNew;
+					cellDetails[i - 1][j].parent_i = i;
+					cellDetails[i - 1][j].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 2nd Successor (South) ------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i + 1, j) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i + 1, j, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i + 1][j].parent_i = i;
+				cellDetails[i + 1][j].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i + 1][j] == false
+					&& isUnBlocked(i + 1, j)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i + 1, j, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i + 1][j].f == FLT_MAX
+					|| cellDetails[i + 1][j].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i + 1, j)));
+					// Update the details of this cell
+					cellDetails[i + 1][j].f = fNew;
+					cellDetails[i + 1][j].g = gNew;
+					cellDetails[i + 1][j].h = hNew;
+					cellDetails[i + 1][j].parent_i = i;
+					cellDetails[i + 1][j].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 3rd Successor (East) ------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i, j + 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i, j + 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i][j + 1].parent_i = i;
+				cellDetails[i][j + 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i][j + 1] == false
+					&& isUnBlocked(i, j + 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j + 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i][j + 1].f == FLT_MAX
+					|| cellDetails[i][j + 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i, j + 1)));
+
+					// Update the details of this cell
+					cellDetails[i][j + 1].f = fNew;
+					cellDetails[i][j + 1].g = gNew;
+					cellDetails[i][j + 1].h = hNew;
+					cellDetails[i][j + 1].parent_i = i;
+					cellDetails[i][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 4th Successor (West) ------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i, j - 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i, j - 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i][j - 1].parent_i = i;
+				cellDetails[i][j - 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i][j - 1] == false
+					&& isUnBlocked(i, j - 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j - 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i][j - 1].f == FLT_MAX
+					|| cellDetails[i][j - 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i, j - 1)));
+
+					// Update the details of this cell
+					cellDetails[i][j - 1].f = fNew;
+					cellDetails[i][j - 1].g = gNew;
+					cellDetails[i][j - 1].h = hNew;
+					cellDetails[i][j - 1].parent_i = i;
+					cellDetails[i][j - 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 5th Successor (North-East)
+		//------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i - 1, j + 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i - 1, j + 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i - 1][j + 1].parent_i = i;
+				cellDetails[i - 1][j + 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i - 1][j + 1] == false
+					&& isUnBlocked(i - 1, j + 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.414;
+				hNew = calculateHValue(i - 1, j + 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i - 1][j + 1].f == FLT_MAX
+					|| cellDetails[i - 1][j + 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i - 1, j + 1)));
+
+					// Update the details of this cell
+					cellDetails[i - 1][j + 1].f = fNew;
+					cellDetails[i - 1][j + 1].g = gNew;
+					cellDetails[i - 1][j + 1].h = hNew;
+					cellDetails[i - 1][j + 1].parent_i = i;
+					cellDetails[i - 1][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 6th Successor (North-West)
+		//------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i - 1, j - 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i - 1, j - 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i - 1][j - 1].parent_i = i;
+				cellDetails[i - 1][j - 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i - 1][j - 1] == false
+					&& isUnBlocked(i - 1, j - 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.414;
+				hNew = calculateHValue(i - 1, j - 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i - 1][j - 1].f == FLT_MAX
+					|| cellDetails[i - 1][j - 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i - 1, j - 1)));
+					// Update the details of this cell
+					cellDetails[i - 1][j - 1].f = fNew;
+					cellDetails[i - 1][j - 1].g = gNew;
+					cellDetails[i - 1][j - 1].h = hNew;
+					cellDetails[i - 1][j - 1].parent_i = i;
+					cellDetails[i - 1][j - 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 7th Successor (South-East)
+		//------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i + 1, j + 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i + 1, j + 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i + 1][j + 1].parent_i = i;
+				cellDetails[i + 1][j + 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i + 1][j + 1] == false
+					&& isUnBlocked(i + 1, j + 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.414;
+				hNew = calculateHValue(i + 1, j + 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i + 1][j + 1].f == FLT_MAX
+					|| cellDetails[i + 1][j + 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i + 1, j + 1)));
+
+					// Update the details of this cell
+					cellDetails[i + 1][j + 1].f = fNew;
+					cellDetails[i + 1][j + 1].g = gNew;
+					cellDetails[i + 1][j + 1].h = hNew;
+					cellDetails[i + 1][j + 1].parent_i = i;
+					cellDetails[i + 1][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 8th Successor (South-West)
+		//------------
+
+		// Only process this cell if this is a valid one
+		if (isValid(i + 1, j - 1) == true) {
+			// If the destination cell is the same as the
+			// current successor
+			if (isDestination(i + 1, j - 1, dest) == true) {
+				// Set the Parent of the destination cell
+				cellDetails[i + 1][j - 1].parent_i = i;
+				cellDetails[i + 1][j - 1].parent_j = j;
+				printf("The destination cell is found\n");
+				tracePath(dest);
+				foundDest = true;
+				return 1;
+			}
+
+			// If the successor is already on the closed
+			// list or if it is blocked, then ignore it.
+			// Else do the following
+			else if (closedList[i + 1][j - 1] == false
+					&& isUnBlocked(i + 1, j - 1)
+							== true) {
+				gNew = cellDetails[i][j].g + 1.414;
+				hNew = calculateHValue(i + 1, j - 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to
+				// the open list. Make the current square
+				// the parent of this square. Record the
+				// f, g, and h costs of the square cell
+				//			 OR
+				// If it is on the open list already, check
+				// to see if this path to that square is
+				// better, using 'f' cost as the measure.
+				if (cellDetails[i + 1][j - 1].f == FLT_MAX
+					|| cellDetails[i + 1][j - 1].f > fNew) {
+					openList.insert(make_pair(
+						fNew, make_pair(i + 1, j - 1)));
+
+					// Update the details of this cell
+					cellDetails[i + 1][j - 1].f = fNew;
+					cellDetails[i + 1][j - 1].g = gNew;
+					cellDetails[i + 1][j - 1].h = hNew;
+					cellDetails[i + 1][j - 1].parent_i = i;
+					cellDetails[i + 1][j - 1].parent_j = j;
+				}
+			}
+		}
+	}
+
+	// When the destination cell is not found and the open
+	// list is empty, then we conclude that we failed to
+	// reach the destination cell. This may happen when the
+	// there is no way to destination cell (due to
+	// blockages)
+	if (foundDest == false)
+		printf("Failed to find the Destination Cell\n");
+
+	return 0;
+}
 //-----------------------------------------------------------------------------------
 
 void mission_goals(){
@@ -348,6 +1000,12 @@ void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     }
 }
 
+std::tuple<int,int> odom2cell(float odom_pose_x, float odom_pose_y){
+    int i = odom_pose_x/grid_map_.info.resolution - grid_map_.info.origin.position.x/grid_map_.info.resolution;
+    int j = odom_pose_y/grid_map_.info.resolution - grid_map_.info.origin.position.x/grid_map_.info.resolution;
+    return std::make_tuple(j,i);
+}
+
 void enable_ctldraw_obstacles(){
     // --abre o arquivo;--
     ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
@@ -368,6 +1026,22 @@ void enable_ctldraw_obstacles(){
             cont = 0;
             // --desenha as barreiras;--
             cout << "VERTEXES: [ " << vertexes[0] << " | " << vertexes[1] << " | " << vertexes[2] << " | " << vertexes[3] << " ]" << endl;
+            
+            //---------------------------------------------------------------ADICIONADO 23/01/23---------------------------------------------------------------
+            /*
+                Para fazer a verficação se o caminho passou pela marcação, neste caso do exemplo, tem que utilizar o vertex[0] e vertex[1].
+            */
+            float cx,cy;
+            tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            vertex1_x_ = cx;
+            vertex1_y_ = cy;
+            tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            vertex2_x_ = cx;
+            vertex2_y_ = cy;
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             for (int y = vertexes[0]; y < vertexes[1]; y++) {
                 for (int x = vertexes[2]; x < vertexes[3]; x++) {
                     modified_map_[y][x] = 100;
@@ -406,22 +1080,59 @@ void enable_patrol_callback(const std_msgs::Bool& epatrol_msg){
 
 //--------------------------ADICIONADO 17/01/23--------------------------------------
 void gazebo_sim_time_callback(const gazebo_msgs::PerformanceMetrics::ConstPtr& time_msg){
-    cout << "####[GAZEBO TIME]#### || " << time_msg->header.seq << endl;
+    // cout << "####[GAZEBO TIME]#### || " << time_msg->header.seq << endl;
     // cout << "####[GAZEBO TIME]#### || " << time_msg->sensors[0] << endl;
-    cout << "####[GAZEBO TIME]#### || " << time_msg->header.stamp.sec << endl;
+    // cout << "####[GAZEBO TIME]#### || " << time_msg->header.stamp.sec << endl;
     gazebo_secs_ = time_msg->header.stamp.sec;
 }
 
 void clock_callback(const rosgraph_msgs::Clock::ConstPtr& time_msg){
-    cout << "###[CLOCK]### || " << time_msg->clock.sec;
+    // cout << "###[CLOCK]### || " << time_msg->clock.sec;
 }
 //-----------------------------------------------------------------------------------
 
 //--------------------------ADICIONADO 20/01/23--------------------------------------
 void global_path_callback(const nav_msgs::Path::ConstPtr& path_msgs){
     global_path_.poses = path_msgs->poses;
+    // for (int x = 0; x < global_path_.poses.size(); x++) {
+    //     cout << "POSE_X [" << x << "] - " << global_path_.poses[x].pose.position.x << endl;
+    //     cout << "POSE_Y [" << x << "] - " << global_path_.poses[x].pose.position.y << endl;
+    // }
 }
 //-----------------------------------------------------------------------------------
+
+//--------------------------ADICIONADO 24/01/23--------------------------------------
+float calc_theta(){
+    float theta;
+
+    if (vertex1_y_ > vertex2_y_) {
+        theta = vertex1_y_ - vertex2_y_;
+    } else {
+        theta = vertex2_y_ - vertex1_y_;
+    }
+
+    return theta;
+}
+
+void calc_threshold_path(){
+    float alpha,theta,beta,gama;
+
+    theta = calc_theta();
+
+    for (int phi = 0; phi < 20; phi++) {
+        alpha = 1 - (phi/theta);
+        beta = (phi/theta) - phi;
+        /*
+            VOU UTILIZAR A FORMULA DE GAMA, JÁ QUE ENQUANTO O RESULTADO FOR NEGATIVO É POSSIVEL CONSIDERAR QUE HÁ UMA PEQUENA QUANTIDADE DE PHI DENTRO DE THETA*.
+            *OBS.: AIND É NECESSÁRIO REALIZAR MAIS TESTES EM RELAÇÃO A ESTA FÓRMULA, DEVIDO AINDA NÃO SER CONSIDERADO A DISTÂNCIA DO OUTRO CAMINHO QUE FOI GERADO. ATÉ 
+            O MOMENTO ESTE CÁLCULO ESTA CONSIDERANDO SOMENTE SE O ESPAÇO ESTÁ MUITO POPULOSO.
+        */
+        gama = (phi/theta) - 1;
+        cout << "PHI : " << phi << " | THETA : " << theta << " | ALPHA : " << alpha << " | BETA : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
+    }
+}
+//-----------------------------------------------------------------------------------
+
 
 int main(int argc, char **argv){
     
@@ -465,9 +1176,13 @@ int main(int argc, char **argv){
 
     //--------------------------ADICIONADO 20/01/23--------------------------------------
     std::stringstream move_base_path_topic_stream;
-    move_base_path_topic_stream << "/" << (std::string)argv[1] << "/move_base/GlobalPlanner/plan";
+    move_base_path_topic_stream << "/" << (std::string)argv[1] << "/move_base/TebLocalPlannerROS/global_plan";
     std::string move_base_path_topic = move_base_path_topic_stream.str();
     ros::Subscriber global_path_sub = node.subscribe(move_base_path_topic, 1000, global_path_callback);
+    //-----------------------------------------------------------------------------------
+
+    //--------------------------ADICIONADO 24/01/23--------------------------------------
+    ros::Publisher astar_path_pub = node.advertise<nav_msgs::Path>("/astar_path",10);
     //-----------------------------------------------------------------------------------
 
     ros::Rate rate(10);
@@ -479,281 +1194,322 @@ int main(int argc, char **argv){
     bool finished_lap = false;
     bool enable_function = true;
     int gt_start, gt_end = 0;
+    bool teste_astar = false;
 
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
-        if (!move_base_client_.isServerConnected()){
-            ros::spinOnce();
-            rate.sleep();
-        } else {
-            //--------------------------ADICIONADO 03/01/23--------------------------------------
-            // cout << "INICIOOOOOOOOOOO" << endl;
-            if (enable_function) {
-                if (sim_laps < 20) {
-                    if (enable_patrol_) {
-                        for (int index = 0; index < goals.size(); index++) {
-                            tie(input_goal_x,input_goal_y) = goals[index];
-                            cout << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                            fulllog_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                            goals_output.target_pose.header.frame_id = "map";
-                            goals_output.target_pose.pose.position.x = input_goal_x;
-                            goals_output.target_pose.pose.position.y = input_goal_y;
-                            goals_output.target_pose.pose.position.z = 0;
-                            goals_output.target_pose.pose.orientation.x = 0.0;
-                            goals_output.target_pose.pose.orientation.y = 0.0;
-                            goals_output.target_pose.pose.orientation.z = 0.70;
-                            goals_output.target_pose.pose.orientation.w = 0.70;
+            if (!move_base_client_.isServerConnected()){
+                ros::spinOnce();
+                rate.sleep();
+            } else {
 
-                            move_base_client_.sendGoal(goals_output);
-                            last_index = index;
-                            // index_++;
-                            setup = false;
-                            if (!time_started_) {
-                                time_started_ = true;
-                                start_time_ = std::chrono::steady_clock::now();
-                                //--------------------------ADICIONADO 17/01/23--------------------------------------
-                                cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                gt_start = gazebo_secs_; 
-                                //-----------------------------------------------------------------------------------
-                            }
-
-                            //--------------------------ADICIONADO 17/01/23--------------------------------------
-                            cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                            gt_start = gazebo_secs_;
-                            //-----------------------------------------------------------------------------------
-
-                            if (move_base_client_.waitForResult()) {
+                
+                if (!grid_map_.data.empty()){
+                    if (!teste_astar) {
+                        cout << "ENTREI PARA FAZER O A*" << endl;
+                        int gcx,gcy,scx,scy;
+                        tie(gcx,gcy) = odom2cell(19.88,43.43);
+                        tie(scx,scy) = odom2cell(16.89,-3.94);
+                        Pair goal = make_pair(gcx,gcy);
+                        Pair start = make_pair(scx,scy);
+                        cout << "CELSS: [SX ; SY] - [GX ; GY] | [ " << scx << " ; " << scy << " ] - [ " << gcx << " ; " << gcy << " ]" << endl;
+                        cout << "JA TRANSFORMEI AS POSICOES, VOU EXECUTAR O A*" << endl;
+                        
+                        enable_ctldraw_obstacles();
+                        grid_update_custom();
+                                    int c = 0;
+                                    while (c < 30) {
+                                        lane_map_pub.publish(lane_map_);
+                                        // map_pub.publish(lane_map_);
+                                        c++;
+                                    }
+                        
+                        int as = aStarSearch_MOD(scx,scy,gcx,gcy);
+                        calc_threshold_path();
+                        // int as = as_mod(scx,scy,gcx,gcy);
+                        // bool tV = isValid(scx,scy);
+                        // cout << "TESTE DE OUTRAS FUNCOES: " << tV << endl;
+                        teste_astar = true;
+                        enable_function = false;
+                        astar_path_pub.publish(test_path_);
+                    }
+                }
+                //--------------------------ADICIONADO 03/01/23--------------------------------------
+                // cout << "INICIOOOOOOOOOOO" << endl;
+                if (enable_function) {
+                    if (sim_laps < 20) {
+                        if (enable_patrol_) {
+                            for (int index = 0; index < goals.size(); index++) {
+                                tie(input_goal_x,input_goal_y) = goals[index];
+                                cout << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                fulllog_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                goals_output.target_pose.header.frame_id = "map";
+                                goals_output.target_pose.pose.position.x = input_goal_x;
+                                goals_output.target_pose.pose.position.y = input_goal_y;
+                                goals_output.target_pose.pose.position.z = 0;
+                                goals_output.target_pose.pose.orientation.x = 0.0;
+                                goals_output.target_pose.pose.orientation.y = 0.0;
+                                goals_output.target_pose.pose.orientation.z = 0.70;
+                                goals_output.target_pose.pose.orientation.w = 0.70;
+        
+                                move_base_client_.sendGoal(goals_output);
+                                last_index = index;
+                                // index_++;
+                                setup = false;
                                 if (!time_started_) {
                                     time_started_ = true;
                                     start_time_ = std::chrono::steady_clock::now();
                                     //--------------------------ADICIONADO 17/01/23--------------------------------------
                                     cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                    gt_start = gazebo_secs_;
+                                    gt_start = gazebo_secs_; 
                                     //-----------------------------------------------------------------------------------
-                                } else {
-                                    ros::spinOnce();
-                                    rate.sleep();
-                                    end_time_ = std::chrono::steady_clock::now();
-                                    //--------------------------ADICIONADO 17/01/23--------------------------------------
-                                    cout << "[END] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                    gt_end = gazebo_secs_;
-                                    cout << "[ELAPSED TIME] | SIMULATION TIME DIFF: " << gt_end - gt_start << endl;
-                                    //-----------------------------------------------------------------------------------
-                                    // time_started_ = false;
-                                    std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                                    write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
-                                    write_in_file_stime(last_index,last_index-1,gt_start,gt_end,goals.size());
-                                    start_time_ = std::chrono::steady_clock::now();
-                                    // //--------------------------ADICIONADO 17/01/23--------------------------------------
-                                    // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                    // gt_start = gazebo_secs_;
-                                    // //-----------------------------------------------------------------------------------
                                 }
-                                cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
-                                fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
-                                cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                                fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+
+                                //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                gt_start = gazebo_secs_;
+                                //-----------------------------------------------------------------------------------
+
+                                if (move_base_client_.waitForResult()) {
+                                    if (!time_started_) {
+                                        time_started_ = true;
+                                        start_time_ = std::chrono::steady_clock::now();
+                                        //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                        cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        gt_start = gazebo_secs_;
+                                        //-----------------------------------------------------------------------------------
+                                    } else {
+                                        ros::spinOnce();
+                                        rate.sleep();
+                                        end_time_ = std::chrono::steady_clock::now();
+                                        //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                        cout << "[END] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        gt_end = gazebo_secs_;
+                                        cout << "[ELAPSED TIME] | SIMULATION TIME DIFF: " << gt_end - gt_start << endl;
+                                        //-----------------------------------------------------------------------------------
+                                        // time_started_ = false;
+                                        std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                                        write_in_file(last_index,last_index-1,start_time_,end_time_,goals.size());
+                                        write_in_file_stime(last_index,last_index-1,gt_start,gt_end,goals.size());
+                                        start_time_ = std::chrono::steady_clock::now();
+                                        // //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                        // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        // gt_start = gazebo_secs_;
+                                        // //-----------------------------------------------------------------------------------
+                                    }
+                                    cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                    fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
+                                    cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                }
                             }
-                        }
-                        if (sim_laps % 2 != 0) {
-                            clean_map_ = grid_map_;
-                            grid_update_clear();
-                            lane_map_pub.publish(clean_map_);
-                            already_drawed_ = false;
-                            cout << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
-                            objects_map_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
-                            fulllog_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
-                        } else {
-                            enable_ctldraw_ = true;
-                            cout << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
-                            objects_map_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
-                            fulllog_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
-                        }
-                        //-----------------------------------------------------------------------------------
-                        cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                        objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                        fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                        sim_laps++;
-                        if (enable_ctldraw_) {
-                            if (!already_drawed_) {
-                                cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
-                                enable_ctldraw_obstacles();
-                                grid_update_custom();
-                                int c = 0;
-                                while (c < 30) {
-                                    lane_map_pub.publish(lane_map_);
-                                    // map_pub.publish(lane_map_);
-                                    c++;
-                                }
-                                for (int cr = 0; cr < 11; cr++){rate.sleep();}
-                                
-                                enable_ctldraw_ = false;
-                            } 
-                            // else {
-                            //     clean_map_ = grid_map_;
-                            //     grid_update_clear();
-                            //     lane_map_pub.publish(clean_map_);
-                            //     already_drawed_ = false;
+
+                            // if (!global_path_.poses.empty()) {
+                            //     for (int x = 0; x < global_path_.poses.size(); x++) {
+                            //         cout << "POSE_X [" << x << "] - " << global_path_.poses[x].pose.position.x << endl;
+                            //         cout << "POSE_Y [" << x << "] - " << global_path_.poses[x].pose.position.y << endl;
+                            //     }
                             // }
+
+                            if (sim_laps % 2 != 0) {
+                                clean_map_ = grid_map_;
+                                grid_update_clear();
+                                lane_map_pub.publish(clean_map_);
+                                already_drawed_ = false;
+                                cout << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                                objects_map_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                                fulllog_file_ << "----------------------------------- WB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            } else {
+                                enable_ctldraw_ = true;
+                                cout << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                                objects_map_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                                fulllog_file_ << "----------------------------------- NB: "<< sim_laps << " ------------------------------------" << std::endl;
+                            }
+                            //-----------------------------------------------------------------------------------
+                            cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                            sim_laps++;
+                            if (enable_ctldraw_) {
+                                if (!already_drawed_) {
+                                    cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
+                                    enable_ctldraw_obstacles();
+                                    grid_update_custom();
+                                    int c = 0;
+                                    while (c < 30) {
+                                        lane_map_pub.publish(lane_map_);
+                                        // map_pub.publish(lane_map_);
+                                        c++;
+                                    }
+                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    
+                                    enable_ctldraw_ = false;
+                                } 
+                                // else {
+                                //     clean_map_ = grid_map_;
+                                //     grid_update_clear();
+                                //     lane_map_pub.publish(clean_map_);
+                                //     already_drawed_ = false;
+                                // }
+                            }
+                            enable_patrol_ = false;
+                        } else {
+                            for (int wait = 0; wait < 20; wait++){rate.sleep();}
+                            enable_patrol_ = true;
                         }
-                        enable_patrol_ = false;
                     } else {
-                        for (int wait = 0; wait < 20; wait++){rate.sleep();}
-                        enable_patrol_ = true;
+                        cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                        objects_map_file_.close();
+                        fulllog_file_.close();
                     }
-                } else {
-                    cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                    objects_map_file_.close();
-                    fulllog_file_.close();
-                }
 
-                // //-----------------------------------------------------------------------------------
-                // if (setup) {
-                //     tie(input_goal_x,input_goal_y) = goals[index_];
-                //     cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                //     fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                //     goals_output.target_pose.header.frame_id = "map";
-                //     goals_output.target_pose.pose.position.x = input_goal_x;
-                //     goals_output.target_pose.pose.position.y = input_goal_y;
-                //     goals_output.target_pose.pose.position.z = 0;
-                //     goals_output.target_pose.pose.orientation.x = 0.0;
-                //     goals_output.target_pose.pose.orientation.y = 0.0;
-                //     goals_output.target_pose.pose.orientation.z = 0.25;
-                //     goals_output.target_pose.pose.orientation.w = 0.95;
+                    // //-----------------------------------------------------------------------------------
+                    // if (setup) {
+                    //     tie(input_goal_x,input_goal_y) = goals[index_];
+                    //     cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    //     fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    //     goals_output.target_pose.header.frame_id = "map";
+                    //     goals_output.target_pose.pose.position.x = input_goal_x;
+                    //     goals_output.target_pose.pose.position.y = input_goal_y;
+                    //     goals_output.target_pose.pose.position.z = 0;
+                    //     goals_output.target_pose.pose.orientation.x = 0.0;
+                    //     goals_output.target_pose.pose.orientation.y = 0.0;
+                    //     goals_output.target_pose.pose.orientation.z = 0.25;
+                    //     goals_output.target_pose.pose.orientation.w = 0.95;
 
-                //     move_base_client_.sendGoal(goals_output);
-                //     last_index = index_;
-                //     index_++;
-                //     setup = false;
-                //     if (!time_started_) {
-                //         time_started_ = true;
-                //         start_time_ = std::chrono::steady_clock::now();
-                //     }
-                // } else {
-                //     if (enable_patrol_) {
-                //         if (move_base_client_.waitForResult()) {
-                //             // if (finished_lap) {
-                //             //     finished_lap = false;
-                //             //     //--------------------------ADICIONADO 03/01/23--------------------------------------
-                //             //     // enable_ctldraw_ = true;
-                //             //     //-----------------------------------------------------------------------------------
-                //             //     if (sim_laps < 10) {
-                //             //         //--------------------------ADICIONADO 05/01/23--------------------------------------
-                //             //         if (sim_laps % 2 == 0) {
-                //             //             clean_map_ = grid_map_;
-                //             //             grid_update_clear();
-                //             //             lane_map_pub.publish(clean_map_);
-                //             //             already_drawed_ = false;
-                //             //         } else {
-                //             //             enable_ctldraw_ = true;
-                //             //         }
-                //             //         //-----------------------------------------------------------------------------------
-                //             //         cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //             //         objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //             //         fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //             //         sim_laps++;
-                //             //     } else {
-                //             //         cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                //             //         objects_map_file_.close();
-                //             //         fulllog_file_.close();
-                //             //     }
-                //             // }
-                //             cout << "TO AQUI COM O INDEX: " << index_ << endl;
-                //             tie(input_goal_x,input_goal_y) = goals[index_];
-                            
-                //             goals_output.target_pose.header.frame_id = "map";
-                //             goals_output.target_pose.pose.position.x = input_goal_x;
-                //             goals_output.target_pose.pose.position.y = input_goal_y;
-                //             goals_output.target_pose.pose.position.z = 0;
-                //             goals_output.target_pose.pose.orientation.x = 0.0;
-                //             goals_output.target_pose.pose.orientation.y = 0.0;
-                //             goals_output.target_pose.pose.orientation.z = 0.25;
-                //             goals_output.target_pose.pose.orientation.w = 0.95;
+                    //     move_base_client_.sendGoal(goals_output);
+                    //     last_index = index_;
+                    //     index_++;
+                    //     setup = false;
+                    //     if (!time_started_) {
+                    //         time_started_ = true;
+                    //         start_time_ = std::chrono::steady_clock::now();
+                    //     }
+                    // } else {
+                    //     if (enable_patrol_) {
+                    //         if (move_base_client_.waitForResult()) {
+                    //             // if (finished_lap) {
+                    //             //     finished_lap = false;
+                    //             //     //--------------------------ADICIONADO 03/01/23--------------------------------------
+                    //             //     // enable_ctldraw_ = true;
+                    //             //     //-----------------------------------------------------------------------------------
+                    //             //     if (sim_laps < 10) {
+                    //             //         //--------------------------ADICIONADO 05/01/23--------------------------------------
+                    //             //         if (sim_laps % 2 == 0) {
+                    //             //             clean_map_ = grid_map_;
+                    //             //             grid_update_clear();
+                    //             //             lane_map_pub.publish(clean_map_);
+                    //             //             already_drawed_ = false;
+                    //             //         } else {
+                    //             //             enable_ctldraw_ = true;
+                    //             //         }
+                    //             //         //-----------------------------------------------------------------------------------
+                    //             //         cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //             //         objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //             //         fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //             //         sim_laps++;
+                    //             //     } else {
+                    //             //         cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                    //             //         objects_map_file_.close();
+                    //             //         fulllog_file_.close();
+                    //             //     }
+                    //             // }
+                    //             cout << "TO AQUI COM O INDEX: " << index_ << endl;
+                    //             tie(input_goal_x,input_goal_y) = goals[index_];
+                                
+                    //             goals_output.target_pose.header.frame_id = "map";
+                    //             goals_output.target_pose.pose.position.x = input_goal_x;
+                    //             goals_output.target_pose.pose.position.y = input_goal_y;
+                    //             goals_output.target_pose.pose.position.z = 0;
+                    //             goals_output.target_pose.pose.orientation.x = 0.0;
+                    //             goals_output.target_pose.pose.orientation.y = 0.0;
+                    //             goals_output.target_pose.pose.orientation.z = 0.25;
+                    //             goals_output.target_pose.pose.orientation.w = 0.95;
 
-                //             // int cont = 0;
-                //             // while (cont < 3500) {
-                //                 // cont++;
-                //             // }
-                //             // if (cont >= 3499) {
-                //                 cout << "MANDEI O PROXIMO GOAL" << endl;
-                //                 move_base_client_.sendGoal(goals_output);
-                //             // }
+                    //             // int cont = 0;
+                    //             // while (cont < 3500) {
+                    //                 // cont++;
+                    //             // }
+                    //             // if (cont >= 3499) {
+                    //                 cout << "MANDEI O PROXIMO GOAL" << endl;
+                    //                 move_base_client_.sendGoal(goals_output);
+                    //             // }
 
-                //             if (!time_started_) {
-                //                 time_started_ = true;
-                //                 start_time_ = std::chrono::steady_clock::now();
-                //             } else {
-                //                 end_time_ = std::chrono::steady_clock::now();
-                //                 // time_started_ = false;
-                //                 std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                //                 write_in_file(last_index,last_index-1,start_time_,end_time_);
-                //                 start_time_ = std::chrono::steady_clock::now();
-                //             }
-                //             cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                //             fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                //             cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                //             fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    //             if (!time_started_) {
+                    //                 time_started_ = true;
+                    //                 start_time_ = std::chrono::steady_clock::now();
+                    //             } else {
+                    //                 end_time_ = std::chrono::steady_clock::now();
+                    //                 // time_started_ = false;
+                    //                 std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                    //                 write_in_file(last_index,last_index-1,start_time_,end_time_);
+                    //                 start_time_ = std::chrono::steady_clock::now();
+                    //             }
+                    //             cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
+                    //             fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
+                    //             cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                    //             fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
 
-                //             last_index = index_;
-                //             if (last_index > 2){
-                //                 first_setup = true;
-                //             }
-                //             index_++;
-                //             if (index_ > goals.size()-1) {
-                //                 index_ = 0;
-                //                 finished_lap = true;
-                //             }
-                //             if (last_index == goals.size()-1 && finished_lap) {
-                //                 finished_lap = false;
-                //                 //--------------------------ADICIONADO 03/01/23--------------------------------------
-                //                 // enable_ctldraw_ = true;
-                //                 //--------------------------ADICIONADO 06/01/23--------------------------------------
-                //                 enable_patrol_ = false;
-                //                 //-----------------------------------------------------------------------------------
-                //                 if (sim_laps < 10) {
-                //                     //--------------------------ADICIONADO 05/01/23--------------------------------------
-                //                     if (sim_laps % 2 == 0) {
-                //                         clean_map_ = grid_map_;
-                //                         grid_update_clear();
-                //                         lane_map_pub.publish(clean_map_);
-                //                         already_drawed_ = false;
-                //                     } else {
-                //                         enable_ctldraw_ = true;
-                //                     }
-                //                     //-----------------------------------------------------------------------------------
-                //                     cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //                     objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //                     fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                //                     sim_laps++;
-                //                 } else {
-                //                     cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                //                     objects_map_file_.close();
-                //                     fulllog_file_.close();
-                //                 }
-                //             }
-                //             // index_++;
-                //             // if (index_ > goals.size()-1) {
-                //             //     index_ = 0;
-                //             //     finished_lap = true;
-                //             // }
-                //         }
+                    //             last_index = index_;
+                    //             if (last_index > 2){
+                    //                 first_setup = true;
+                    //             }
+                    //             index_++;
+                    //             if (index_ > goals.size()-1) {
+                    //                 index_ = 0;
+                    //                 finished_lap = true;
+                    //             }
+                    //             if (last_index == goals.size()-1 && finished_lap) {
+                    //                 finished_lap = false;
+                    //                 //--------------------------ADICIONADO 03/01/23--------------------------------------
+                    //                 // enable_ctldraw_ = true;
+                    //                 //--------------------------ADICIONADO 06/01/23--------------------------------------
+                    //                 enable_patrol_ = false;
+                    //                 //-----------------------------------------------------------------------------------
+                    //                 if (sim_laps < 10) {
+                    //                     //--------------------------ADICIONADO 05/01/23--------------------------------------
+                    //                     if (sim_laps % 2 == 0) {
+                    //                         clean_map_ = grid_map_;
+                    //                         grid_update_clear();
+                    //                         lane_map_pub.publish(clean_map_);
+                    //                         already_drawed_ = false;
+                    //                     } else {
+                    //                         enable_ctldraw_ = true;
+                    //                     }
+                    //                     //-----------------------------------------------------------------------------------
+                    //                     cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //                     objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //                     fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
+                    //                     sim_laps++;
+                    //                 } else {
+                    //                     cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                    //                     objects_map_file_.close();
+                    //                     fulllog_file_.close();
+                    //                 }
+                    //             }
+                    //             // index_++;
+                    //             // if (index_ > goals.size()-1) {
+                    //             //     index_ = 0;
+                    //             //     finished_lap = true;
+                    //             // }
+                    //         }
+                    //     }
+                    // }
+                    // cout << "FIMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
+                } 
+                //--------------------------ADICIONADO 03/01/23--------------------------------------
+                // else {
+                //     if (disable_all_ctldraw_) {
+                //         clean_map_ = grid_map_;
+                //         grid_update_clear();
+                //         lane_map_pub.publish(clean_map_);
+                //         disable_all_ctldraw_ = false;
                 //     }
                 // }
-                // cout << "FIMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
-            } 
-            //--------------------------ADICIONADO 03/01/23--------------------------------------
-            // else {
-            //     if (disable_all_ctldraw_) {
-            //         clean_map_ = grid_map_;
-            //         grid_update_clear();
-            //         lane_map_pub.publish(clean_map_);
-            //         disable_all_ctldraw_ = false;
-            //     }
-            // }
-            //-----------------------------------------------------------------------------------
-        }
+                //-----------------------------------------------------------------------------------
+            }
         }else{
-            // cout << "AINDA NAO RECEBI O MAPA" << endl;
+            cout << "AINDA NAO RECEBI O MAPA" << endl;
         }
         ros::spinOnce();
         rate.sleep();
