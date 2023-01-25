@@ -95,6 +95,7 @@ geometry_msgs::Pose pose_path_;
 int grid_a[4000][4000];
 bool closedList[4000][4000];
 cell cellDetails[4000][4000];
+bool astar_mod_ = false;
 
 
 std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
@@ -143,7 +144,7 @@ double calculateHValue(int row, int col, Pair dest){
 
 // A Utility Function to trace the path from the source
 // to destination
-void tracePath(Pair dest){
+int tracePath(Pair dest){
 	printf("\nThe Path is ");
 	int row = dest.first;
 	int col = dest.second;
@@ -161,6 +162,7 @@ void tracePath(Pair dest){
 
 	Path.push(make_pair(row, col));
 	geometry_msgs::PoseStamped ps;
+    int tam_path = Path.size();
     while (!Path.empty()) {
 		pair<int, int> p = Path.top();
 		Path.pop();
@@ -176,7 +178,7 @@ void tracePath(Pair dest){
 		// printf("-> (%d,%d) ", p.first, p.second);
 	}
 
-	return;
+	return tam_path;
 }
 
 // A Function to find the shortest path between
@@ -185,17 +187,19 @@ void tracePath(Pair dest){
 int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
     
     cout << "INSIDE A STAR SEARCH!!!!!!!!!!!!!" << endl;
-    for (int x = 0; x < 4000; x++) {
-        for (int y = 0; y < 4000; y++) {
-            grid_a[x][y] = -1;
+    if (!astar_mod_) {
+        for (int x = 0; x < 4000; x++) {
+            for (int y = 0; y < 4000; y++) {
+                grid_a[x][y] = -1;
+            }
         }
-    }
 
-    for(int x = 0; x < 4000; x++){
-        int multi = x * 4000;
-        for(int y = 0; y < 4000; y++){
-            int index = y + multi;
-            grid_a[x][y] = grid_map_.data[index];
+        for(int x = 0; x < 4000; x++){
+            int multi = x * 4000;
+            for(int y = 0; y < 4000; y++){
+                int index = y + multi;
+                grid_a[x][y] = grid_map_.data[index];
+            }
         }
     }
     
@@ -319,9 +323,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j].parent_i = i;
 				cellDetails[i - 1][j].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
@@ -367,9 +371,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j].parent_i = i;
 				cellDetails[i + 1][j].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
@@ -414,9 +418,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i][j + 1].parent_i = i;
 				cellDetails[i][j + 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -463,9 +467,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i][j - 1].parent_i = i;
 				cellDetails[i][j - 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -513,9 +517,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j + 1].parent_i = i;
 				cellDetails[i - 1][j + 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -563,9 +567,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j - 1].parent_i = i;
 				cellDetails[i - 1][j - 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -612,9 +616,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j + 1].parent_i = i;
 				cellDetails[i + 1][j + 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -662,9 +666,9 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j - 1].parent_i = i;
 				cellDetails[i + 1][j - 1].parent_j = j;
 				printf("The destination cell is found\n");
-				tracePath(dest);
+				int tam_path = tracePath(dest);
 				foundDest = true;
-				return 1;
+				return tam_path;
 			}
 
 			// If the successor is already on the closed
@@ -1114,12 +1118,13 @@ float calc_theta(){
     return theta;
 }
 
-void calc_threshold_path(){
+float calc_threshold_path(){
     float alpha,theta,beta,gama;
 
     theta = calc_theta();
 
-    for (int phi = 0; phi < 20; phi++) {
+    // for (int phi = 0; phi < 20; phi++) {
+        int phi = 4;
         alpha = 1 - (phi/theta);
         beta = (phi/theta) - phi;
         /*
@@ -1129,7 +1134,20 @@ void calc_threshold_path(){
         */
         gama = (phi/theta) - 1;
         cout << "PHI : " << phi << " | THETA : " << theta << " | ALPHA : " << alpha << " | BETA : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
+    // }
+
+    return gama;
+}
+//-----------------------------------------------------------------------------------
+
+//--------------------------ADICIONADO 25/01/23--------------------------------------
+void copy_modified_to_astar_grid(){
+    for (int x = 0; x < 4000; x++) {
+        for (int y = 0; y < 4000; y++) {
+            grid_a[x][y] = modified_map_[x][y];
+        }
     }
+    astar_mod_ = true;
 }
 //-----------------------------------------------------------------------------------
 
@@ -1184,6 +1202,9 @@ int main(int argc, char **argv){
     //--------------------------ADICIONADO 24/01/23--------------------------------------
     ros::Publisher astar_path_pub = node.advertise<nav_msgs::Path>("/astar_path",10);
     //-----------------------------------------------------------------------------------
+    //--------------------------ADICIONADO 25/01/23--------------------------------------
+    ros::Publisher astar_path_mod_pub = node.advertise<nav_msgs::Path>("/astar_path_mod",10);
+    //-----------------------------------------------------------------------------------
 
     ros::Rate rate(10);
 
@@ -1208,6 +1229,7 @@ int main(int argc, char **argv){
                     if (!teste_astar) {
                         cout << "ENTREI PARA FAZER O A*" << endl;
                         int gcx,gcy,scx,scy;
+                        float gamma;
                         tie(gcx,gcy) = odom2cell(19.88,43.43);
                         tie(scx,scy) = odom2cell(16.89,-3.94);
                         Pair goal = make_pair(gcx,gcy);
@@ -1223,15 +1245,23 @@ int main(int argc, char **argv){
                                         // map_pub.publish(lane_map_);
                                         c++;
                                     }
-                        
-                        int as = aStarSearch_MOD(scx,scy,gcx,gcy);
-                        calc_threshold_path();
+                        astar_mod_ = false;
+                        int beta = aStarSearch_MOD(scx,scy,gcx,gcy);
+                        gamma = calc_threshold_path();
                         // int as = as_mod(scx,scy,gcx,gcy);
                         // bool tV = isValid(scx,scy);
                         // cout << "TESTE DE OUTRAS FUNCOES: " << tV << endl;
                         teste_astar = true;
                         enable_function = false;
                         astar_path_pub.publish(test_path_);
+
+                        copy_modified_to_astar_grid();
+                        int omega = aStarSearch_MOD(scx,scy,gcx,gcy);
+                        // calc_threshold_path();
+                        astar_path_mod_pub.publish(test_path_);
+
+                        cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << (beta + (beta*gamma)) << endl;
+
                     }
                 }
                 //--------------------------ADICIONADO 03/01/23--------------------------------------
