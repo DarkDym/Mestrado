@@ -29,6 +29,12 @@
 #define ROW 4000
 #define COL 4000
 //-----------------------------------------------------------------------------------
+//--------------------------ADICIONADO 26/01/23--------------------------------------
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+using namespace Eigen;
+//-----------------------------------------------------------------------------------
 
 using namespace std::chrono;
 using namespace std;
@@ -90,6 +96,13 @@ nav_msgs::Path test_path_;
 geometry_msgs::Pose pose_path_;
 //-----------------------------------------------------------------------------------
 
+//--------------------------ADICIONADO 26/01/23--------------------------------------
+float AMCL_POSE_[3] = {0,0,0};
+bool isPathInBlock_ = false;
+ros::Publisher astar_path_mod_pub;
+ros::Publisher astar_path_pub;
+int vertexes_[4] = {0,0,0,0};
+//-----------------------------------------------------------------------------------
 
 //--------------------------ADICIONADO 24/01/23--------------------------------------
 int grid_a[4000][4000];
@@ -102,6 +115,28 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
     float x = (cell_value_x + grid_map_.info.origin.position.x/grid_map_.info.resolution) * grid_map_.info.resolution;
     float y = (cell_value_y + grid_map_.info.origin.position.y/grid_map_.info.resolution) * grid_map_.info.resolution;
     return std::make_tuple(x,y);
+}
+
+void block_path_verification_y(float py){
+    if (!isPathInBlock_) {
+        // cout << "###################DENTRO DO BLOCK_PATH_VERIFICATION###################" << endl;
+        // cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+        if (vertex1_y_ > vertex2_y_) {
+            if ((py - vertex2_y_) >= 0 && (py - vertex2_y_) <= 0.2) {
+                cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+                cout << "PY: " << py << " ";
+                cout << "VALOR DA SUBSTRACAO: " << (py - vertex2_y_) << endl;
+                isPathInBlock_ = true;
+            }
+        } else {
+            if ((py - vertex1_y_) >= 0 && (py - vertex1_y_) <= 0.2) {
+                cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+                cout << "PY: " << py << " ";
+                cout << "VALOR DA SUBSTRACAO: " << (py - vertex1_y_) << endl;
+                isPathInBlock_ = true;
+            }
+        }
+    }
 }
 
 // A Utility Function to check whether given cell (row, col)
@@ -169,6 +204,7 @@ int tracePath(Pair dest){
         float px,py;
         tie(px,py) = cell2odom(p.second, p.first);
         // cout << "-> (" << px << "," << py << ") ";
+        block_path_verification_y(py);
         pose_path_.position.x = px;
         pose_path_.position.y = py;
         ps.pose = pose_path_;
@@ -322,7 +358,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i - 1][j].parent_i = i;
 				cellDetails[i - 1][j].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("NORTH | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -370,7 +406,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i + 1][j].parent_i = i;
 				cellDetails[i + 1][j].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("SOUTH | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -417,7 +453,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i][j + 1].parent_i = i;
 				cellDetails[i][j + 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("EAST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -466,7 +502,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i][j - 1].parent_i = i;
 				cellDetails[i][j - 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("WEST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -516,7 +552,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i - 1][j + 1].parent_i = i;
 				cellDetails[i - 1][j + 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("NORTH-EAST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -566,7 +602,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i - 1][j - 1].parent_i = i;
 				cellDetails[i - 1][j - 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("NORTH-WEST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -615,7 +651,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i + 1][j + 1].parent_i = i;
 				cellDetails[i + 1][j + 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("SOUTH-EAST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -665,7 +701,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				// Set the Parent of the destination cell
 				cellDetails[i + 1][j - 1].parent_i = i;
 				cellDetails[i + 1][j - 1].parent_j = j;
-				printf("The destination cell is found\n");
+				printf("SOUTH-WEST | The destination cell is found\n");
 				int tam_path = tracePath(dest);
 				foundDest = true;
 				return tam_path;
@@ -1061,6 +1097,97 @@ void enable_ctldraw_obstacles(){
     // -------------------
 }
 
+void read_vertex(){
+    ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
+    if (ctldraw_file_.is_open()) {  
+        cout << "FILE OPENED SUCCEFULLY!" << endl;
+        string line, line_aux;
+        int cont = 0;
+        int vertexes[4];
+        while(getline(ctldraw_file_, line)){
+            stringstream st(line);
+            while(getline(st, line_aux, ';')){
+                cout << line_aux << endl;
+                vertexes[cont] = stoi(line_aux);
+                cont++;
+            }
+            cont = 0;
+            cout << "VERTEXES: [ " << vertexes[0] << " | " << vertexes[1] << " | " << vertexes[2] << " | " << vertexes[3] << " ]" << endl;
+            float cx,cy;
+            tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            vertex1_x_ = cx;
+            vertex1_y_ = cy;
+            tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            vertex2_x_ = cx;
+            vertex2_y_ = cy;
+            vertexes_[0] = vertexes[0];
+            vertexes_[1] = vertexes[1];
+            vertexes_[2] = vertexes[2];
+            vertexes_[3] = vertexes[3];
+        }
+    } else {
+        cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
+    }
+    ctldraw_file_.close();
+}
+
+void grid_block_for_astar(){
+    // --abre o arquivo;--
+    // ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
+    // if (ctldraw_file_.is_open()) {
+    //     cout << "FILE OPENED SUCCEFULLY!" << endl;
+        
+        // --le o arquivo;--
+        // string line, line_aux;
+        // int cont = 0;
+        // int vertexes[4];
+        // while(getline(ctldraw_file_, line)){
+        //     stringstream st(line);
+        //     while(getline(st, line_aux, ';')){
+        //         cout << line_aux << endl;
+        //         vertexes[cont] = stoi(line_aux);
+        //         cont++;
+        //     }
+        //     cont = 0;
+        //     // --desenha as barreiras;--
+            // cout << "#################################################################################################################" << endl;
+            // cout << "GRID_BLOCK_FOR_ASTAR" << endl;
+            // cout << "VERTEXES: [ " << vertexes_[0] << " | " << vertexes_[1] << " | " << vertexes_[2] << " | " << vertexes_[3] << " ]" << endl;
+            // cout << "#################################################################################################################" << endl;
+            
+        //     //---------------------------------------------------------------ADICIONADO 23/01/23---------------------------------------------------------------
+        //     /*
+        //         Para fazer a verficação se o caminho passou pela marcação, neste caso do exemplo, tem que utilizar o vertex[0] e vertex[1].
+        //     */
+        //     float cx,cy;
+        //     tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+        //     cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+        //     vertex1_x_ = cx;
+        //     vertex1_y_ = cy;
+        //     tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+        //     cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+        //     vertex2_x_ = cx;
+        //     vertex2_y_ = cy;
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            for (int y = vertexes_[0]; y < vertexes_[1]; y++) {
+                for (int x = vertexes_[2]; x < vertexes_[3]; x++) {
+                    grid_a[y][x] = 100;
+                }
+            }
+            // -------------------------
+        // }
+        already_drawed_ = true;
+        astar_mod_ = true;
+        // -----------------
+    // } else {
+    //     cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
+    // }
+    // -------------------
+}
+
 // void disable_all_ctldraw_obstacles(){
     
 // }
@@ -1151,6 +1278,56 @@ void copy_modified_to_astar_grid(){
 }
 //-----------------------------------------------------------------------------------
 
+//--------------------------ADICIONADO 26/01/23--------------------------------------
+void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg){
+    AMCL_POSE_[0] = amcl_msg->pose.pose.position.x;
+    AMCL_POSE_[1] = amcl_msg->pose.pose.position.y;
+    Quaternionf q;
+    q.x() = amcl_msg->pose.pose.orientation.x;
+    q.y() = amcl_msg->pose.pose.orientation.y;
+    q.z() = amcl_msg->pose.pose.orientation.z;
+    q.w() = amcl_msg->pose.pose.orientation.w;
+    auto euler = q.toRotationMatrix().eulerAngles(0,1,2);
+    AMCL_POSE_[2] = euler[2];
+}
+
+bool path_verification(float goal_x, float goal_y){
+    int gcx,gcy,scx,scy;
+    float gamma;
+
+    tie(gcx,gcy) = odom2cell(goal_x,goal_y);
+    tie(scx,scy) = odom2cell(AMCL_POSE_[0],AMCL_POSE_[1]);
+
+    astar_mod_ = false;
+    int beta = aStarSearch_MOD(scx,scy,gcx,gcy);
+    astar_path_pub.publish(test_path_);
+
+    if (isPathInBlock_) {
+        gamma = calc_threshold_path();
+
+        grid_block_for_astar();
+
+        int omega = aStarSearch_MOD(scx,scy,gcx,gcy);
+        astar_path_mod_pub.publish(test_path_);
+
+        float epsilon = beta + (beta*gamma);
+        float lambda = abs(beta - omega) * abs(gamma);
+        float epsilon_mod = beta + lambda;
+
+        cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
+
+        isPathInBlock_ = false;
+
+        if (epsilon > omega) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+//-----------------------------------------------------------------------------------
 
 int main(int argc, char **argv){
     
@@ -1169,6 +1346,8 @@ int main(int argc, char **argv){
     open_file();
     read_file();
     mission_goals_from_file();
+
+    
 
     std::stringstream move_base_topic_stream;
     move_base_topic_stream << "/" << (std::string)argv[1] << "/move_base";
@@ -1200,10 +1379,16 @@ int main(int argc, char **argv){
     //-----------------------------------------------------------------------------------
 
     //--------------------------ADICIONADO 24/01/23--------------------------------------
-    ros::Publisher astar_path_pub = node.advertise<nav_msgs::Path>("/astar_path",10);
+    astar_path_pub = node.advertise<nav_msgs::Path>("/astar_path",10);
     //-----------------------------------------------------------------------------------
     //--------------------------ADICIONADO 25/01/23--------------------------------------
-    ros::Publisher astar_path_mod_pub = node.advertise<nav_msgs::Path>("/astar_path_mod",10);
+    astar_path_mod_pub = node.advertise<nav_msgs::Path>("/astar_path_mod",10);
+    //-----------------------------------------------------------------------------------
+    //--------------------------ADICIONADO 26/01/23--------------------------------------
+    std::stringstream amcl_topic_stream;
+    amcl_topic_stream << "/" << (std::string)argv[1] << "/amcl_pose";
+    std::string amcl_topic = amcl_topic_stream.str();
+    ros::Subscriber amcl_sub = node.subscribe(amcl_topic, 1000, amcl_pose_callback);
     //-----------------------------------------------------------------------------------
 
     ros::Rate rate(10);
@@ -1224,46 +1409,49 @@ int main(int argc, char **argv){
                 rate.sleep();
             } else {
 
-                
-                if (!grid_map_.data.empty()){
-                    if (!teste_astar) {
-                        cout << "ENTREI PARA FAZER O A*" << endl;
-                        int gcx,gcy,scx,scy;
-                        float gamma;
-                        tie(gcx,gcy) = odom2cell(19.88,43.43);
-                        tie(scx,scy) = odom2cell(16.89,-3.94);
-                        Pair goal = make_pair(gcx,gcy);
-                        Pair start = make_pair(scx,scy);
-                        cout << "CELSS: [SX ; SY] - [GX ; GY] | [ " << scx << " ; " << scy << " ] - [ " << gcx << " ; " << gcy << " ]" << endl;
-                        cout << "JA TRANSFORMEI AS POSICOES, VOU EXECUTAR O A*" << endl;
+                //--------------------------ADICIONADO 26/01/23--------------------------------------
+                read_vertex();
+                //-----------------------------------------------------------------------------------
+
+                // if (!grid_map_.data.empty()){
+                //     if (!teste_astar) {
+                //         cout << "ENTREI PARA FAZER O A*" << endl;
+                //         int gcx,gcy,scx,scy;
+                //         float gamma;
+                //         tie(gcx,gcy) = odom2cell(19.88,43.43);
+                //         tie(scx,scy) = odom2cell(16.89,-3.94);
+                //         Pair goal = make_pair(gcx,gcy);
+                //         Pair start = make_pair(scx,scy);
+                //         cout << "CELSS: [SX ; SY] - [GX ; GY] | [ " << scx << " ; " << scy << " ] - [ " << gcx << " ; " << gcy << " ]" << endl;
+                //         cout << "JA TRANSFORMEI AS POSICOES, VOU EXECUTAR O A*" << endl;
                         
-                        enable_ctldraw_obstacles();
-                        grid_update_custom();
-                                    int c = 0;
-                                    while (c < 30) {
-                                        lane_map_pub.publish(lane_map_);
-                                        // map_pub.publish(lane_map_);
-                                        c++;
-                                    }
-                        astar_mod_ = false;
-                        int beta = aStarSearch_MOD(scx,scy,gcx,gcy);
-                        gamma = calc_threshold_path();
-                        // int as = as_mod(scx,scy,gcx,gcy);
-                        // bool tV = isValid(scx,scy);
-                        // cout << "TESTE DE OUTRAS FUNCOES: " << tV << endl;
-                        teste_astar = true;
-                        enable_function = false;
-                        astar_path_pub.publish(test_path_);
+                //         enable_ctldraw_obstacles();
+                //         grid_update_custom();
+                //         int c = 0;
+                //         while (c < 30) {
+                //             lane_map_pub.publish(lane_map_);
+                //             // map_pub.publish(lane_map_);
+                //             c++;
+                //         }
+                //         astar_mod_ = false;
+                //         int beta = aStarSearch_MOD(scx,scy,gcx,gcy);
+                //         gamma = calc_threshold_path();
+                //         // int as = as_mod(scx,scy,gcx,gcy);
+                //         // bool tV = isValid(scx,scy);
+                //         // cout << "TESTE DE OUTRAS FUNCOES: " << tV << endl;
+                //         teste_astar = true;
+                //         enable_function = false;
+                //         astar_path_pub.publish(test_path_);
 
-                        copy_modified_to_astar_grid();
-                        int omega = aStarSearch_MOD(scx,scy,gcx,gcy);
-                        // calc_threshold_path();
-                        astar_path_mod_pub.publish(test_path_);
+                //         copy_modified_to_astar_grid();
+                //         int omega = aStarSearch_MOD(scx,scy,gcx,gcy);
+                //         // calc_threshold_path();
+                //         astar_path_mod_pub.publish(test_path_);
 
-                        cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << (beta + (beta*gamma)) << endl;
+                //         cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << (beta + (beta*gamma)) << endl;
 
-                    }
-                }
+                //     }
+                // }
                 //--------------------------ADICIONADO 03/01/23--------------------------------------
                 // cout << "INICIOOOOOOOOOOO" << endl;
                 if (enable_function) {
@@ -1281,6 +1469,25 @@ int main(int argc, char **argv){
                                 goals_output.target_pose.pose.orientation.y = 0.0;
                                 goals_output.target_pose.pose.orientation.z = 0.70;
                                 goals_output.target_pose.pose.orientation.w = 0.70;
+
+                                //--------------------------ADICIONADO 26/01/23--------------------------------------
+                                if (path_verification(input_goal_x,input_goal_y)) {
+                                    cout << "EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!" << endl;
+                                    enable_ctldraw_obstacles();
+                                    grid_update_custom();
+                                    int c = 0;
+                                    while (c < 30) {
+                                        lane_map_pub.publish(lane_map_);
+                                        // map_pub.publish(lane_map_);
+                                        c++;
+                                    }
+                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    ros::spinOnce();
+                                    rate.sleep();
+                                } else {
+                                    cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
+                                }
+                                //-----------------------------------------------------------------------------------
         
                                 move_base_client_.sendGoal(goals_output);
                                 last_index = index;
@@ -1393,139 +1600,6 @@ int main(int argc, char **argv){
                         fulllog_file_.close();
                     }
 
-                    // //-----------------------------------------------------------------------------------
-                    // if (setup) {
-                    //     tie(input_goal_x,input_goal_y) = goals[index_];
-                    //     cout << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    //     fulllog_file_ << "GOAL [" << index_-1 << " -> " << index_ << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    //     goals_output.target_pose.header.frame_id = "map";
-                    //     goals_output.target_pose.pose.position.x = input_goal_x;
-                    //     goals_output.target_pose.pose.position.y = input_goal_y;
-                    //     goals_output.target_pose.pose.position.z = 0;
-                    //     goals_output.target_pose.pose.orientation.x = 0.0;
-                    //     goals_output.target_pose.pose.orientation.y = 0.0;
-                    //     goals_output.target_pose.pose.orientation.z = 0.25;
-                    //     goals_output.target_pose.pose.orientation.w = 0.95;
-
-                    //     move_base_client_.sendGoal(goals_output);
-                    //     last_index = index_;
-                    //     index_++;
-                    //     setup = false;
-                    //     if (!time_started_) {
-                    //         time_started_ = true;
-                    //         start_time_ = std::chrono::steady_clock::now();
-                    //     }
-                    // } else {
-                    //     if (enable_patrol_) {
-                    //         if (move_base_client_.waitForResult()) {
-                    //             // if (finished_lap) {
-                    //             //     finished_lap = false;
-                    //             //     //--------------------------ADICIONADO 03/01/23--------------------------------------
-                    //             //     // enable_ctldraw_ = true;
-                    //             //     //-----------------------------------------------------------------------------------
-                    //             //     if (sim_laps < 10) {
-                    //             //         //--------------------------ADICIONADO 05/01/23--------------------------------------
-                    //             //         if (sim_laps % 2 == 0) {
-                    //             //             clean_map_ = grid_map_;
-                    //             //             grid_update_clear();
-                    //             //             lane_map_pub.publish(clean_map_);
-                    //             //             already_drawed_ = false;
-                    //             //         } else {
-                    //             //             enable_ctldraw_ = true;
-                    //             //         }
-                    //             //         //-----------------------------------------------------------------------------------
-                    //             //         cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //             //         objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //             //         fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //             //         sim_laps++;
-                    //             //     } else {
-                    //             //         cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                    //             //         objects_map_file_.close();
-                    //             //         fulllog_file_.close();
-                    //             //     }
-                    //             // }
-                    //             cout << "TO AQUI COM O INDEX: " << index_ << endl;
-                    //             tie(input_goal_x,input_goal_y) = goals[index_];
-                                
-                    //             goals_output.target_pose.header.frame_id = "map";
-                    //             goals_output.target_pose.pose.position.x = input_goal_x;
-                    //             goals_output.target_pose.pose.position.y = input_goal_y;
-                    //             goals_output.target_pose.pose.position.z = 0;
-                    //             goals_output.target_pose.pose.orientation.x = 0.0;
-                    //             goals_output.target_pose.pose.orientation.y = 0.0;
-                    //             goals_output.target_pose.pose.orientation.z = 0.25;
-                    //             goals_output.target_pose.pose.orientation.w = 0.95;
-
-                    //             // int cont = 0;
-                    //             // while (cont < 3500) {
-                    //                 // cont++;
-                    //             // }
-                    //             // if (cont >= 3499) {
-                    //                 cout << "MANDEI O PROXIMO GOAL" << endl;
-                    //                 move_base_client_.sendGoal(goals_output);
-                    //             // }
-
-                    //             if (!time_started_) {
-                    //                 time_started_ = true;
-                    //                 start_time_ = std::chrono::steady_clock::now();
-                    //             } else {
-                    //                 end_time_ = std::chrono::steady_clock::now();
-                    //                 // time_started_ = false;
-                    //                 std::cout << "TERMINEI VOU GRAVAR - GOAL [" << last_index << "]" << " | Time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
-                    //                 write_in_file(last_index,last_index-1,start_time_,end_time_);
-                    //                 start_time_ = std::chrono::steady_clock::now();
-                    //             }
-                    //             cout << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                    //             fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index_ << endl;
-                    //             cout << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-                    //             fulllog_file_ << "GOAL [" << last_index << " -> " << index_ << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-
-                    //             last_index = index_;
-                    //             if (last_index > 2){
-                    //                 first_setup = true;
-                    //             }
-                    //             index_++;
-                    //             if (index_ > goals.size()-1) {
-                    //                 index_ = 0;
-                    //                 finished_lap = true;
-                    //             }
-                    //             if (last_index == goals.size()-1 && finished_lap) {
-                    //                 finished_lap = false;
-                    //                 //--------------------------ADICIONADO 03/01/23--------------------------------------
-                    //                 // enable_ctldraw_ = true;
-                    //                 //--------------------------ADICIONADO 06/01/23--------------------------------------
-                    //                 enable_patrol_ = false;
-                    //                 //-----------------------------------------------------------------------------------
-                    //                 if (sim_laps < 10) {
-                    //                     //--------------------------ADICIONADO 05/01/23--------------------------------------
-                    //                     if (sim_laps % 2 == 0) {
-                    //                         clean_map_ = grid_map_;
-                    //                         grid_update_clear();
-                    //                         lane_map_pub.publish(clean_map_);
-                    //                         already_drawed_ = false;
-                    //                     } else {
-                    //                         enable_ctldraw_ = true;
-                    //                     }
-                    //                     //-----------------------------------------------------------------------------------
-                    //                     cout << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //                     objects_map_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //                     fulllog_file_ << "----------------------------------- END OF LAP: "<< sim_laps << " ------------------------------------" << std::endl;
-                    //                     sim_laps++;
-                    //                 } else {
-                    //                     cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                    //                     objects_map_file_.close();
-                    //                     fulllog_file_.close();
-                    //                 }
-                    //             }
-                    //             // index_++;
-                    //             // if (index_ > goals.size()-1) {
-                    //             //     index_ = 0;
-                    //             //     finished_lap = true;
-                    //             // }
-                    //         }
-                    //     }
-                    // }
-                    // cout << "FIMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
                 } 
                 //--------------------------ADICIONADO 03/01/23--------------------------------------
                 // else {
