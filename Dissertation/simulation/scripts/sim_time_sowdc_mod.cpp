@@ -104,6 +104,11 @@ ros::Publisher astar_path_pub;
 int vertexes_[4] = {0,0,0,0};
 //-----------------------------------------------------------------------------------
 
+//--------------------------ADICIONADO 30/01/23--------------------------------------
+vector<tuple<int,int,int,int,float,float,float,float,int>> block_vertex_;
+std::ofstream calc_file_;
+//-----------------------------------------------------------------------------------
+
 //--------------------------ADICIONADO 24/01/23--------------------------------------
 int grid_a[4000][4000];
 bool closedList[4000][4000];
@@ -117,25 +122,49 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
     return std::make_tuple(x,y);
 }
 
-void block_path_verification_y(float py){
+void block_path_verification_y(float py, int block_index){
     if (!isPathInBlock_) {
         // cout << "###################DENTRO DO BLOCK_PATH_VERIFICATION###################" << endl;
         // cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
-        if (vertex1_y_ > vertex2_y_) {
-            if ((py - vertex2_y_) >= 0 && (py - vertex2_y_) <= 0.2) {
-                cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+
+        // if (vertex1_y_ > vertex2_y_) {
+        //     if ((py - vertex2_y_) >= 0 && (py - vertex2_y_) <= 0.2) {
+        //         cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+        //         cout << "PY: " << py << " ";
+        //         cout << "VALOR DA SUBSTRACAO: " << (py - vertex2_y_) << endl;
+        //         isPathInBlock_ = true;
+        //     }
+        // } else {
+        //     if ((py - vertex1_y_) >= 0 && (py - vertex1_y_) <= 0.2) {
+        //         cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+        //         cout << "PY: " << py << " ";
+        //         cout << "VALOR DA SUBSTRACAO: " << (py - vertex1_y_) << endl;
+        //         isPathInBlock_ = true;
+        //     }
+        // }
+
+        //--------------------------ADICIONADO 30/01/23--------------------------------------
+        int v1,v2,v3,v4,qnt_p;
+        float ov1,ov2,ov3,ov4;
+        tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+        if (ov2 > ov4) {
+            if ((py - ov4) >= 0 && (py - ov4) <= 0.2) {
+                cout << "VERTEX1_Y: " << ov2 << " | VERTEX2_Y: " << ov4 << endl;
                 cout << "PY: " << py << " ";
-                cout << "VALOR DA SUBSTRACAO: " << (py - vertex2_y_) << endl;
+                cout << "VALOR DA SUBSTRACAO: " << (py - ov4) << endl;
                 isPathInBlock_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE!" << endl; 
             }
         } else {
-            if ((py - vertex1_y_) >= 0 && (py - vertex1_y_) <= 0.2) {
-                cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+            if ((py - ov2) >= 0 && (py - ov2) <= 0.2) {
+                cout << "VERTEX1_Y: " << ov2 << " | VERTEX2_Y: " << ov4 << endl;
                 cout << "PY: " << py << " ";
-                cout << "VALOR DA SUBSTRACAO: " << (py - vertex1_y_) << endl;
+                cout << "VALOR DA SUBSTRACAO: " << (py - ov2) << endl;
                 isPathInBlock_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE!" << endl;
             }
         }
+        //-----------------------------------------------------------------------------------
     }
 }
 
@@ -151,13 +180,13 @@ bool isValid(int row, int col){
 
 // A Utility Function to check whether the given cell is
 // blocked or not
-bool isUnBlocked(int row, int col){
+tuple<bool,int> isUnBlocked(int row, int col){
     // cout << "VERIFICATION OF CELL" << endl;
 	// Returns true if the cell is not blocked else false
-	if (grid_a[row][col] == 0)
-		return true;
+	if (grid_a[row][col] == 0 || grid_a[row][col] == 48)
+		return make_tuple(true,grid_a[row][col]);
 	else
-		return false;
+		return make_tuple(false,grid_a[row][col]);
 }
 
 // A Utility Function to check whether destination cell has
@@ -179,7 +208,7 @@ double calculateHValue(int row, int col, Pair dest){
 
 // A Utility Function to trace the path from the source
 // to destination
-int tracePath(Pair dest){
+int tracePath(Pair dest, int block_index){
 	printf("\nThe Path is ");
 	int row = dest.first;
 	int col = dest.second;
@@ -204,7 +233,7 @@ int tracePath(Pair dest){
         float px,py;
         tie(px,py) = cell2odom(p.second, p.first);
         // cout << "-> (" << px << "," << py << ") ";
-        block_path_verification_y(py);
+        block_path_verification_y(py,block_index);
         pose_path_.position.x = px;
         pose_path_.position.y = py;
         ps.pose = pose_path_;
@@ -220,7 +249,7 @@ int tracePath(Pair dest){
 // A Function to find the shortest path between
 // a given source cell to a destination cell according
 // to A* Search Algorithm
-int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
+int aStarSearch_MOD(int srcx, int srcy, int gx, int gy, int block_index){
     
     cout << "INSIDE A STAR SEARCH!!!!!!!!!!!!!" << endl;
     if (!astar_mod_) {
@@ -255,7 +284,11 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 	}
 
 	// Either the source or the destination is blocked
-	if (isUnBlocked(src.first, src.second) == false || isUnBlocked(dest.first, dest.second)	== false) {
+    bool isUnBlocked_src_,isUnBlocked_dest_;
+    int cell_value_;
+    tie(isUnBlocked_src_,cell_value_) = isUnBlocked(src.first, src.second);
+    tie(isUnBlocked_dest_,cell_value_) = isUnBlocked(dest.first, dest.second);
+	if (isUnBlocked_src_ == false || isUnBlocked_dest_ == false) {
 		printf("Source or the destination is blocked\n");
 		return 0;
 	}
@@ -359,40 +392,46 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j].parent_i = i;
 				cellDetails[i - 1][j].parent_j = j;
 				printf("NORTH | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i - 1][j] == false
-					&& isUnBlocked(i - 1, j)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.0;
-				hNew = calculateHValue(i - 1, j, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i - 1][j] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i - 1, j);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.0;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.0;
+                    }
+                    
+                    hNew = calculateHValue(i - 1, j, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i - 1][j].f == FLT_MAX
-					|| cellDetails[i - 1][j].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i - 1, j)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i - 1][j].f == FLT_MAX
+                        || cellDetails[i - 1][j].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i - 1, j)));
 
-					// Update the details of this cell
-					cellDetails[i - 1][j].f = fNew;
-					cellDetails[i - 1][j].g = gNew;
-					cellDetails[i - 1][j].h = hNew;
-					cellDetails[i - 1][j].parent_i = i;
-					cellDetails[i - 1][j].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i - 1][j].f = fNew;
+                        cellDetails[i - 1][j].g = gNew;
+                        cellDetails[i - 1][j].h = hNew;
+                        cellDetails[i - 1][j].parent_i = i;
+                        cellDetails[i - 1][j].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -407,39 +446,44 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j].parent_i = i;
 				cellDetails[i + 1][j].parent_j = j;
 				printf("SOUTH | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i + 1][j] == false
-					&& isUnBlocked(i + 1, j)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.0;
-				hNew = calculateHValue(i + 1, j, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i + 1][j] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i + 1, j);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.0;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.0;
+                    }
+                    hNew = calculateHValue(i + 1, j, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i + 1][j].f == FLT_MAX
-					|| cellDetails[i + 1][j].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i + 1, j)));
-					// Update the details of this cell
-					cellDetails[i + 1][j].f = fNew;
-					cellDetails[i + 1][j].g = gNew;
-					cellDetails[i + 1][j].h = hNew;
-					cellDetails[i + 1][j].parent_i = i;
-					cellDetails[i + 1][j].parent_j = j;
-				}
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i + 1][j].f == FLT_MAX
+                        || cellDetails[i + 1][j].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i + 1, j)));
+                        // Update the details of this cell
+                        cellDetails[i + 1][j].f = fNew;
+                        cellDetails[i + 1][j].g = gNew;
+                        cellDetails[i + 1][j].h = hNew;
+                        cellDetails[i + 1][j].parent_i = i;
+                        cellDetails[i + 1][j].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -454,7 +498,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i][j + 1].parent_i = i;
 				cellDetails[i][j + 1].parent_j = j;
 				printf("EAST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -462,33 +506,38 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i][j + 1] == false
-					&& isUnBlocked(i, j + 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.0;
-				hNew = calculateHValue(i, j + 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i][j + 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i, j + 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.0;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.0;
+                    }
+                    hNew = calculateHValue(i, j + 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i][j + 1].f == FLT_MAX
-					|| cellDetails[i][j + 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i, j + 1)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i][j + 1].f == FLT_MAX
+                        || cellDetails[i][j + 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i, j + 1)));
 
-					// Update the details of this cell
-					cellDetails[i][j + 1].f = fNew;
-					cellDetails[i][j + 1].g = gNew;
-					cellDetails[i][j + 1].h = hNew;
-					cellDetails[i][j + 1].parent_i = i;
-					cellDetails[i][j + 1].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i][j + 1].f = fNew;
+                        cellDetails[i][j + 1].g = gNew;
+                        cellDetails[i][j + 1].h = hNew;
+                        cellDetails[i][j + 1].parent_i = i;
+                        cellDetails[i][j + 1].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -503,7 +552,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i][j - 1].parent_i = i;
 				cellDetails[i][j - 1].parent_j = j;
 				printf("WEST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -511,33 +560,38 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i][j - 1] == false
-					&& isUnBlocked(i, j - 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.0;
-				hNew = calculateHValue(i, j - 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i][j - 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i, j - 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.0;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.0;
+                    }
+                    hNew = calculateHValue(i, j - 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i][j - 1].f == FLT_MAX
-					|| cellDetails[i][j - 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i, j - 1)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i][j - 1].f == FLT_MAX
+                        || cellDetails[i][j - 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i, j - 1)));
 
-					// Update the details of this cell
-					cellDetails[i][j - 1].f = fNew;
-					cellDetails[i][j - 1].g = gNew;
-					cellDetails[i][j - 1].h = hNew;
-					cellDetails[i][j - 1].parent_i = i;
-					cellDetails[i][j - 1].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i][j - 1].f = fNew;
+                        cellDetails[i][j - 1].g = gNew;
+                        cellDetails[i][j - 1].h = hNew;
+                        cellDetails[i][j - 1].parent_i = i;
+                        cellDetails[i][j - 1].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -553,7 +607,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j + 1].parent_i = i;
 				cellDetails[i - 1][j + 1].parent_j = j;
 				printf("NORTH-EAST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -561,33 +615,39 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i - 1][j + 1] == false
-					&& isUnBlocked(i - 1, j + 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.414;
-				hNew = calculateHValue(i - 1, j + 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i - 1][j + 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i - 1, j + 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.414;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.414;
+                    }
+                    
+                    hNew = calculateHValue(i - 1, j + 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i - 1][j + 1].f == FLT_MAX
-					|| cellDetails[i - 1][j + 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i - 1, j + 1)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i - 1][j + 1].f == FLT_MAX
+                        || cellDetails[i - 1][j + 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i - 1, j + 1)));
 
-					// Update the details of this cell
-					cellDetails[i - 1][j + 1].f = fNew;
-					cellDetails[i - 1][j + 1].g = gNew;
-					cellDetails[i - 1][j + 1].h = hNew;
-					cellDetails[i - 1][j + 1].parent_i = i;
-					cellDetails[i - 1][j + 1].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i - 1][j + 1].f = fNew;
+                        cellDetails[i - 1][j + 1].g = gNew;
+                        cellDetails[i - 1][j + 1].h = hNew;
+                        cellDetails[i - 1][j + 1].parent_i = i;
+                        cellDetails[i - 1][j + 1].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -603,7 +663,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i - 1][j - 1].parent_i = i;
 				cellDetails[i - 1][j - 1].parent_j = j;
 				printf("NORTH-WEST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -611,32 +671,37 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i - 1][j - 1] == false
-					&& isUnBlocked(i - 1, j - 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.414;
-				hNew = calculateHValue(i - 1, j - 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i - 1][j - 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i - 1, j - 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.414;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.414;
+                    }
+                    hNew = calculateHValue(i - 1, j - 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i - 1][j - 1].f == FLT_MAX
-					|| cellDetails[i - 1][j - 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i - 1, j - 1)));
-					// Update the details of this cell
-					cellDetails[i - 1][j - 1].f = fNew;
-					cellDetails[i - 1][j - 1].g = gNew;
-					cellDetails[i - 1][j - 1].h = hNew;
-					cellDetails[i - 1][j - 1].parent_i = i;
-					cellDetails[i - 1][j - 1].parent_j = j;
-				}
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i - 1][j - 1].f == FLT_MAX
+                        || cellDetails[i - 1][j - 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i - 1, j - 1)));
+                        // Update the details of this cell
+                        cellDetails[i - 1][j - 1].f = fNew;
+                        cellDetails[i - 1][j - 1].g = gNew;
+                        cellDetails[i - 1][j - 1].h = hNew;
+                        cellDetails[i - 1][j - 1].parent_i = i;
+                        cellDetails[i - 1][j - 1].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -652,7 +717,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j + 1].parent_i = i;
 				cellDetails[i + 1][j + 1].parent_j = j;
 				printf("SOUTH-EAST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -660,33 +725,38 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i + 1][j + 1] == false
-					&& isUnBlocked(i + 1, j + 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.414;
-				hNew = calculateHValue(i + 1, j + 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i + 1][j + 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i + 1, j + 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.414;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.414;
+                    }
+                    hNew = calculateHValue(i + 1, j + 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i + 1][j + 1].f == FLT_MAX
-					|| cellDetails[i + 1][j + 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i + 1, j + 1)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i + 1][j + 1].f == FLT_MAX
+                        || cellDetails[i + 1][j + 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i + 1, j + 1)));
 
-					// Update the details of this cell
-					cellDetails[i + 1][j + 1].f = fNew;
-					cellDetails[i + 1][j + 1].g = gNew;
-					cellDetails[i + 1][j + 1].h = hNew;
-					cellDetails[i + 1][j + 1].parent_i = i;
-					cellDetails[i + 1][j + 1].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i + 1][j + 1].f = fNew;
+                        cellDetails[i + 1][j + 1].g = gNew;
+                        cellDetails[i + 1][j + 1].h = hNew;
+                        cellDetails[i + 1][j + 1].parent_i = i;
+                        cellDetails[i + 1][j + 1].parent_j = j;
+                    }
+                }
 			}
 		}
 
@@ -702,7 +772,7 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 				cellDetails[i + 1][j - 1].parent_i = i;
 				cellDetails[i + 1][j - 1].parent_j = j;
 				printf("SOUTH-WEST | The destination cell is found\n");
-				int tam_path = tracePath(dest);
+				int tam_path = tracePath(dest,block_index);
 				foundDest = true;
 				return tam_path;
 			}
@@ -710,33 +780,38 @@ int aStarSearch_MOD(int srcx, int srcy, int gx, int gy){
 			// If the successor is already on the closed
 			// list or if it is blocked, then ignore it.
 			// Else do the following
-			else if (closedList[i + 1][j - 1] == false
-					&& isUnBlocked(i + 1, j - 1)
-							== true) {
-				gNew = cellDetails[i][j].g + 1.414;
-				hNew = calculateHValue(i + 1, j - 1, dest);
-				fNew = gNew + hNew;
+			else if (closedList[i + 1][j - 1] == false) {
+                tie(isUnBlocked_src_,cell_value_) = isUnBlocked(i + 1, j - 1);
+                if (isUnBlocked_src_ == true) {
+                    if (cell_value_ == 0) {
+                        gNew = cellDetails[i][j].g + 1.414;
+                    } else {
+                        gNew = cellDetails[i][j].g + 2.414;
+                    }
+                    hNew = calculateHValue(i + 1, j - 1, dest);
+                    fNew = gNew + hNew;
 
-				// If it isn’t on the open list, add it to
-				// the open list. Make the current square
-				// the parent of this square. Record the
-				// f, g, and h costs of the square cell
-				//			 OR
-				// If it is on the open list already, check
-				// to see if this path to that square is
-				// better, using 'f' cost as the measure.
-				if (cellDetails[i + 1][j - 1].f == FLT_MAX
-					|| cellDetails[i + 1][j - 1].f > fNew) {
-					openList.insert(make_pair(
-						fNew, make_pair(i + 1, j - 1)));
+                    // If it isn’t on the open list, add it to
+                    // the open list. Make the current square
+                    // the parent of this square. Record the
+                    // f, g, and h costs of the square cell
+                    //			 OR
+                    // If it is on the open list already, check
+                    // to see if this path to that square is
+                    // better, using 'f' cost as the measure.
+                    if (cellDetails[i + 1][j - 1].f == FLT_MAX
+                        || cellDetails[i + 1][j - 1].f > fNew) {
+                        openList.insert(make_pair(
+                            fNew, make_pair(i + 1, j - 1)));
 
-					// Update the details of this cell
-					cellDetails[i + 1][j - 1].f = fNew;
-					cellDetails[i + 1][j - 1].g = gNew;
-					cellDetails[i + 1][j - 1].h = hNew;
-					cellDetails[i + 1][j - 1].parent_i = i;
-					cellDetails[i + 1][j - 1].parent_j = j;
-				}
+                        // Update the details of this cell
+                        cellDetails[i + 1][j - 1].f = fNew;
+                        cellDetails[i + 1][j - 1].g = gNew;
+                        cellDetails[i + 1][j - 1].h = hNew;
+                        cellDetails[i + 1][j - 1].parent_i = i;
+                        cellDetails[i + 1][j - 1].parent_j = j;
+                    }
+                }
 			}
 		}
 	}
@@ -840,7 +915,12 @@ void mission_goals_from_file(){
         tie(cell,input_goal_x,input_goal_y) = object_goals_[x];
         fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
         cout << "INDICE: " << x << " CELL: " << cell << " PX: " << input_goal_x << " PY: " << input_goal_y << endl;
-        inv_goals = make_tuple(input_goal_x-1.0,input_goal_y-1.0);
+        // inv_goals = make_tuple(input_goal_x-1.0,input_goal_y-1.0);
+        /*
+            Para os testes com os goals randômicos, estou retirando a substração de 1 do goal
+            para que não acabe dentro da parede o goal.
+        */
+        inv_goals = make_tuple(input_goal_x,input_goal_y);
         goals.emplace_back(inv_goals);
     }
     fulllog_file_ << "-----------GOALS--------------" << endl;
@@ -860,6 +940,14 @@ void init_fulllog_file(std::string arq_name){
     name_stream << "./full_log_" << arq_name << ".txt";
     std::string file_name = name_stream.str();
     fulllog_file_.open(file_name,ios::app);
+}
+
+void init_CALCS_file(std::string arq_name){
+
+    std::stringstream name_stream;
+    name_stream << "./formulas_" << arq_name << ".txt";
+    std::string file_name = name_stream.str();
+    calc_file_.open(file_name,ios::app);
 }
 
 void open_file(){
@@ -1004,6 +1092,14 @@ void grid_update_clear(){
     }
 }
 
+void grid_astar_update_clear(){
+    for(int x = 0; x < grid_map_.info.width; x++){
+        for(int y = 0; y < grid_map_.info.height; y++){
+            grid_a[x][y] = original_map_[x][y];
+        }
+    }
+}
+
 void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr& map_msg){
     grid_map_.header.frame_id = map_msg->header.frame_id;
     grid_map_.header.seq = map_msg->header.seq;
@@ -1046,54 +1142,67 @@ std::tuple<int,int> odom2cell(float odom_pose_x, float odom_pose_y){
     return std::make_tuple(j,i);
 }
 
-void enable_ctldraw_obstacles(){
+void enable_ctldraw_obstacles(int block_index){
     // --abre o arquivo;--
-    ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
-    if (ctldraw_file_.is_open()) {
-        cout << "FILE OPENED SUCCEFULLY!" << endl;
+    // ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
+    // if (ctldraw_file_.is_open()) {
+        // cout << "FILE OPENED SUCCEFULLY!" << endl;
         
         // --le o arquivo;--
-        string line, line_aux;
-        int cont = 0;
-        int vertexes[4];
-        while(getline(ctldraw_file_, line)){
-            stringstream st(line);
-            while(getline(st, line_aux, ';')){
-                cout << line_aux << endl;
-                vertexes[cont] = stoi(line_aux);
-                cont++;
-            }
-            cont = 0;
-            // --desenha as barreiras;--
-            cout << "VERTEXES: [ " << vertexes[0] << " | " << vertexes[1] << " | " << vertexes[2] << " | " << vertexes[3] << " ]" << endl;
+        // string line, line_aux;
+        // int cont = 0;
+        // int vertexes[4];
+        // while(getline(ctldraw_file_, line)){
+            // stringstream st(line);
+            // while(getline(st, line_aux, ';')){
+            //     cout << line_aux << endl;
+            //     vertexes[cont] = stoi(line_aux);
+            //     cont++;
+            // }
+            // cont = 0;
+            // // --desenha as barreiras;--
+            // cout << "VERTEXES: [ " << vertexes[0] << " | " << vertexes[1] << " | " << vertexes[2] << " | " << vertexes[3] << " ]" << endl;
             
-            //---------------------------------------------------------------ADICIONADO 23/01/23---------------------------------------------------------------
-            /*
-                Para fazer a verficação se o caminho passou pela marcação, neste caso do exemplo, tem que utilizar o vertex[0] e vertex[1].
-            */
-            float cx,cy;
-            tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
-            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
-            vertex1_x_ = cx;
-            vertex1_y_ = cy;
-            tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
-            cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
-            vertex2_x_ = cx;
-            vertex2_y_ = cy;
+            // //---------------------------------------------------------------ADICIONADO 23/01/23---------------------------------------------------------------
+            // /*
+            //     Para fazer a verficação se o caminho passou pela marcação, neste caso do exemplo, tem que utilizar o vertex[0] e vertex[1].
+            // */
+            // float cx,cy;
+            // tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+            // cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            // vertex1_x_ = cx;
+            // vertex1_y_ = cy;
+            // tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+            // cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
+            // vertex2_x_ = cx;
+            // vertex2_y_ = cy;
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            for (int y = vertexes[0]; y < vertexes[1]; y++) {
-                for (int x = vertexes[2]; x < vertexes[3]; x++) {
+            // for (int y = vertexes[0]; y < vertexes[1]; y++) {
+            //     for (int x = vertexes[2]; x < vertexes[3]; x++) {
+            //         modified_map_[y][x] = 100;
+            //     }
+            // }
+
+            //--------------------------ADICIONADO 30/01/23--------------------------------------
+            int v1,v2,v3,v4,qnt_p;
+            float ov1,ov2,ov3,ov4;
+            tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+            cout << "[ V1 , V2 , V3 , V4 ] : [ " << v1 << " , " << v2 << " , " << v3 << " , " << v4 << " ]" << endl; 
+            for (int y = v2; y < v4; y++) {
+                for (int x = v1; x < v3; x++) {
                     modified_map_[y][x] = 100;
                 }
             }
+            //-----------------------------------------------------------------------------------
+
             // -------------------------
-        }
+        // }
         already_drawed_ = true;
         // -----------------
-    } else {
-        cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
-    }
+    // } else {
+    //     cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
+    // }
     // -------------------
 }
 
@@ -1102,23 +1211,34 @@ void read_vertex(){
     if (ctldraw_file_.is_open()) {  
         cout << "FILE OPENED SUCCEFULLY!" << endl;
         string line, line_aux;
-        int cont = 0;
+        // int cont = 0;
         int vertexes[4];
         while(getline(ctldraw_file_, line)){
+            int cont = 0;
+            int qnt_person = 0;
             stringstream st(line);
             while(getline(st, line_aux, ';')){
-                cout << line_aux << endl;
-                vertexes[cont] = stoi(line_aux);
-                cont++;
+                if (cont <= 3) {
+                    cout << line_aux << endl;
+                    vertexes[cont] = stoi(line_aux);
+                    cont++;
+                } else {
+                    cout << line_aux << endl;
+                    qnt_person = stoi(line_aux);
+                }
             }
             cont = 0;
             cout << "VERTEXES: [ " << vertexes[0] << " | " << vertexes[1] << " | " << vertexes[2] << " | " << vertexes[3] << " ]" << endl;
             float cx,cy;
-            tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+            // tie(cx,cy) = cell2odom(vertexes[2],vertexes[0]);
+            //TESTE COM OS VALORES RANDOMICOS
+            tie(cx,cy) = cell2odom(vertexes[0],vertexes[1]);
             cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
             vertex1_x_ = cx;
             vertex1_y_ = cy;
-            tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+            // tie(cx,cy) = cell2odom(vertexes[3],vertexes[1]);
+            //TESTE COM OS VALORES RANDOMICOS
+            tie(cx,cy) = cell2odom(vertexes[2],vertexes[3]);
             cout << "POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ " << cx << " , " << cy << " ]" << endl;
             vertex2_x_ = cx;
             vertex2_y_ = cy;
@@ -1126,6 +1246,9 @@ void read_vertex(){
             vertexes_[1] = vertexes[1];
             vertexes_[2] = vertexes[2];
             vertexes_[3] = vertexes[3];
+            tuple<int,int,int,int,float,float,float,float,int> v_aux;
+            v_aux = make_tuple(vertexes[0],vertexes[1],vertexes[2],vertexes[3],vertex1_x_,vertex1_y_,vertex2_x_,vertex2_y_,qnt_person);
+            block_vertex_.emplace_back(v_aux);
         }
     } else {
         cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
@@ -1133,7 +1256,7 @@ void read_vertex(){
     ctldraw_file_.close();
 }
 
-void grid_block_for_astar(){
+void grid_block_for_astar(int block_index){
     // --abre o arquivo;--
     // ctldraw_file_.open("./ctldraw_teste.txt", ios::in);
     // if (ctldraw_file_.is_open()) {
@@ -1172,12 +1295,22 @@ void grid_block_for_astar(){
         //     vertex2_y_ = cy;
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            for (int y = vertexes_[0]; y < vertexes_[1]; y++) {
-                for (int x = vertexes_[2]; x < vertexes_[3]; x++) {
+            // for (int y = vertexes_[0]; y < vertexes_[1]; y++) {
+            //     for (int x = vertexes_[2]; x < vertexes_[3]; x++) {
+            //         grid_a[y][x] = 100;
+            //     }
+            // }
+            // -------------------------
+            //--------------------------ADICIONADO 30/01/23--------------------------------------
+            int v1,v2,v3,v4,qnt_p;
+            float ov1,ov2,ov3,ov4;
+            tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+            for (int y = v2; y < v4; y++) {
+                for (int x = v1; x < v3; x++) {
                     grid_a[y][x] = 100;
                 }
             }
-            // -------------------------
+            //-----------------------------------------------------------------------------------
         // }
         already_drawed_ = true;
         astar_mod_ = true;
@@ -1233,22 +1366,25 @@ void global_path_callback(const nav_msgs::Path::ConstPtr& path_msgs){
 //-----------------------------------------------------------------------------------
 
 //--------------------------ADICIONADO 24/01/23--------------------------------------
-float calc_theta(){
+float calc_theta(int block_index){
     float theta;
+    int v1,v2,v3,v4,qnt_p;
+    float ov1,ov2,ov3,ov4;
+    tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
 
-    if (vertex1_y_ > vertex2_y_) {
-        theta = vertex1_y_ - vertex2_y_;
+    if (ov2 > ov4) {
+        theta = ov2 - ov4;
     } else {
-        theta = vertex2_y_ - vertex1_y_;
+        theta = ov4 - ov2;
     }
 
     return theta;
 }
 
-float calc_threshold_path(){
+float calc_threshold_path(int block_index){
     float alpha,theta,beta,gama;
 
-    theta = calc_theta();
+    theta = calc_theta(block_index);
 
     // for (int phi = 0; phi < 20; phi++) {
         int phi = 4;
@@ -1291,7 +1427,7 @@ void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr
     AMCL_POSE_[2] = euler[2];
 }
 
-bool path_verification(float goal_x, float goal_y){
+bool path_verification(float goal_x, float goal_y, int block_index){
     int gcx,gcy,scx,scy;
     float gamma;
 
@@ -1299,15 +1435,17 @@ bool path_verification(float goal_x, float goal_y){
     tie(scx,scy) = odom2cell(AMCL_POSE_[0],AMCL_POSE_[1]);
 
     astar_mod_ = false;
-    int beta = aStarSearch_MOD(scx,scy,gcx,gcy);
+    int beta = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
     astar_path_pub.publish(test_path_);
 
+    calc_file_ << "BETA: " << beta << endl;
+
     if (isPathInBlock_) {
-        gamma = calc_threshold_path();
+        gamma = calc_threshold_path(block_index);
 
-        grid_block_for_astar();
+        grid_block_for_astar(block_index);
 
-        int omega = aStarSearch_MOD(scx,scy,gcx,gcy);
+        int omega = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
         astar_path_mod_pub.publish(test_path_);
 
         float epsilon = beta + (beta*gamma);
@@ -1315,6 +1453,7 @@ bool path_verification(float goal_x, float goal_y){
         float epsilon_mod = beta + lambda;
 
         cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
+        calc_file_ << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
 
         isPathInBlock_ = false;
 
@@ -1324,6 +1463,7 @@ bool path_verification(float goal_x, float goal_y){
             return false;
         }
     } else {
+        calc_file_ << "PATH IS FREE!" << endl;
         return false;
     }
 }
@@ -1340,6 +1480,7 @@ int main(int argc, char **argv){
     //-----------------------------------------------------------------------------------
 
     init_file((std::string)argv[2]);
+    init_CALCS_file((std::string)argv[2]);
     init_fulllog_file((std::string)argv[2]);
     
     // mission_goals();
@@ -1471,9 +1612,16 @@ int main(int argc, char **argv){
                                 goals_output.target_pose.pose.orientation.w = 0.70;
 
                                 //--------------------------ADICIONADO 26/01/23--------------------------------------
-                                if (path_verification(input_goal_x,input_goal_y)) {
+                                    //--------------------------ADICIONADO 30/01/23--------------------------------------
+                                    calc_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    int v1,v2,v3,v4,qnt_p;
+                                    float ov1,ov2,ov3,ov4;
+                                    tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[index];
+                                    calc_file_ << "VERTEXES_CELL: [ " << v1 << " | " << v2 << " | " << v3 << " | " << v4 << " ] | " << "VERTEXES_ODOM: [ " << ov1 << " | " << ov2 << " | " << ov3 << " | " << ov4 << " ]" << " | QNT_PEOPLE: " << qnt_p << endl;
+                                    //-----------------------------------------------------------------------------------
+                                if (path_verification(input_goal_x,input_goal_y,index)) {
                                     cout << "EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!" << endl;
-                                    enable_ctldraw_obstacles();
+                                    enable_ctldraw_obstacles(index);
                                     grid_update_custom();
                                     int c = 0;
                                     while (c < 30) {
@@ -1486,6 +1634,19 @@ int main(int argc, char **argv){
                                     rate.sleep();
                                 } else {
                                     cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
+                                    grid_astar_update_clear();
+                                    //SÓ PRA VISUALIZAR O QUE ESTA ACONTECENDO NO MAPA
+                                    enable_ctldraw_obstacles(index);
+                                    grid_update_custom();
+                                    int c = 0;
+                                    while (c < 30) {
+                                        lane_map_pub.publish(lane_map_);
+                                        // map_pub.publish(lane_map_);
+                                        c++;
+                                    }
+                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    ros::spinOnce();
+                                    rate.sleep();
                                 }
                                 //-----------------------------------------------------------------------------------
         
@@ -1538,6 +1699,14 @@ int main(int argc, char **argv){
                                     fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
                                     cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                     fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+
+                                    //--------------------------ADICIONADO 30/01/23--------------------------------------
+                                    for (int cr = 0; cr < 20; cr++){rate.sleep();}
+                                    clean_map_ = grid_map_;
+                                    grid_update_clear();
+                                    grid_astar_update_clear();
+                                    lane_map_pub.publish(clean_map_);
+                                    //-----------------------------------------------------------------------------------
                                 }
                             }
 
@@ -1570,7 +1739,7 @@ int main(int argc, char **argv){
                             if (enable_ctldraw_) {
                                 if (!already_drawed_) {
                                     cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
-                                    enable_ctldraw_obstacles();
+                                    // enable_ctldraw_obstacles(index);
                                     grid_update_custom();
                                     int c = 0;
                                     while (c < 30) {
