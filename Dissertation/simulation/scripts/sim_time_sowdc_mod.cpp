@@ -108,6 +108,13 @@ int vertexes_[4] = {0,0,0,0};
 vector<tuple<int,int,int,int,float,float,float,float,int>> block_vertex_;
 std::ofstream calc_file_;
 //-----------------------------------------------------------------------------------
+//--------------------------ADICIONADO 31/01/23--------------------------------------
+bool isVertexReaded_ = false;
+float AMCL_POSE_SIM_[3] = {0,0,0};
+bool calc_test_ = false;
+bool isPathInBlock_x_ = false;
+bool isPathInBlock_y_ = false;
+//-----------------------------------------------------------------------------------
 
 //--------------------------ADICIONADO 24/01/23--------------------------------------
 int grid_a[4000][4000];
@@ -123,7 +130,7 @@ std::tuple<float,float> cell2odom(int cell_value_x, int cell_value_y){
 }
 
 void block_path_verification_y(float py, int block_index){
-    if (!isPathInBlock_) {
+    if (!isPathInBlock_y_) {
         // cout << "###################DENTRO DO BLOCK_PATH_VERIFICATION###################" << endl;
         // cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
 
@@ -152,16 +159,62 @@ void block_path_verification_y(float py, int block_index){
                 cout << "VERTEX1_Y: " << ov2 << " | VERTEX2_Y: " << ov4 << endl;
                 cout << "PY: " << py << " ";
                 cout << "VALOR DA SUBSTRACAO: " << (py - ov4) << endl;
-                isPathInBlock_ = true;
-                calc_file_ << "PATH GOES THROUGH BLOCKAGE!" << endl; 
+                isPathInBlock_y_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE ## Y ##!" << endl; 
             }
         } else {
             if ((py - ov2) >= 0 && (py - ov2) <= 0.2) {
                 cout << "VERTEX1_Y: " << ov2 << " | VERTEX2_Y: " << ov4 << endl;
                 cout << "PY: " << py << " ";
                 cout << "VALOR DA SUBSTRACAO: " << (py - ov2) << endl;
-                isPathInBlock_ = true;
-                calc_file_ << "PATH GOES THROUGH BLOCKAGE!" << endl;
+                isPathInBlock_y_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE ## Y ##!" << endl;
+            }
+        }
+        //-----------------------------------------------------------------------------------
+    }
+}
+
+void block_path_verification_x(float px, int block_index){
+    if (!isPathInBlock_x_) {
+        // cout << "###################DENTRO DO BLOCK_PATH_VERIFICATION###################" << endl;
+        // cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+
+        // if (vertex1_y_ > vertex2_y_) {
+        //     if ((py - vertex2_y_) >= 0 && (py - vertex2_y_) <= 0.2) {
+        //         cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+        //         cout << "PY: " << py << " ";
+        //         cout << "VALOR DA SUBSTRACAO: " << (py - vertex2_y_) << endl;
+        //         isPathInBlock_ = true;
+        //     }
+        // } else {
+        //     if ((py - vertex1_y_) >= 0 && (py - vertex1_y_) <= 0.2) {
+        //         cout << "VERTEX1_Y: " << vertex1_y_ << " | VERTEX2_Y: " << vertex2_y_ << endl;
+        //         cout << "PY: " << py << " ";
+        //         cout << "VALOR DA SUBSTRACAO: " << (py - vertex1_y_) << endl;
+        //         isPathInBlock_ = true;
+        //     }
+        // }
+
+        //--------------------------ADICIONADO 30/01/23--------------------------------------
+        int v1,v2,v3,v4,qnt_p;
+        float ov1,ov2,ov3,ov4;
+        tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+        if (ov1 > ov3) {
+            if ((px - ov3) >= 0 && (px - ov3) <= 0.2) {
+                cout << "VERTEX1_Y: " << ov1 << " | VERTEX2_Y: " << ov3 << endl;
+                cout << "PY: " << px << " ";
+                cout << "VALOR DA SUBSTRACAO: " << (px - ov3) << endl;
+                isPathInBlock_x_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X ##!" << endl; 
+            }
+        } else {
+            if ((px - ov1) >= 0 && (px - ov1) <= 0.2) {
+                cout << "VERTEX1_Y: " << ov1 << " | VERTEX2_Y: " << ov3 << endl;
+                cout << "PY: " << px << " ";
+                cout << "VALOR DA SUBSTRACAO: " << (px - ov1) << endl;
+                isPathInBlock_x_ = true;
+                calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X ##!" << endl;
             }
         }
         //-----------------------------------------------------------------------------------
@@ -234,6 +287,7 @@ int tracePath(Pair dest, int block_index){
         tie(px,py) = cell2odom(p.second, p.first);
         // cout << "-> (" << px << "," << py << ") ";
         block_path_verification_y(py,block_index);
+        block_path_verification_x(px,block_index);
         pose_path_.position.x = px;
         pose_path_.position.y = py;
         ps.pose = pose_path_;
@@ -1250,6 +1304,7 @@ void read_vertex(){
             v_aux = make_tuple(vertexes[0],vertexes[1],vertexes[2],vertexes[3],vertex1_x_,vertex1_y_,vertex2_x_,vertex2_y_,qnt_person);
             block_vertex_.emplace_back(v_aux);
         }
+        isVertexReaded_ = true;
     } else {
         cout << "COULD NOT OPEN CHOOSEN FILE!" << endl;
     }
@@ -1381,13 +1436,33 @@ float calc_theta(int block_index){
     return theta;
 }
 
+float calc_theta_x(int block_index){
+    float theta_x;
+    int v1,v2,v3,v4,qnt_p;
+    float ov1,ov2,ov3,ov4;
+    tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+
+    if (ov1 > ov3) {
+        theta_x = ov1 - ov3;
+    } else {
+        theta_x = ov3 - ov1;
+    }
+
+    return theta_x;
+}
+
 float calc_threshold_path(int block_index){
-    float alpha,theta,beta,gama;
+    float alpha,theta,beta,gama,theta_x,gamma_t;
 
     theta = calc_theta(block_index);
+    theta_x = calc_theta_x(block_index);
+
+    int v1,v2,v3,v4,qnt_p;
+    float ov1,ov2,ov3,ov4;
+    tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
 
     // for (int phi = 0; phi < 20; phi++) {
-        int phi = 4;
+        int phi = qnt_p;
         alpha = 1 - (phi/theta);
         beta = (phi/theta) - phi;
         /*
@@ -1396,10 +1471,40 @@ float calc_threshold_path(int block_index){
             O MOMENTO ESTE CÁLCULO ESTA CONSIDERANDO SOMENTE SE O ESPAÇO ESTÁ MUITO POPULOSO.
         */
         gama = (phi/theta) - 1;
-        cout << "PHI : " << phi << " | THETA : " << theta << " | ALPHA : " << alpha << " | BETA : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
+        gamma_t = (phi / (theta*theta_x)) - 1;
+        cout << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
+        calc_file_ << "PHI : " << phi << " | THETA_Y : " << theta << " | THETA_X : " << theta_x << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << " | GAMMA_T: " << gamma_t << endl;
     // }
 
     return gama;
+}
+
+float calc_threshold_path_gamma_mod(int block_index){
+    float alpha,theta,beta,gama,theta_x,gamma_t;
+
+    theta = calc_theta(block_index);
+    theta_x = calc_theta_x(block_index);
+
+    int v1,v2,v3,v4,qnt_p;
+    float ov1,ov2,ov3,ov4;
+    tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+
+    // for (int phi = 0; phi < 20; phi++) {
+        int phi = qnt_p;
+        alpha = 1 - (phi/theta);
+        beta = (phi/theta) - phi;
+        /*
+            VOU UTILIZAR A FORMULA DE GAMA, JÁ QUE ENQUANTO O RESULTADO FOR NEGATIVO É POSSIVEL CONSIDERAR QUE HÁ UMA PEQUENA QUANTIDADE DE PHI DENTRO DE THETA*.
+            *OBS.: AIND É NECESSÁRIO REALIZAR MAIS TESTES EM RELAÇÃO A ESTA FÓRMULA, DEVIDO AINDA NÃO SER CONSIDERADO A DISTÂNCIA DO OUTRO CAMINHO QUE FOI GERADO. ATÉ 
+            O MOMENTO ESTE CÁLCULO ESTA CONSIDERANDO SOMENTE SE O ESPAÇO ESTÁ MUITO POPULOSO.
+        */
+        gama = (phi/theta) - 1;
+        gamma_t = (phi / (theta*theta_x)) - 1;
+        // cout << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
+        // calc_file_ << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << " | GAMMA_T: " << gamma_t << endl;
+    // }
+
+    return gamma_t;
 }
 //-----------------------------------------------------------------------------------
 
@@ -1429,10 +1534,22 @@ void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr
 
 bool path_verification(float goal_x, float goal_y, int block_index){
     int gcx,gcy,scx,scy;
-    float gamma;
+    float gamma,gamma_t;
+
+    //--------------------------ADICIONADO 31/01/23--------------------------------------
+    if (!calc_test_){
+        AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
+        AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
+        calc_test_ = true;
+    }
+    //-----------------------------------------------------------------------------------
 
     tie(gcx,gcy) = odom2cell(goal_x,goal_y);
-    tie(scx,scy) = odom2cell(AMCL_POSE_[0],AMCL_POSE_[1]);
+    // tie(scx,scy) = odom2cell(AMCL_POSE_[0],AMCL_POSE_[1]);
+    tie(scx,scy) = odom2cell(AMCL_POSE_SIM_[0],AMCL_POSE_SIM_[1]);
+
+    // calc_file_ << "ROBOT POSE: [ " << AMCL_POSE_[0] << " ; " << AMCL_POSE_[1] << " ] | GOAL: [ " << goal_x << " ; " << goal_y << " ]" << endl;
+    calc_file_ << "ROBOT POSE: [ " << AMCL_POSE_SIM_[0] << " ; " << AMCL_POSE_SIM_[1] << " ] | GOAL: [ " << goal_x << " ; " << goal_y << " ]" << endl;
 
     astar_mod_ = false;
     int beta = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
@@ -1440,8 +1557,9 @@ bool path_verification(float goal_x, float goal_y, int block_index){
 
     calc_file_ << "BETA: " << beta << endl;
 
-    if (isPathInBlock_) {
+    if (isPathInBlock_x_ || isPathInBlock_y_) {
         gamma = calc_threshold_path(block_index);
+        gamma_t = calc_threshold_path_gamma_mod(block_index);
 
         grid_block_for_astar(block_index);
 
@@ -1449,13 +1567,29 @@ bool path_verification(float goal_x, float goal_y, int block_index){
         astar_path_mod_pub.publish(test_path_);
 
         float epsilon = beta + (beta*gamma);
-        float lambda = abs(beta - omega) * abs(gamma);
+        // float lambda = abs(beta - omega) * abs(gamma);
+        float lambda = abs(beta - omega) * abs(gamma_t);
         float epsilon_mod = beta + lambda;
 
         cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
         calc_file_ << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
+        if (epsilon_mod > omega) {
+            calc_file_ <<  "O CAMINHO OMEGA É MAIS VANTAJOSO!    |  BETA: " << beta << " OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+            if (lambda > 2*beta) {
+                calc_file_ << "*****************************************************************************************************************" << endl;
+                calc_file_ << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
+                calc_file_ << "*****************************************************************************************************************" << endl;
+            } else {
+                calc_file_ << "LAMBDA: " << lambda << endl;
+            }
+        } else if(epsilon_mod == omega){ 
+            calc_file_ <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+        } else {
+            calc_file_ <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+        }
 
-        isPathInBlock_ = false;
+        isPathInBlock_x_ = false;
+        isPathInBlock_y_ = false;
 
         if (epsilon > omega) {
             return true;
@@ -1542,6 +1676,7 @@ int main(int argc, char **argv){
     bool enable_function = true;
     int gt_start, gt_end = 0;
     bool teste_astar = false;
+    bool pv_s = false;
 
     while(ros::ok()){
         if (grid_map_.info.width > 0) {
@@ -1551,7 +1686,9 @@ int main(int argc, char **argv){
             } else {
 
                 //--------------------------ADICIONADO 26/01/23--------------------------------------
-                read_vertex();
+                if (!isVertexReaded_){
+                    read_vertex();
+                }
                 //-----------------------------------------------------------------------------------
 
                 // if (!grid_map_.data.empty()){
@@ -1595,6 +1732,16 @@ int main(int argc, char **argv){
                 // }
                 //--------------------------ADICIONADO 03/01/23--------------------------------------
                 // cout << "INICIOOOOOOOOOOO" << endl;
+
+                //--------------------------ADICIONADO 31/01/23--------------------------------------
+                /*
+                    VOU ALTERAR O FUNCIONAMENTO DO PROGRAMA PARA PODER GERAR UM ARQUIVO DE SIMULAÇÃO.
+                    NESSA ALTERAÇÃO VOU TIRAR O MOVE_BASE (1671) E (1689), PARA QUE SEJA TROCADA PELA
+                    CONSIDERAÇÃO DE QUE SEMPRE QUE O 'GOAL' TERMINA ATUALIZA A POSIÇÃO DO ROBÔ PARA
+                    QUE SEJA CALCULADO NOVAMENTE O CAMINHO. VOU TIRAR OS SLEEPS TAMBÉM.
+                */
+                //-----------------------------------------------------------------------------------
+
                 if (enable_function) {
                     if (sim_laps < 20) {
                         if (enable_patrol_) {
@@ -1613,6 +1760,7 @@ int main(int argc, char **argv){
 
                                 //--------------------------ADICIONADO 26/01/23--------------------------------------
                                     //--------------------------ADICIONADO 30/01/23--------------------------------------
+                                    calc_file_ << "------------------------------------------------ SIM_LAP: " << sim_laps << "  | INDEX_GOAL: " << index << " ----------------------------------------" << endl;
                                     calc_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                     int v1,v2,v3,v4,qnt_p;
                                     float ov1,ov2,ov3,ov4;
@@ -1629,9 +1777,10 @@ int main(int argc, char **argv){
                                         // map_pub.publish(lane_map_);
                                         c++;
                                     }
-                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    // for (int cr = 0; cr < 11; cr++){rate.sleep();}
                                     ros::spinOnce();
                                     rate.sleep();
+                                    pv_s = true;
                                 } else {
                                     cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
                                     grid_astar_update_clear();
@@ -1644,13 +1793,19 @@ int main(int argc, char **argv){
                                         // map_pub.publish(lane_map_);
                                         c++;
                                     }
-                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    // for (int cr = 0; cr < 11; cr++){rate.sleep();}
                                     ros::spinOnce();
                                     rate.sleep();
+                                    pv_s = true;
                                 }
                                 //-----------------------------------------------------------------------------------
         
-                                move_base_client_.sendGoal(goals_output);
+                                //--------------------------ADICIONADO 31/01/23--------------------------------------
+                                AMCL_POSE_SIM_[0] = input_goal_x;
+                                AMCL_POSE_SIM_[1] = input_goal_y;
+                                //-----------------------------------------------------------------------------------
+
+                                // move_base_client_.sendGoal(goals_output);
                                 last_index = index;
                                 // index_++;
                                 setup = false;
@@ -1668,7 +1823,8 @@ int main(int argc, char **argv){
                                 gt_start = gazebo_secs_;
                                 //-----------------------------------------------------------------------------------
 
-                                if (move_base_client_.waitForResult()) {
+                                if (pv_s){
+                                // if (move_base_client_.waitForResult()) {
                                     if (!time_started_) {
                                         time_started_ = true;
                                         start_time_ = std::chrono::steady_clock::now();
@@ -1701,13 +1857,15 @@ int main(int argc, char **argv){
                                     fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
 
                                     //--------------------------ADICIONADO 30/01/23--------------------------------------
-                                    for (int cr = 0; cr < 20; cr++){rate.sleep();}
+                                    // for (int cr = 0; cr < 20; cr++){rate.sleep();}
                                     clean_map_ = grid_map_;
                                     grid_update_clear();
                                     grid_astar_update_clear();
                                     lane_map_pub.publish(clean_map_);
                                     //-----------------------------------------------------------------------------------
                                 }
+                                calc_file_ << "#############################################################################################################################" << endl;
+                                pv_s = false;
                             }
 
                             // if (!global_path_.poses.empty()) {
@@ -1747,7 +1905,7 @@ int main(int argc, char **argv){
                                         // map_pub.publish(lane_map_);
                                         c++;
                                     }
-                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    // for (int cr = 0; cr < 11; cr++){rate.sleep();}
                                     
                                     enable_ctldraw_ = false;
                                 } 
@@ -1760,13 +1918,14 @@ int main(int argc, char **argv){
                             }
                             enable_patrol_ = false;
                         } else {
-                            for (int wait = 0; wait < 20; wait++){rate.sleep();}
+                            // for (int wait = 0; wait < 20; wait++){rate.sleep();}
                             enable_patrol_ = true;
                         }
                     } else {
                         cout << "FINALIZADO O PROCESSO DE SIMULACAO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
                         objects_map_file_.close();
                         fulllog_file_.close();
+                        calc_file_.close();
                     }
 
                 } 
