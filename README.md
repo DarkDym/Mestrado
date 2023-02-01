@@ -46,6 +46,14 @@ The application of this research is divided in two major components:
 - [ROBOTICS EVALUATION TOOLKITS](https://github.com/wh200720041/warehouse_simulation_toolkit) | 
 - [Gazebo models and worlds collection](https://github.com/chaolmu/gazebo_models_worlds_collection) | 
 - [AprilTag Imgs](https://github.com/AprilRobotics/apriltag-imgs) | Repositório com todas as famílias de tags já geradas
+- [Actor Collision Plugin](https://github.com/gazebosim/gazebo-classic/blob/gazebo9/examples/plugins/actor_collisions/README.md) | Biblioteca para colisão dos atores do gazebo.
+- [Quaternion <--> Euler Calculator](https://www.energid.com/resources/orientation-calculator) | Calculadora de Quaternion <--> Euler.
+- [How to make animated model Gazebo](https://classic.gazebosim.org/tutorials?tut=actor&cat=build_robot) | Tutorial de como fazer um ator animado no gazebo.
+- [TEB Optimization](https://mowito-navstack.readthedocs.io/en/latest/step_5c.html) | Otimizações e soluções de problemas do TEB Local Planner 
+- [A*](https://www.geeksforgeeks.org/a-search-algorithm/) | Algoritmo A*
+- [Social Navigation Layer ROS](http://wiki.ros.org/social_navigation_layers) | Layer de navegação levando em consideração pessoas, implementado para ser um pacote ROS.
+- [Can social_navigation_layer be used in local avoidance by DWA?](https://answers.ros.org/question/209409/can-social_navigation_layer-be-used-in-local-avoidance-by-dwa/)
+
 
 ## Possible References
 

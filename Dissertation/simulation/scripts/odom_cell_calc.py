@@ -3,6 +3,7 @@ import numpy
 import rospy
 from nav_msgs.msg import OccupancyGrid
 import ast
+from itertools import permutations
 
 resolution = 0.05
 width = 4000
@@ -31,9 +32,19 @@ class Calc_odom_cell:
                 odom_x = (int(ix) + origin_x/resolution) * resolution
                 odom_y = (int(iy) + origin_y/resolution) * resolution
                 print("RESULTADO [ODOM_X ; ODOM_Y] : [ " + str(odom_x) + " ; " + str(odom_y) + " ]")
+            elif int(mode) == 3:
+                # sample_list = [1, 2, 3, 4]
+                # list_combinations = list()
+
+                # for n in range(len(sample_list)):
+                n = input("QNT DE AREAS NO MAPA: ")
+                list_combinations = list(permutations(range(1,int(n)+1)))
+
+                print(list_combinations)
             else:
                 print("FECHANDO")
                 close_op = True
+    
     
     def odom2cell(self,ix,iy):
         cell_x = float(ix)/resolution - origin_x/resolution
@@ -86,7 +97,20 @@ class Calc_odom_cell:
                 [3] - [(-0.3;0.25);(-0.3;5.28);(34.2;5.26);(34.2;0.13)] --> [-0.3;0.13][34.2;5.28]
                 [4] - [(29.6;0.14);(34.2;0.13);(34.6;45.6);(30.0;45.6)] --> [29.6;0.13][34.6;45.6]
 
-            Opções de teste:
+            Regiões do mapa SOWDC_2P:
+                [1] - [(0.19;41.1);(0.19;46.0);(34.6;45.6);(34.6;40.7)] --> [0.19;40.7][34.6;46.0]
+                [2] - [(0.19;46.0);(4.87;46.0);(4.5;0.25);(-0.3;0.25)] --> [-0.3;0.25][4.87;46.0]
+                [3] - [(-0.3;0.25);(-0.3;5.28);(34.2;5.26);(34.2;0.13)] --> [-0.3;0.13][34.2;5.28]
+                [4] - [(29.6;0.14);(34.2;0.13);(34.6;45.6);(30.0;45.6)] --> [29.6;0.13][34.6;45.6]
+                [5] - [();();();()] --> [;][;]
+
+            Regiões do mapa SOWDC_4P:
+                [1] - [(0.19;41.1);(0.19;46.0);(34.6;45.6);(34.6;40.7)] --> [0.19;40.7][34.6;46.0]
+                [2] - [(0.19;46.0);(4.87;46.0);(4.5;0.25);(-0.3;0.25)] --> [-0.3;0.25][4.87;46.0]
+                [3] - [(-0.3;0.25);(-0.3;5.28);(34.2;5.26);(34.2;0.13)] --> [-0.3;0.13][34.2;5.28]
+                [4] - [(29.6;0.14);(34.2;0.13);(34.6;45.6);(30.0;45.6)] --> [29.6;0.13][34.6;45.6]
+                [5] - [();();();()] --> [;][;]
+                [6] - [();();();()] --> [;][;]
 
         """
         # rospy.init_node('getLaneMap', anonymous=True)
@@ -94,24 +118,50 @@ class Calc_odom_cell:
         # rate = rospy.Rate(10)
         # rospy.spin()
 
-        sowdc_regions = [[0.19,40.7,34.6,46.0],[-0.3,0.25,4.97,46.0],[-0.3,0.13,34.2,5.28],[29.6,0.13,34.6,45.6]]
-        test_vector = [[1,2,3,4],[1,2,4,3],[1,3,2,4],[1,3,4,2],[1,4,2,3],[1,4,3,2],[2,1,3,4],[2,1,4,3],
+        choice = input("1: SOWDC  |  2: SOWDC_2P  |  3: SOWDC_4P | :")
+        if int(choice) == 1:
+            random.seed(1)
+            sowdc_regions = [[0.19,40.7,34.6,46.0],[-0.3,0.25,4.97,46.0],[-0.3,0.13,34.2,5.28],[29.6,0.13,34.6,45.6]]
+            test_vector = [[1,2,3,4],[1,2,4,3],[1,3,2,4],[1,3,4,2],[1,4,2,3],[1,4,3,2],[2,1,3,4],[2,1,4,3],
                         [2,3,1,4],[2,3,4,1],[2,4,1,3],[2,4,3,1],[3,1,2,4],[3,1,4,2],[3,2,1,4],[3,2,4,1],[3,4,1,2],[3,4,2,1],
                         [4,1,2,3],[4,1,3,2],[4,2,1,3],[4,2,3,1],[4,3,1,2],[4,3,2,1]]
-        test_vector_ind = [i for i in range(24)]
-        random.seed(1)
-        sample_test_vector = random.sample(test_vector_ind,24)
-        print(sample_test_vector)
+            test_vector = list(permutations(range(1,5)))
+            test_vector_ind = [i for i in range(24)]
+            sample_test_vector = random.sample(test_vector_ind,len(test_vector))
+            tam_test = len(test_vector)
+            qnt_regions = 4
+        elif int(choice) == 2:
+            random.seed(1)
+            sowdc_regions = [[0.19,40.7,34.6,46.0],[-0.3,0.25,4.97,46.0],[-0.3,0.13,34.2,5.28],[29.6,0.13,34.6,45.6],[,,,]]
+            test_vector_2p = list(permutations(range(1,6)))
+            test_vector_ind_2p = [i for i in range(len(test_vector_2p))]
+            sample_test_vector_2p = random.sample(test_vector_ind_2p,len(test_vector_2p))
+            sample_test_vector = sample_test_vector_2p
+            tam_test = len(test_vector_2p)
+            qnt_regions = 5
+        elif int(choice) == 3:
+            random.seed(1)
+            sowdc_regions = [[0.19,40.7,34.6,46.0],[-0.3,0.25,4.97,46.0],[-0.3,0.13,34.2,5.28],[29.6,0.13,34.6,45.6],[,,,],[,,,]]
+            test_vector_4p = list(permutations(range(1,7)))
+            test_vector_ind_4p = [i for i in range(len(test_vector_4p))]
+            sample_test_vector_4p = random.sample(test_vector_ind_4p,len(test_vector_4p))
+            sample_test_vector = sample_test_vector_4p
+            tam_test = len(test_vector_4p)
+            qnt_regions = 6
+        else:
+            print("FINALIZANDO")
+        
+        # print(sample_test_vector)
         self.open_grid_cells()
         blockage_threshold = 1.0
 
-        blockage_file = open('ctldraw_teste.txt','w')
-        goal_file = open('objects_in_map.txt','w')
+        blockage_file = open('new_ctldraw_teste.txt','w')
+        goal_file = open('new_objects_in_map.txt','w')
 
         for _ in range(2):
-            for x in range(24):
+            for x in range(tam_test):
                 print("###############################################################################")
-                for c in range(4):
+                for c in range(qnt_regions):
                     # print(sowdc_regions[c])
                     # print("SOWDC: " + str(sowdc_regions[test_vector[sample_test_vector[x]][c]-1]) + " | " + str(sowdc_regions[test_vector[sample_test_vector[x]][c]-1][0]) + " | " + str(sowdc_regions[test_vector[sample_test_vector[x]][c]-1][1])
                         #   + " | " + str(sowdc_regions[test_vector[sample_test_vector[x]][c]-1][2]) + " | " + str(sowdc_regions[test_vector[sample_test_vector[x]][c]-1][3]))
