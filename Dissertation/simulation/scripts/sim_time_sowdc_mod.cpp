@@ -59,6 +59,7 @@ float vertex1_x_,vertex1_y_,vertex2_x_,vertex2_y_;
 //-----------------------------------------------------------------------------------
 
 vector<tuple<float,float>> goals;
+vector<tuple<float,float>> robot_poses_4_simulation_;
 int index_ = 0;
 bool time_started_ = false;
 std::chrono::steady_clock::time_point start_time_;
@@ -67,7 +68,9 @@ std::ofstream objects_map_file_;
 std::ofstream fulllog_file_;
 bool first_setup = false;
 fstream objects_file_;
+fstream robot_poses_file_;
 vector<tuple<int,float,float>> object_goals_;
+vector<tuple<float,float>> new_robot_pose_;
 
 //--------------------------ADICIONADO 03/01/23--------------------------------------
 nav_msgs::OccupancyGrid grid_map_;
@@ -224,6 +227,24 @@ void block_path_verification_x(float px, int block_index){
     }
 }
 
+void block_path_verification_(float px, float py, int block_index){
+    if (!isPathInBlock_) {
+        //--------------------------ADICIONADO 03/02/23--------------------------------------
+        int v1,v2,v3,v4,qnt_p;
+        float ov1,ov2,ov3,ov4;
+        tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+        
+        if (((px >= ov1) && (px <= ov3)) && ((py >= ov2) && (py <= ov4))) {
+            isPathInBlock_ = true;
+            calc_file_ << "*************************************************************" << endl;
+            calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X AND Y##!" << endl;
+            calc_file_ << "PX: " << px << " | PY: " << py << endl;
+            calc_file_ << "*************************************************************" << endl;
+        }
+        //-----------------------------------------------------------------------------------
+    }
+}
+
 // A Utility Function to check whether given cell (row, col)
 // is a valid cell or not.
 bool isValid(int row, int col){
@@ -289,8 +310,9 @@ int tracePath(Pair dest, int block_index){
         float px,py;
         tie(px,py) = cell2odom(p.second, p.first);
         // cout << "-> (" << px << "," << py << ") ";
-        block_path_verification_y(py,block_index);
-        block_path_verification_x(px,block_index);
+        // block_path_verification_y(py,block_index);
+        // block_path_verification_x(px,block_index);
+        block_path_verification_(px,py,block_index);
         pose_path_.position.x = px;
         pose_path_.position.y = py;
         ps.pose = pose_path_;
@@ -983,6 +1005,25 @@ void mission_goals_from_file(){
     fulllog_file_ << "-----------GOALS--------------" << endl;
 }
 
+void robot_pose_from_file(){
+    tuple<float,float> inv_goals;
+    float input_goal_x, input_goal_y;
+    fulllog_file_ << "-----------GOALS--------------" << endl;    
+    for (int x = 0; x < new_robot_pose_.size(); x++) {
+        tie(input_goal_x,input_goal_y) = new_robot_pose_[x];
+        cout << "INDICE: " << x << " PX: " << input_goal_x << " PY: " << input_goal_y << endl;
+        fulllog_file_ << "GOAL 0: [" << input_goal_x << " | " << input_goal_y << "]" << endl;
+        // inv_goals = make_tuple(input_goal_x-1.0,input_goal_y-1.0);
+        /*
+            Para os testes com os goals randômicos, estou retirando a substração de 1 do goal
+            para que não acabe dentro da parede o goal.
+        */
+        inv_goals = make_tuple(input_goal_x,input_goal_y);
+        robot_poses_4_simulation_.emplace_back(inv_goals);
+    }
+    fulllog_file_ << "-----------GOALS--------------" << endl;
+}
+
 void init_file(std::string arq_name){
 
     std::stringstream name_stream;
@@ -1016,6 +1057,15 @@ void open_file(){
     }
 }
 
+void open_file_robot_poses(){
+    robot_poses_file_.open("./new_robot_pose.txt", ios::in);
+    if (robot_poses_file_.is_open()) {
+        cout << "FILE OPENED ./new_robot_pose.txt SUCCEFULLY!" << endl;
+    } else {
+        cout << "COULD NOT OPEN ./new_robot_pose.txt CHOOSEN FILE!" << endl;
+    }
+}
+
 void read_file(){
     string line, line_aux;
     int cell_value = 0;
@@ -1041,6 +1091,25 @@ void read_file(){
         aux_pos.clear();
     }
     objects_file_.close();
+}
+
+void read_file_robot_poses(){
+    string line, line_aux;
+    bool first_colum = false;
+    tuple<float,float> aux_goals;
+    vector<float> aux_pos;
+    while(getline(robot_poses_file_, line)){
+        stringstream st(line);
+        while(getline(st, line_aux, ';')){
+            cout << line_aux << endl;
+            aux_pos.emplace_back(stof(line_aux));
+        }
+        cout << "----------------------" << endl;
+        aux_goals = make_tuple(aux_pos[0],aux_pos[1]);
+        new_robot_pose_.emplace_back(aux_goals);
+        aux_pos.clear();
+    }
+    robot_poses_file_.close();
 }
 
 void write_in_file(int index, int last_index, std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time, int size){
@@ -1541,9 +1610,13 @@ bool path_verification(float goal_x, float goal_y, int block_index){
 
     //--------------------------ADICIONADO 31/01/23--------------------------------------
     if (!calc_test_){
-        AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
-        AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
+        // AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
+        // AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
         calc_test_ = true;
+        float r_sim_x, r_sim_y;
+        tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[0];
+        AMCL_POSE_SIM_[0] = r_sim_x;
+        AMCL_POSE_SIM_[1] = r_sim_y;
     }
     //-----------------------------------------------------------------------------------
 
@@ -1560,7 +1633,8 @@ bool path_verification(float goal_x, float goal_y, int block_index){
 
     calc_file_ << "BETA: " << beta << endl;
 
-    if (isPathInBlock_x_ || isPathInBlock_y_) {
+    // if (isPathInBlock_x_ && isPathInBlock_y_) {
+    if (isPathInBlock_) {
         gamma = calc_threshold_path(block_index);
         gamma_t = calc_threshold_path_gamma_mod(block_index);
 
@@ -1602,8 +1676,9 @@ bool path_verification(float goal_x, float goal_y, int block_index){
             }
         }
 
-        isPathInBlock_x_ = false;
-        isPathInBlock_y_ = false;
+        // isPathInBlock_x_ = false;
+        // isPathInBlock_y_ = false;
+        isPathInBlock_ = false;
 
         if (epsilon > omega) {
             return true;
@@ -1613,6 +1688,9 @@ bool path_verification(float goal_x, float goal_y, int block_index){
     } else {
         calc_file_ << "PATH IS FREE!" << endl;
         cont_free_++;
+        // isPathInBlock_x_ = false;
+        // isPathInBlock_y_ = false;
+        isPathInBlock_ = false;
         return false;
     }
 }
@@ -1636,6 +1714,10 @@ int main(int argc, char **argv){
     open_file();
     read_file();
     mission_goals_from_file();
+    
+    open_file_robot_poses();
+    read_file_robot_poses();
+    robot_pose_from_file();
 
     
 
@@ -1825,8 +1907,8 @@ int main(int argc, char **argv){
                                 //-----------------------------------------------------------------------------------
         
                                 //--------------------------ADICIONADO 31/01/23--------------------------------------
-                                srand((unsigned) time(NULL));
-                                // srand((goals.size() * sim_laps) + index);
+                                // srand((unsigned) time(NULL));
+                                srand((goals.size() * sim_laps) + index);
                                 calc_file_ << "SEED UTILIZADA NESTE PROCESSO DE RANDOMIZAÇÃO DA POSIÇÃO DO ROBÔ: " << (unsigned) time(NULL) + index << endl;
                                 R_index = rand() % 192;
                                 tie(input_goal_x,input_goal_y) = goals[R_index];
@@ -1838,9 +1920,12 @@ int main(int argc, char **argv){
                                     tie(input_goal_x,input_goal_y) = goals[R_index];
                                     calc_file_ << "#######  DEPOIS  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
                                 }
-                                
-                                AMCL_POSE_SIM_[0] = input_goal_x;
-                                AMCL_POSE_SIM_[1] = input_goal_y;
+                                float r_sim_x, r_sim_y;
+                                tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[index+1];
+                                // AMCL_POSE_SIM_[0] = input_goal_x;
+                                // AMCL_POSE_SIM_[1] = input_goal_y;
+                                AMCL_POSE_SIM_[0] = r_sim_x;
+                                AMCL_POSE_SIM_[1] = r_sim_y;
                                 //-----------------------------------------------------------------------------------
 
                                 // move_base_client_.sendGoal(goals_output);
