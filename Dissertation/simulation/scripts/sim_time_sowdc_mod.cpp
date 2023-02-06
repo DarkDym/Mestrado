@@ -1610,13 +1610,13 @@ bool path_verification(float goal_x, float goal_y, int block_index){
 
     //--------------------------ADICIONADO 31/01/23--------------------------------------
     if (!calc_test_){
-        // AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
-        // AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
+        AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
+        AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
         calc_test_ = true;
-        float r_sim_x, r_sim_y;
-        tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[0];
-        AMCL_POSE_SIM_[0] = r_sim_x;
-        AMCL_POSE_SIM_[1] = r_sim_y;
+        // float r_sim_x, r_sim_y;
+        // tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[0];
+        // AMCL_POSE_SIM_[0] = r_sim_x;
+        // AMCL_POSE_SIM_[1] = r_sim_y;
     }
     //-----------------------------------------------------------------------------------
 
@@ -1920,12 +1920,12 @@ int main(int argc, char **argv){
                                     tie(input_goal_x,input_goal_y) = goals[R_index];
                                     calc_file_ << "#######  DEPOIS  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
                                 }
-                                float r_sim_x, r_sim_y;
-                                tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[index+1];
-                                // AMCL_POSE_SIM_[0] = input_goal_x;
-                                // AMCL_POSE_SIM_[1] = input_goal_y;
-                                AMCL_POSE_SIM_[0] = r_sim_x;
-                                AMCL_POSE_SIM_[1] = r_sim_y;
+                                // float r_sim_x, r_sim_y;
+                                // tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[index+1];
+                                AMCL_POSE_SIM_[0] = input_goal_x;
+                                AMCL_POSE_SIM_[1] = input_goal_y;
+                                // AMCL_POSE_SIM_[0] = r_sim_x;
+                                // AMCL_POSE_SIM_[1] = r_sim_y;
                                 //-----------------------------------------------------------------------------------
 
                                 // move_base_client_.sendGoal(goals_output);
