@@ -1907,8 +1907,8 @@ int main(int argc, char **argv){
                                 //-----------------------------------------------------------------------------------
         
                                 //--------------------------ADICIONADO 31/01/23--------------------------------------
-                                // srand((unsigned) time(NULL));
-                                srand((goals.size() * sim_laps) + index);
+                                srand((unsigned) time(NULL));
+                                // srand((goals.size() * sim_laps) + index);
                                 calc_file_ << "SEED UTILIZADA NESTE PROCESSO DE RANDOMIZAÇÃO DA POSIÇÃO DO ROBÔ: " << (unsigned) time(NULL) + index << endl;
                                 R_index = rand() % 192;
                                 tie(input_goal_x,input_goal_y) = goals[R_index];
