@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='SOWDC_5R'>
+    <pose frame=''>0 0 0 0 0 0</pose>
+	<static>true</static>    
+	<link name="SOWDC_5R">
+	<collision name='collision'>
+        <geometry>
+          <mesh>
+		<uri>model://sowdc_5R/meshes/map.dae</uri>
+	</mesh>
+        </geometry>
+    </collision>
+	<visual name="visual">
+		<geometry>
+			<mesh>
+				<uri>model://sowdc_5R/meshes/map.dae</uri>
+		</mesh>
+        </geometry>
+	<material>
+	<script>
+	<uri>model://sowdc_5R/materials/scripts</uri>
+	<uri>model://sowdc_5R/materials/textures</uri>
+	<name>SOWDC</name>
+	</script>
+	</material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -2,6 +2,7 @@ import random
 import numpy
 import rospy
 from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import PointStamped
 import ast
 from itertools import permutations
 
@@ -10,6 +11,9 @@ width = 4000
 height = 4000
 origin_x = -100.00
 origin_y = -100.00
+p_count = 0
+block_points = []
+blockage = []
 
 class Calc_odom_cell:
     def __init__(self):
@@ -76,7 +80,39 @@ class Calc_odom_cell:
         goal = random.sample(valid_cells,1)    
         print(goal)
         print("PROCESSO DE CRIACAO DO ARQUIVO FINALIZADA!")
+        rospy.signal_shutdown("TERMINEI o ARQUIVO")
+        exit()
         # rospy.signal_shutdown    
+    
+    def point_callback(self,point_msg):
+        global p_count
+        global block_points
+        global blockage
+        print("PONTO X: " + str(point_msg.point.x))
+        print("PONTO Y: " + str(point_msg.point.y))
+        block_points.append((point_msg.point.x,point_msg.point.y))
+        p_count += 1
+        if p_count < 2:
+            print("SELECIONE O PROXIMO PONTOS")
+        else:
+            print("CRIANDO O BLOQUEIO NAS SEGUINTES COORDENADAS")
+            print("X1: " + str(block_points[0][0]) + " Y1: " + str(block_points[0][1]))
+            (cell_x1,cell_y1) = self.odom2cell(block_points[0][0],block_points[0][1])
+            print("CELL_X1: " + str(cell_x1) + " CELL_Y1: " + str(cell_y1))
+            print("X2: " + str(block_points[1][0]) + " Y2: " + str(block_points[1][1]))
+            (cell_x2,cell_y2) = self.odom2cell(block_points[1][0],block_points[1][1])
+            print("CELL_X2: " + str(cell_x2) + " CELL_Y2: " + str(cell_y2))
+            blockage.append((cell_x1,cell_y1,cell_x2,cell_y2))
+            option = input("QUER CRIAR MAIS BLOQUEIOS? 1 - SIM | 2 - NÃO --> ")
+            if int(option) == 1:
+                p_count = 0
+                block_points.clear()
+                print("PODE ESCOLHER OS PROXIMOS PONTOS")
+            elif int(option) == 2:
+                print(blockage)
+                rospy.signal_shutdown("TERMINEI")
+                exit()
+
 
     def open_grid_cells(self,regions):
         self.valid_cells = []
@@ -114,7 +150,7 @@ class Calc_odom_cell:
                 [6] - [(15.3;45.8);(21.3;45.7);(20.5;0.251);(14.5;0.168)] --> [14.5;0.168][21.3;45.7]
 
         """
-        map_mode = input("1: GERAR ARQUIVO DE CÉLULAS LIVRES | 2: GERAR ARQUIVOS DE SIMULAÇÃO -->")
+        map_mode = input("1: GERAR ARQUIVO DE CÉLULAS LIVRES | 2: GERAR ARQUIVOS DE SIMULAÇÃO | 3: GERAR BLOQUEIOS A PARTIR DO CLICKE_POINT | 4: CALCULAR ODOM2CELL CELL2ODOM-->")
         if int(map_mode) == 1 :
             rospy.init_node('getLaneMap', anonymous=True)
             grid_sub = rospy.Subscriber('/lane_map', OccupancyGrid, self.grid_callback)
@@ -404,6 +440,34 @@ class Calc_odom_cell:
                 # print("ODOM GOAL : " + str(gx) + " | " + str(gy))
                 # pass
                 # rospy.spin()
+        elif int(map_mode) == 3:
+            rospy.init_node('getClickedPoint', anonymous=True)
+            grid_sub = rospy.Subscriber('/clicked_point', PointStamped, self.point_callback)
+            rate = rospy.Rate(10)
+            print("SELECIONE PELO RVIZ OS PONTOS NO QUAL DESEJA CRIAR UM BLOQUEIO.")
+            rospy.spin()
+        elif int(map_mode) == 4:
+            close_op = False
+
+            while(not close_op):
+                print("1 - ODOM_2_CELL")
+                print("2 - CELL_2_ODOM")
+                mode = input(":")
+                if int(mode) == 1:
+                    ix = input("ODOM_X: ")
+                    iy = input("ODOM_Y: ")
+                    cell_x = float(ix)/resolution - origin_x/resolution
+                    cell_y = float(iy)/resolution - origin_x/resolution
+                    print("RESULTADO [CELL_X ; CELL_Y] : [ " + str(cell_x) + " ; " + str(cell_y) + " ]")
+                elif int(mode) == 2:
+                    ix = input("CELL_X: ")
+                    iy = input("CELL_Y: ")
+                    odom_x = (int(ix) + origin_x/resolution) * resolution
+                    odom_y = (int(iy) + origin_y/resolution) * resolution
+                    print("RESULTADO [ODOM_X ; ODOM_Y] : [ " + str(odom_x) + " ; " + str(odom_y) + " ]")
+                else:
+                    print("FECHANDO")
+                    close_op = True
         else:
             exit()
 
