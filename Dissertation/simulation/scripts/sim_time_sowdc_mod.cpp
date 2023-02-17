@@ -1604,7 +1604,7 @@ void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr
     AMCL_POSE_[2] = euler[2];
 }
 
-bool path_verification(float goal_x, float goal_y, int block_index){
+int path_verification(float goal_x, float goal_y, int block_index){
     int gcx,gcy,scx,scy;
     float gamma,gamma_t;
 
@@ -1612,7 +1612,7 @@ bool path_verification(float goal_x, float goal_y, int block_index){
     if (!calc_test_){
         AMCL_POSE_SIM_[0] = AMCL_POSE_[0];
         AMCL_POSE_SIM_[1] = AMCL_POSE_[1];
-        calc_test_ = true;
+        // calc_test_ = true;
         // float r_sim_x, r_sim_y;
         // tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[0];
         // AMCL_POSE_SIM_[0] = r_sim_x;
@@ -1626,6 +1626,7 @@ bool path_verification(float goal_x, float goal_y, int block_index){
 
     // calc_file_ << "ROBOT POSE: [ " << AMCL_POSE_[0] << " ; " << AMCL_POSE_[1] << " ] | GOAL: [ " << goal_x << " ; " << goal_y << " ]" << endl;
     calc_file_ << "ROBOT POSE: [ " << AMCL_POSE_SIM_[0] << " ; " << AMCL_POSE_SIM_[1] << " ] | GOAL: [ " << goal_x << " ; " << goal_y << " ]" << endl;
+    cout << "------ROBOT POSE: [ " << AMCL_POSE_SIM_[0] << " ; " << AMCL_POSE_SIM_[1] << " ] | GOAL: [ " << goal_x << " ; " << goal_y << " ]" << endl;
 
     astar_mod_ = false;
     int beta = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
@@ -1657,13 +1658,22 @@ bool path_verification(float goal_x, float goal_y, int block_index){
                 calc_file_ << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
                 calc_file_ << "*****************************************************************************************************************" << endl;
                 cont_omega2beta_++;
+                isPathInBlock_ = false;
+                cout << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
+                return 1;
             } else {
                 calc_file_ << "LAMBDA: " << lambda << endl;
                 cont_omega_++;
+                isPathInBlock_ = false;
+                cout <<  "O CAMINHO OMEGA É MAIS VANTAJOSO!    |  BETA: " << beta << " OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+                return 2;
             }
         } else if(epsilon_mod == omega){ 
             calc_file_ <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+            cout <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
             cont_equal_++;
+            isPathInBlock_ = false;
+            return 2;
         } else {
             calc_file_ <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
             if ((omega - epsilon_mod) < 150) {
@@ -1671,27 +1681,33 @@ bool path_verification(float goal_x, float goal_y, int block_index){
                 calc_file_ << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
                 calc_file_ << "*****************************************************************************************************************" << endl;
                 cont_beta2omega_++;
+                isPathInBlock_ = false;
+                cout << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
+                return 2;
             } else {
                 cont_beta_++;
+                isPathInBlock_ = false;
+                cout <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+                return 1;
             }
         }
 
         // isPathInBlock_x_ = false;
         // isPathInBlock_y_ = false;
-        isPathInBlock_ = false;
+        // isPathInBlock_ = false;
 
-        if (epsilon > omega) {
-            return true;
-        } else {
-            return false;
-        }
+        // if (epsilon_mod > omega) {
+        //     return 1;
+        // } else {
+            
+        // }
     } else {
         calc_file_ << "PATH IS FREE!" << endl;
         cont_free_++;
         // isPathInBlock_x_ = false;
         // isPathInBlock_y_ = false;
         isPathInBlock_ = false;
-        return false;
+        return 0;
     }
 }
 //-----------------------------------------------------------------------------------
@@ -1846,7 +1862,7 @@ int main(int argc, char **argv){
                         if (enable_patrol_) {
                             for (int index = 0; index < goals.size(); index++) {
                                 tie(input_goal_x,input_goal_y) = goals[index];
-                                cout << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                cout << "##GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                 fulllog_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                 goals_output.target_pose.header.frame_id = "map";
                                 goals_output.target_pose.pose.position.x = input_goal_x;
@@ -1856,74 +1872,142 @@ int main(int argc, char **argv){
                                 goals_output.target_pose.pose.orientation.y = 0.0;
                                 goals_output.target_pose.pose.orientation.z = 0.70;
                                 goals_output.target_pose.pose.orientation.w = 0.70;
-
-                                //--------------------------ADICIONADO 26/01/23--------------------------------------
-                                    //--------------------------ADICIONADO 30/01/23--------------------------------------
+                                objects_map_file_ << "------ROBOT POSE: [ " << AMCL_POSE_SIM_[0] << " ; " << AMCL_POSE_SIM_[1] << " ] | GOAL: [ " << input_goal_x << " ; " << input_goal_y << " ]" << endl;
+                                //--------------------------ADICIONADO 17/02/23--------------------------------------
+                                if (sim_laps % 2 == 0) {
+                                    calc_file_ << "------------------------------------------------ SIM_LAP: " << sim_laps << "  | INDEX_GOAL: " << index << " ----------------------------------------" << endl;
+                                    calc_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                    gt_start = gazebo_secs_;
+                                    move_base_client_.sendGoal(goals_output);
+                                } else {
                                     calc_file_ << "------------------------------------------------ SIM_LAP: " << sim_laps << "  | INDEX_GOAL: " << index << " ----------------------------------------" << endl;
                                     calc_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                     int v1,v2,v3,v4,qnt_p;
                                     float ov1,ov2,ov3,ov4;
                                     tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[index];
                                     calc_file_ << "VERTEXES_CELL: [ " << v1 << " | " << v2 << " | " << v3 << " | " << v4 << " ] | " << "VERTEXES_ODOM: [ " << ov1 << " | " << ov2 << " | " << ov3 << " | " << ov4 << " ]" << " | QNT_PEOPLE: " << qnt_p << endl;
-                                    //-----------------------------------------------------------------------------------
-                                //--------------------------ADICIONADO 01/02/23--------------------------------------
-                                start_time_ = std::chrono::steady_clock::now();
-                                //-----------------------------------------------------------------------------------
-                                if (path_verification(input_goal_x,input_goal_y,index)) {
-                                    cout << "EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!" << endl;
-                                    enable_ctldraw_obstacles(index);
-                                    grid_update_custom();
-                                    int c = 0;
-                                    while (c < 30) {
-                                        lane_map_pub.publish(lane_map_);
-                                        // map_pub.publish(lane_map_);
-                                        c++;
-                                    }
-                                    // for (int cr = 0; cr < 11; cr++){rate.sleep();}
-                                    // ros::spinOnce();
-                                    // rate.sleep();
-                                    pv_s = true;
-                                } else {
-                                    cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
+                                    clean_map_ = grid_map_;
+                                    grid_update_clear();
                                     grid_astar_update_clear();
-                                    //SÓ PRA VISUALIZAR O QUE ESTA ACONTECENDO NO MAPA
-                                    enable_ctldraw_obstacles(index);
-                                    grid_update_custom();
-                                    int c = 0;
-                                    while (c < 30) {
-                                        lane_map_pub.publish(lane_map_);
-                                        // map_pub.publish(lane_map_);
-                                        c++;
+                                    lane_map_pub.publish(clean_map_);
+                                    for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                    ros::spinOnce();
+                                    rate.sleep();
+                                    int path_return = path_verification(input_goal_x,input_goal_y,index);
+                                    if (path_return == 2) {
+                                        cout << "EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!" << endl;
+                                        enable_ctldraw_obstacles(index);
+                                        grid_update_custom();
+                                        int c = 0;
+                                        while (c < 30) {
+                                            lane_map_pub.publish(lane_map_);
+                                            // map_pub.publish(lane_map_);
+                                            c++;
+                                        }
+                                        for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                        ros::spinOnce();
+                                        rate.sleep();
+                                        cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        gt_start = gazebo_secs_;
+                                        move_base_client_.sendGoal(goals_output);
+                                        // pv_s = true;
+                                    } else if (path_return == 1) {
+                                        cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
+                                        grid_astar_update_clear();
+                                        cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        gt_start = gazebo_secs_;    
+                                        move_base_client_.sendGoal(goals_output);
+                                        //SÓ PRA VISUALIZAR O QUE ESTA ACONTECENDO NO MAPA
+                                        // enable_ctldraw_obstacles(index);
+                                        // grid_update_custom();
+                                        // int c = 0;
+                                        // while (c < 30) {
+                                        //     lane_map_pub.publish(lane_map_);
+                                        //     // map_pub.publish(lane_map_);
+                                        //     c++;
+                                        // }
+                                        // for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                        // ros::spinOnce();
+                                        // rate.sleep();
+                                        // pv_s = true;
+                                    } else {
+                                        cout << "PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2" << endl;
+                                        cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        gt_start = gazebo_secs_;
+                                        move_base_client_.sendGoal(goals_output);
                                     }
-                                    // for (int cr = 0; cr < 11; cr++){rate.sleep();}
-                                    // ros::spinOnce();
-                                    // rate.sleep();
-                                    pv_s = true;
                                 }
                                 //-----------------------------------------------------------------------------------
+
+
+                                //--------------------------ADICIONADO 26/01/23--------------------------------------
+                                    //--------------------------ADICIONADO 30/01/23--------------------------------------
+                                    // calc_file_ << "------------------------------------------------ SIM_LAP: " << sim_laps << "  | INDEX_GOAL: " << index << " ----------------------------------------" << endl;
+                                    // calc_file_ << "GOAL [" << index-1 << " -> " << index << "] FOR " << (std::string)argv[1] << ": [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    // int v1,v2,v3,v4,qnt_p;
+                                    // float ov1,ov2,ov3,ov4;
+                                    // tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[index];
+                                    // calc_file_ << "VERTEXES_CELL: [ " << v1 << " | " << v2 << " | " << v3 << " | " << v4 << " ] | " << "VERTEXES_ODOM: [ " << ov1 << " | " << ov2 << " | " << ov3 << " | " << ov4 << " ]" << " | QNT_PEOPLE: " << qnt_p << endl;
+                                    //-----------------------------------------------------------------------------------
                                 //--------------------------ADICIONADO 01/02/23--------------------------------------
-                                end_time_ = std::chrono::steady_clock::now();
-                                calc_file_ << "Time elapsed for A* calculation= " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
+                                // start_time_ = std::chrono::steady_clock::now();
+                                //-----------------------------------------------------------------------------------
+                                // if (path_verification(input_goal_x,input_goal_y,index)) {
+                                //     cout << "EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!" << endl;
+                                //     enable_ctldraw_obstacles(index);
+                                //     grid_update_custom();
+                                //     int c = 0;
+                                //     while (c < 30) {
+                                //         lane_map_pub.publish(lane_map_);
+                                //         // map_pub.publish(lane_map_);
+                                //         c++;
+                                //     }
+                                //     // for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                //     // ros::spinOnce();
+                                //     // rate.sleep();
+                                //     pv_s = true;
+                                // } else {
+                                //     cout << "EPSILON MENOR QUE OMEGA, MANTENDO O CAMINHO ORIGINAL!" << endl;
+                                //     grid_astar_update_clear();
+                                //     //SÓ PRA VISUALIZAR O QUE ESTA ACONTECENDO NO MAPA
+                                //     enable_ctldraw_obstacles(index);
+                                //     grid_update_custom();
+                                //     int c = 0;
+                                //     while (c < 30) {
+                                //         lane_map_pub.publish(lane_map_);
+                                //         // map_pub.publish(lane_map_);
+                                //         c++;
+                                //     }
+                                //     // for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                //     // ros::spinOnce();
+                                //     // rate.sleep();
+                                //     pv_s = true;
+                                // }
+                                //-----------------------------------------------------------------------------------
+                                //--------------------------ADICIONADO 01/02/23--------------------------------------
+                                // end_time_ = std::chrono::steady_clock::now();
+                                // calc_file_ << "Time elapsed for A* calculation= " << std::chrono::duration_cast<std::chrono::seconds>(end_time_ - start_time_).count() << "[s]" << std::endl;
                                 //-----------------------------------------------------------------------------------
         
                                 //--------------------------ADICIONADO 31/01/23--------------------------------------
-                                srand((unsigned) time(NULL));
-                                // srand((goals.size() * sim_laps) + index);
-                                calc_file_ << "SEED UTILIZADA NESTE PROCESSO DE RANDOMIZAÇÃO DA POSIÇÃO DO ROBÔ: " << (unsigned) time(NULL) + index << endl;
-                                R_index = rand() % 192;
-                                tie(input_goal_x,input_goal_y) = goals[R_index];
-                                float igx,igy;
-                                tie(igx,igy) = goals[index+1];
-                                calc_file_ << "#######  ANTES  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
-                                if(input_goal_x == igx && input_goal_x == igx) {
-                                    R_index = rand() % 192;
-                                    tie(input_goal_x,input_goal_y) = goals[R_index];
-                                    calc_file_ << "#######  DEPOIS  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
-                                }
+                                // srand((unsigned) time(NULL));
+                                // // srand((goals.size() * sim_laps) + index);
+                                // calc_file_ << "SEED UTILIZADA NESTE PROCESSO DE RANDOMIZAÇÃO DA POSIÇÃO DO ROBÔ: " << (unsigned) time(NULL) + index << endl;
+                                // R_index = rand() % 192;
+                                // tie(input_goal_x,input_goal_y) = goals[R_index];
+                                // float igx,igy;
+                                // tie(igx,igy) = goals[index+1];
+                                // calc_file_ << "#######  ANTES  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
+                                // if(input_goal_x == igx && input_goal_x == igx) {
+                                //     R_index = rand() % 192;
+                                //     tie(input_goal_x,input_goal_y) = goals[R_index];
+                                //     calc_file_ << "#######  DEPOIS  ####### RANDOM GOAL FOR ROBOT_POSE: " << R_index << endl;
+                                // }
                                 // float r_sim_x, r_sim_y;
                                 // tie(r_sim_x,r_sim_y) = robot_poses_4_simulation_[index+1];
-                                AMCL_POSE_SIM_[0] = input_goal_x;
-                                AMCL_POSE_SIM_[1] = input_goal_y;
+                                // AMCL_POSE_SIM_[0] = input_goal_x;
+                                // AMCL_POSE_SIM_[1] = input_goal_y;
                                 // AMCL_POSE_SIM_[0] = r_sim_x;
                                 // AMCL_POSE_SIM_[1] = r_sim_y;
                                 //-----------------------------------------------------------------------------------
@@ -1942,24 +2026,26 @@ int main(int argc, char **argv){
                                 }
 
                                 //--------------------------ADICIONADO 17/01/23--------------------------------------
-                                cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                gt_start = gazebo_secs_;
+                                // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                // gt_start = gazebo_secs_;
                                 //-----------------------------------------------------------------------------------
 
-                                if (pv_s){
-                                // if (move_base_client_.waitForResult()) {
+                                // if (pv_s){
+                                if (move_base_client_.waitForResult()) {
                                     if (!time_started_) {
                                         time_started_ = true;
                                         start_time_ = std::chrono::steady_clock::now();
                                         //--------------------------ADICIONADO 17/01/23--------------------------------------
-                                        cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
-                                        gt_start = gazebo_secs_;
+                                        // cout << "[START] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
+                                        // gt_start = gazebo_secs_;
                                         //-----------------------------------------------------------------------------------
                                     } else {
                                         // ros::spinOnce();
                                         // rate.sleep();
                                         end_time_ = std::chrono::steady_clock::now();
                                         //--------------------------ADICIONADO 17/01/23--------------------------------------
+                                        ros::spinOnce();
+                                        rate.sleep();
                                         cout << "[END] | GAZEBO SIMULATION SECS: " << gazebo_secs_ << endl;
                                         gt_end = gazebo_secs_;
                                         cout << "[ELAPSED TIME] | SIMULATION TIME DIFF: " << gt_end - gt_start << endl;
@@ -1976,19 +2062,19 @@ int main(int argc, char **argv){
                                     }
                                     cout << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
                                     fulllog_file_ << "LAST_INDEX: " << last_index << " INDEX_: " << index+1 << endl;
-                                    cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
+                                    // cout << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
                                     fulllog_file_ << "GOAL [" << last_index << " -> " << index+1 << "] FOR HUSKY: [ " << input_goal_x << " | " << input_goal_y << " ] " << endl;
-
+                                    cout << "#############################################################################################################################" << endl;
                                     //--------------------------ADICIONADO 30/01/23--------------------------------------
                                     // for (int cr = 0; cr < 20; cr++){rate.sleep();}
-                                    clean_map_ = grid_map_;
-                                    grid_update_clear();
-                                    grid_astar_update_clear();
-                                    lane_map_pub.publish(clean_map_);
+                                    // clean_map_ = grid_map_;
+                                    // grid_update_clear();
+                                    // grid_astar_update_clear();
+                                    // lane_map_pub.publish(clean_map_);
                                     //-----------------------------------------------------------------------------------
                                 }
                                 calc_file_ << "#############################################################################################################################" << endl;
-                                pv_s = false;
+                                // pv_s = false;
                             }
                             /*
                                 CONT_BETA: QNT DE VEZES EM QUE O CAMINHO BETA FOI ESCOLHIDO;
@@ -2037,7 +2123,7 @@ int main(int argc, char **argv){
                             if (enable_ctldraw_) {
                                 if (!already_drawed_) {
                                     cout << "###################ENTREI NA PARTE DO DRAW####################" << endl;
-                                    // enable_ctldraw_obstacles(index);
+                                    // enable_ctldraw_obstacles(0);
                                     grid_update_custom();
                                     int c = 0;
                                     while (c < 30) {

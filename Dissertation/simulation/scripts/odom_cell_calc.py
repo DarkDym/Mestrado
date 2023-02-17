@@ -14,6 +14,7 @@ origin_y = -100.00
 p_count = 0
 block_points = []
 blockage = []
+qnt_goals = 0
 
 class Calc_odom_cell:
     def __init__(self):
@@ -112,6 +113,23 @@ class Calc_odom_cell:
                 print(blockage)
                 rospy.signal_shutdown("TERMINEI")
                 exit()
+
+    def objective_point_callback(self,point_msg):
+        global p_count
+        global block_points
+        global qnt_goals
+        # global blockage
+        print("PONTO X: " + str(point_msg.point.x))
+        print("PONTO Y: " + str(point_msg.point.y))
+        block_points.append((point_msg.point.x,point_msg.point.y))
+        p_count += 1
+
+        if p_count != qnt_goals:
+            print("PODE ESCOLHER OS PROXIMOS PONTOS")
+        else:
+            print(block_points)
+            rospy.signal_shutdown("TERMINEI")
+            exit()
 
 
     def open_grid_cells(self,regions):
@@ -442,17 +460,27 @@ class Calc_odom_cell:
                 # rospy.spin()
         elif int(map_mode) == 3:
             rospy.init_node('getClickedPoint', anonymous=True)
-            grid_sub = rospy.Subscriber('/clicked_point', PointStamped, self.point_callback)
-            rate = rospy.Rate(10)
-            print("SELECIONE PELO RVIZ OS PONTOS NO QUAL DESEJA CRIAR UM BLOQUEIO.")
-            rospy.spin()
+            op = input("1 - BLOCK  |  2 - OBJECTIVES --> ")
+            if int(op) == 1:
+                grid_sub = rospy.Subscriber('/clicked_point', PointStamped, self.point_callback)
+                rate = rospy.Rate(10)
+                print("SELECIONE PELO RVIZ OS PONTOS NO QUAL DESEJA CRIAR UM BLOQUEIO.")
+                rospy.spin()
+            elif int(op) == 2:
+                op = input("QUAL A QUANTIDADE DE GOALS: ")
+                qnt_goals = int(op)
+                grid_sub = rospy.Subscriber('/clicked_point', PointStamped, self.objective_point_callback)
+                rate = rospy.Rate(10)
+                print("SELECIONE PELO RVIZ OS PONTOS NO QUAL DESEJA CRIAR UM BLOQUEIO.")
+                rospy.spin()
         elif int(map_mode) == 4:
             close_op = False
 
             while(not close_op):
                 print("1 - ODOM_2_CELL")
                 print("2 - CELL_2_ODOM")
-                mode = input(":")
+                print("3 - RANDOMIZE OBJECTIVES")
+                mode = input(": ")
                 if int(mode) == 1:
                     ix = input("ODOM_X: ")
                     iy = input("ODOM_Y: ")
@@ -465,6 +493,24 @@ class Calc_odom_cell:
                     odom_x = (int(ix) + origin_x/resolution) * resolution
                     odom_y = (int(iy) + origin_y/resolution) * resolution
                     print("RESULTADO [ODOM_X ; ODOM_Y] : [ " + str(odom_x) + " ; " + str(odom_y) + " ]")
+                elif int(mode) == 3:
+                    all_lines = []
+                    with open("./objects_in_map_4R.txt",'r') as random_file:
+                        lines = random_file.readlines()
+                        for line in lines:
+                            splited = line.split('\n')
+                            # self.valid_cells.append(splited[0])
+                            # result = ast.literal_eval(splited[0])
+                            # self.valid_cells.append(result)
+                            all_lines.append(splited[0])
+                    goals_test = random.sample(range(1,192),10)
+                    print(goals_test)
+                    new_goals = []
+                    for i in range(0,len(goals_test)):
+                        # print(goals_test[i])
+                        print(all_lines[goals_test[i]])
+                        new_goals.append(all_lines[goals_test[i]])
+                    print(new_goals)
                 else:
                     print("FECHANDO")
                     close_op = True

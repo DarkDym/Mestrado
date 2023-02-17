@@ -1,0 +1,568 @@
+VERTEXES: [ 2231 | 2820 | 2467 | 2915 ]
+POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ 11.55 , 41 ]
+POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ 23.35 , 45.75 ]
+##GOAL [-1 -> 0] FOR pioneer: [ 27.3 | 43.295 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [0] | Time elapsed = 71[s]
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 71[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+#############################################################################################################################
+##GOAL [0 -> 1] FOR pioneer: [ 1.35 | 13.75 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [1] | Time elapsed = 71[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 71[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 0[s]
+LAST_INDEX: 1 INDEX_: 2
+#############################################################################################################################
+##GOAL [1 -> 2] FOR pioneer: [ 2 | 6.65 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [2] | Time elapsed = 19[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 19[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 0[s]
+LAST_INDEX: 2 INDEX_: 3
+#############################################################################################################################
+##GOAL [2 -> 3] FOR pioneer: [ 27.5 | 42.8 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [3] | Time elapsed = 81[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 81[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+#############################################################################################################################
+##GOAL [3 -> 4] FOR pioneer: [ 5.5 | 3.2 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [4] | Time elapsed = 87[s]
+[REAL TIME] | GOAL [3-> 4] | Time elapsed = 87[s]
+[SIMULATION TIME] | GOAL [3-> 4] | Time elapsed = 0[s]
+LAST_INDEX: 4 INDEX_: 5
+#############################################################################################################################
+##GOAL [4 -> 5] FOR pioneer: [ 32.5 | 43.5 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [5] | Time elapsed = 74[s]
+[REAL TIME] | GOAL [4-> 5] | Time elapsed = 74[s]
+[SIMULATION TIME] | GOAL [4-> 5] | Time elapsed = 0[s]
+LAST_INDEX: 5 INDEX_: 6
+#############################################################################################################################
+##GOAL [5 -> 6] FOR pioneer: [ 4.25 | 2.8 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [6] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [5-> 6] | Time elapsed = 78[s]
+[SIMULATION TIME] | GOAL [5-> 6] | Time elapsed = 0[s]
+LAST_INDEX: 6 INDEX_: 7
+#############################################################################################################################
+##GOAL [6 -> 7] FOR pioneer: [ 32.95 | 28.65 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [7] | Time elapsed = 57[s]
+[REAL TIME] | GOAL [6-> 7] | Time elapsed = 57[s]
+[SIMULATION TIME] | GOAL [6-> 7] | Time elapsed = 0[s]
+LAST_INDEX: 7 INDEX_: 8
+#############################################################################################################################
+##GOAL [7 -> 8] FOR pioneer: [ 1.9 | 17.5 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [8] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [7-> 8] | Time elapsed = 76[s]
+[SIMULATION TIME] | GOAL [7-> 8] | Time elapsed = 0[s]
+LAST_INDEX: 8 INDEX_: 9
+#############################################################################################################################
+##GOAL [8 -> 9] FOR pioneer: [ 32.4 | 25.55 ] 
+[START] | GAZEBO SIMULATION SECS: 2537
+[END] | GAZEBO SIMULATION SECS: 2537
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [9] | Time elapsed = 73[s]
+[REAL TIME] | GOAL [8-> 9] | Time elapsed = 73[s]
+[SIMULATION TIME] | GOAL [8-> 9] | Time elapsed = 0[s]
+LAST_INDEX: 9 INDEX_: 10
+#############################################################################################################################
+----------------------------------- NB: 0 ------------------------------------
+----------------------------------- END OF LAP: 0 ------------------------------------
+###################ENTREI NA PARTE DO DRAW####################
+##GOAL [-1 -> 0] FOR pioneer: [ 27.3 | 43.295 ] 
+------ROBOT POSE: [ 32.4001 ; 25.5019 ] | GOAL: [ 27.3 ; 43.295 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3197
+[END] | GAZEBO SIMULATION SECS: 3197
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [0] | Time elapsed = 28[s]
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 28[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+#############################################################################################################################
+##GOAL [0 -> 1] FOR pioneer: [ 1.35 | 13.75 ] 
+------ROBOT POSE: [ 27.277 ; 43.3237 ] | GOAL: [ 1.35 ; 13.75 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+NORTH-WEST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH-WEST | The destination cell is found
+
+The Path is BETA : 1052 | OMEGA : 1623 | EPSILON : 885.895 | LAMBDA : 530.251 | EPSILON_MOD : 1582.25
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 40.7493
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 3225
+[END] | GAZEBO SIMULATION SECS: 3225
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [1] | Time elapsed = 96[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 96[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 0[s]
+LAST_INDEX: 1 INDEX_: 2
+#############################################################################################################################
+##GOAL [1 -> 2] FOR pioneer: [ 2 | 6.65 ] 
+------ROBOT POSE: [ 1.35041 ; 13.6494 ] | GOAL: [ 2 ; 6.65 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+NORTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3315
+[END] | GAZEBO SIMULATION SECS: 3315
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [2] | Time elapsed = 21[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 21[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 0[s]
+LAST_INDEX: 2 INDEX_: 3
+#############################################################################################################################
+##GOAL [2 -> 3] FOR pioneer: [ 27.5 | 42.8 ] 
+------ROBOT POSE: [ 2.03607 ; 6.60878 ] | GOAL: [ 27.5 ; 42.8 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+EAST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is BETA : 1198 | OMEGA : 1477 | EPSILON : 1008.84 | LAMBDA : 259.089 | EPSILON_MOD : 1457.09
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 19.9108
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 3337
+[END] | GAZEBO SIMULATION SECS: 3337
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [3] | Time elapsed = 97[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 97[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 0[s]
+LAST_INDEX: 3 INDEX_: 4
+#############################################################################################################################
+##GOAL [3 -> 4] FOR pioneer: [ 5.5 | 3.2 ] 
+------ROBOT POSE: [ 27.4688 ; 42.9138 ] | GOAL: [ 5.5 ; 3.2 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+EAST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is BETA : 1308 | OMEGA : 1367 | EPSILON : 1101.47 | LAMBDA : 54.7895 | EPSILON_MOD : 1362.79
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 4.21057
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 3431
+[END] | GAZEBO SIMULATION SECS: 3431
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [4] | Time elapsed = 85[s]
+[REAL TIME] | GOAL [3-> 4] | Time elapsed = 85[s]
+[SIMULATION TIME] | GOAL [3-> 4] | Time elapsed = 0[s]
+LAST_INDEX: 4 INDEX_: 5
+#############################################################################################################################
+##GOAL [4 -> 5] FOR pioneer: [ 32.5 | 43.5 ] 
+------ROBOT POSE: [ 5.46732 ; 3.19874 ] | GOAL: [ 32.5 ; 43.5 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3510
+[END] | GAZEBO SIMULATION SECS: 3510
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [5] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [4-> 5] | Time elapsed = 75[s]
+[SIMULATION TIME] | GOAL [4-> 5] | Time elapsed = 0[s]
+LAST_INDEX: 5 INDEX_: 6
+#############################################################################################################################
+##GOAL [5 -> 6] FOR pioneer: [ 4.25 | 2.8 ] 
+------ROBOT POSE: [ 32.5023 ; 43.4748 ] | GOAL: [ 4.25 ; 2.8 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3582
+[END] | GAZEBO SIMULATION SECS: 3582
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [6] | Time elapsed = 80[s]
+[REAL TIME] | GOAL [5-> 6] | Time elapsed = 80[s]
+[SIMULATION TIME] | GOAL [5-> 6] | Time elapsed = 0[s]
+LAST_INDEX: 6 INDEX_: 7
+#############################################################################################################################
+##GOAL [6 -> 7] FOR pioneer: [ 32.95 | 28.65 ] 
+------ROBOT POSE: [ 4.21204 ; 2.87332 ] | GOAL: [ 32.95 ; 28.65 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3658
+[END] | GAZEBO SIMULATION SECS: 3658
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [7] | Time elapsed = 61[s]
+[REAL TIME] | GOAL [6-> 7] | Time elapsed = 61[s]
+[SIMULATION TIME] | GOAL [6-> 7] | Time elapsed = 0[s]
+LAST_INDEX: 7 INDEX_: 8
+#############################################################################################################################
+##GOAL [7 -> 8] FOR pioneer: [ 1.9 | 17.5 ] 
+------ROBOT POSE: [ 32.9495 ; 28.4987 ] | GOAL: [ 1.9 ; 17.5 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3716
+[END] | GAZEBO SIMULATION SECS: 3716
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [8] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [7-> 8] | Time elapsed = 78[s]
+[SIMULATION TIME] | GOAL [7-> 8] | Time elapsed = 0[s]
+LAST_INDEX: 8 INDEX_: 9
+#############################################################################################################################
+##GOAL [8 -> 9] FOR pioneer: [ 32.4 | 25.55 ] 
+------ROBOT POSE: [ 1.89786 ; 17.4042 ] | GOAL: [ 32.4 ; 25.55 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 3791
+[END] | GAZEBO SIMULATION SECS: 3791
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [9] | Time elapsed = 75[s]
+[REAL TIME] | GOAL [8-> 9] | Time elapsed = 75[s]
+[SIMULATION TIME] | GOAL [8-> 9] | Time elapsed = 0[s]
+LAST_INDEX: 9 INDEX_: 10
+#############################################################################################################################
+----------------------------------- WB: 1 ------------------------------------
+----------------------------------- END OF LAP: 1 ------------------------------------
+##GOAL [-1 -> 0] FOR pioneer: [ 27.3 | 43.295 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+[END] | GAZEBO SIMULATION SECS: 3862
+[ELAPSED TIME] | SIMULATION TIME DIFF: 0
+TERMINEI VOU GRAVAR - GOAL [0] | Time elapsed = 26[s]
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 26[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 0[s]
+LAST_INDEX: 0 INDEX_: 1
+#############################################################################################################################
+##GOAL [0 -> 1] FOR pioneer: [ 1.35 | 13.75 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+^C##GOAL [1 -> 2] FOR pioneer: [ 2 | 6.65 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [2 -> 3] FOR pioneer: [ 27.5 | 42.8 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [3 -> 4] FOR pioneer: [ 5.5 | 3.2 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [4 -> 5] FOR pioneer: [ 32.5 | 43.5 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [5 -> 6] FOR pioneer: [ 4.25 | 2.8 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [6 -> 7] FOR pioneer: [ 32.95 | 28.65 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [7 -> 8] FOR pioneer: [ 1.9 | 17.5 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+##GOAL [8 -> 9] FOR pioneer: [ 32.4 | 25.55 ] 
+[START] | GAZEBO SIMULATION SECS: 3862
+----------------------------------- NB: 2 ------------------------------------
+----------------------------------- END OF LAP: 2 ------------------------------------
+###################ENTREI NA PARTE DO DRAW####################
+
+
+
+
+
+V2
+
+VERTEXES: [ 2231 | 2820 | 2467 | 2915 ]
+POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ 11.55 , 41 ]
+POSICAO NO MAPA DA MARCACAO | [ CX , CY ] : [ 23.35 , 45.75 ]
+##GOAL [-1 -> 0] FOR pioneer: [ 27.3 | 43.295 ] 
+[START] | GAZEBO SIMULATION SECS: 4361
+[START] | GAZEBO SIMULATION SECS: 4361
+[END] | GAZEBO SIMULATION SECS: 4454
+[ELAPSED TIME] | SIMULATION TIME DIFF: 93
+TERMINEI VOU GRAVAR - GOAL [0] | Time elapsed = 98[s]
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 98[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 93[s]
+LAST_INDEX: 0 INDEX_: 1
+#############################################################################################################################
+##GOAL [0 -> 1] FOR pioneer: [ 1.35 | 13.75 ] 
+[START] | GAZEBO SIMULATION SECS: 4454
+[END] | GAZEBO SIMULATION SECS: 4518
+[ELAPSED TIME] | SIMULATION TIME DIFF: 64
+TERMINEI VOU GRAVAR - GOAL [1] | Time elapsed = 66[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 66[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 64[s]
+LAST_INDEX: 1 INDEX_: 2
+#############################################################################################################################
+##GOAL [1 -> 2] FOR pioneer: [ 2 | 6.65 ] 
+[START] | GAZEBO SIMULATION SECS: 4518
+[END] | GAZEBO SIMULATION SECS: 4538
+[ELAPSED TIME] | SIMULATION TIME DIFF: 20
+TERMINEI VOU GRAVAR - GOAL [2] | Time elapsed = 20[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 20[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 20[s]
+LAST_INDEX: 2 INDEX_: 3
+#############################################################################################################################
+##GOAL [2 -> 3] FOR pioneer: [ 27.5 | 42.8 ] 
+[START] | GAZEBO SIMULATION SECS: 4538
+[END] | GAZEBO SIMULATION SECS: 4653
+[ELAPSED TIME] | SIMULATION TIME DIFF: 115
+TERMINEI VOU GRAVAR - GOAL [3] | Time elapsed = 121[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 121[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 115[s]
+LAST_INDEX: 3 INDEX_: 4
+#############################################################################################################################
+##GOAL [3 -> 4] FOR pioneer: [ 5.5 | 3.2 ] 
+[START] | GAZEBO SIMULATION SECS: 4653
+[END] | GAZEBO SIMULATION SECS: 4770
+[ELAPSED TIME] | SIMULATION TIME DIFF: 117
+TERMINEI VOU GRAVAR - GOAL [4] | Time elapsed = 122[s]
+[REAL TIME] | GOAL [3-> 4] | Time elapsed = 122[s]
+[SIMULATION TIME] | GOAL [3-> 4] | Time elapsed = 117[s]
+LAST_INDEX: 4 INDEX_: 5
+#############################################################################################################################
+##GOAL [4 -> 5] FOR pioneer: [ 32.5 | 43.5 ] 
+[START] | GAZEBO SIMULATION SECS: 4770
+[END] | GAZEBO SIMULATION SECS: 4841
+[ELAPSED TIME] | SIMULATION TIME DIFF: 71
+TERMINEI VOU GRAVAR - GOAL [5] | Time elapsed = 74[s]
+[REAL TIME] | GOAL [4-> 5] | Time elapsed = 74[s]
+[SIMULATION TIME] | GOAL [4-> 5] | Time elapsed = 71[s]
+LAST_INDEX: 5 INDEX_: 6
+#############################################################################################################################
+##GOAL [5 -> 6] FOR pioneer: [ 4.25 | 2.8 ] 
+[START] | GAZEBO SIMULATION SECS: 4841
+[END] | GAZEBO SIMULATION SECS: 4917
+[ELAPSED TIME] | SIMULATION TIME DIFF: 76
+TERMINEI VOU GRAVAR - GOAL [6] | Time elapsed = 80[s]
+[REAL TIME] | GOAL [5-> 6] | Time elapsed = 80[s]
+[SIMULATION TIME] | GOAL [5-> 6] | Time elapsed = 76[s]
+LAST_INDEX: 6 INDEX_: 7
+#############################################################################################################################
+##GOAL [6 -> 7] FOR pioneer: [ 32.95 | 28.65 ] 
+[START] | GAZEBO SIMULATION SECS: 4917
+[END] | GAZEBO SIMULATION SECS: 4974
+[ELAPSED TIME] | SIMULATION TIME DIFF: 57
+TERMINEI VOU GRAVAR - GOAL [7] | Time elapsed = 58[s]
+[REAL TIME] | GOAL [6-> 7] | Time elapsed = 58[s]
+[SIMULATION TIME] | GOAL [6-> 7] | Time elapsed = 57[s]
+LAST_INDEX: 7 INDEX_: 8
+#############################################################################################################################
+##GOAL [7 -> 8] FOR pioneer: [ 8.8 | 43.3 ] 
+[START] | GAZEBO SIMULATION SECS: 4974
+[END] | GAZEBO SIMULATION SECS: 5034
+[ELAPSED TIME] | SIMULATION TIME DIFF: 60
+TERMINEI VOU GRAVAR - GOAL [8] | Time elapsed = 63[s]
+[REAL TIME] | GOAL [7-> 8] | Time elapsed = 63[s]
+[SIMULATION TIME] | GOAL [7-> 8] | Time elapsed = 60[s]
+LAST_INDEX: 8 INDEX_: 9
+#############################################################################################################################
+##GOAL [8 -> 9] FOR pioneer: [ 32.4 | 25.55 ] 
+[START] | GAZEBO SIMULATION SECS: 5034
+[END] | GAZEBO SIMULATION SECS: 5109
+[ELAPSED TIME] | SIMULATION TIME DIFF: 75
+TERMINEI VOU GRAVAR - GOAL [9] | Time elapsed = 78[s]
+[REAL TIME] | GOAL [8-> 9] | Time elapsed = 78[s]
+[SIMULATION TIME] | GOAL [8-> 9] | Time elapsed = 75[s]
+LAST_INDEX: 9 INDEX_: 10
+#############################################################################################################################
+----------------------------------- NB: 0 ------------------------------------
+----------------------------------- END OF LAP: 0 ------------------------------------
+###################ENTREI NA PARTE DO DRAW####################
+##GOAL [-1 -> 0] FOR pioneer: [ 27.3 | 43.295 ] 
+------ROBOT POSE: [ 32.4429 ; 25.508 ] | GOAL: [ 27.3 ; 43.295 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 5110
+[END] | GAZEBO SIMULATION SECS: 5135
+[ELAPSED TIME] | SIMULATION TIME DIFF: 25
+TERMINEI VOU GRAVAR - GOAL [0] | Time elapsed = 27[s]
+[REAL TIME] | GOAL [-1-> 0] | Time elapsed = 27[s]
+[SIMULATION TIME] | GOAL [-1-> 0] | Time elapsed = 25[s]
+LAST_INDEX: 0 INDEX_: 1
+#############################################################################################################################
+##GOAL [0 -> 1] FOR pioneer: [ 1.35 | 13.75 ] 
+------ROBOT POSE: [ 27.2918 ; 43.3144 ] | GOAL: [ 1.35 ; 13.75 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+NORTH-WEST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH-WEST | The destination cell is found
+
+The Path is BETA : 1052 | OMEGA : 1623 | EPSILON : 885.895 | LAMBDA : 530.251 | EPSILON_MOD : 1582.25
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 40.7493
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 5138
+[END] | GAZEBO SIMULATION SECS: 5227
+[ELAPSED TIME] | SIMULATION TIME DIFF: 89
+TERMINEI VOU GRAVAR - GOAL [1] | Time elapsed = 96[s]
+[REAL TIME] | GOAL [0-> 1] | Time elapsed = 96[s]
+[SIMULATION TIME] | GOAL [0-> 1] | Time elapsed = 89[s]
+LAST_INDEX: 1 INDEX_: 2
+#############################################################################################################################
+##GOAL [1 -> 2] FOR pioneer: [ 2 | 6.65 ] 
+------ROBOT POSE: [ 1.35317 ; 13.5964 ] | GOAL: [ 2 ; 6.65 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+NORTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 5228
+[END] | GAZEBO SIMULATION SECS: 5246
+[ELAPSED TIME] | SIMULATION TIME DIFF: 18
+TERMINEI VOU GRAVAR - GOAL [2] | Time elapsed = 20[s]
+[REAL TIME] | GOAL [1-> 2] | Time elapsed = 20[s]
+[SIMULATION TIME] | GOAL [1-> 2] | Time elapsed = 18[s]
+LAST_INDEX: 2 INDEX_: 3
+#############################################################################################################################
+##GOAL [2 -> 3] FOR pioneer: [ 27.5 | 42.8 ] 
+------ROBOT POSE: [ 2.03438 ; 6.61916 ] | GOAL: [ 27.5 ; 42.8 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+EAST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is BETA : 1198 | OMEGA : 1477 | EPSILON : 1008.84 | LAMBDA : 259.089 | EPSILON_MOD : 1457.09
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 19.9108
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 5249
+[END] | GAZEBO SIMULATION SECS: 5337
+[ELAPSED TIME] | SIMULATION TIME DIFF: 88
+TERMINEI VOU GRAVAR - GOAL [3] | Time elapsed = 95[s]
+[REAL TIME] | GOAL [2-> 3] | Time elapsed = 95[s]
+[SIMULATION TIME] | GOAL [2-> 3] | Time elapsed = 88[s]
+LAST_INDEX: 3 INDEX_: 4
+#############################################################################################################################
+##GOAL [3 -> 4] FOR pioneer: [ 5.5 | 3.2 ] 
+------ROBOT POSE: [ 27.4684 ; 42.8474 ] | GOAL: [ 5.5 ; 3.2 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+EAST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is BETA : 1308 | OMEGA : 1367 | EPSILON : 1101.47 | LAMBDA : 54.7895 | EPSILON_MOD : 1362.79
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 4.21057
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 5340
+[END] | GAZEBO SIMULATION SECS: 5417
+[ELAPSED TIME] | SIMULATION TIME DIFF: 77
+TERMINEI VOU GRAVAR - GOAL [4] | Time elapsed = 84[s]
+[REAL TIME] | GOAL [3-> 4] | Time elapsed = 84[s]
+[SIMULATION TIME] | GOAL [3-> 4] | Time elapsed = 77[s]
+LAST_INDEX: 4 INDEX_: 5
+#############################################################################################################################
+##GOAL [4 -> 5] FOR pioneer: [ 32.5 | 43.5 ] 
+------ROBOT POSE: [ 5.46266 ; 3.19747 ] | GOAL: [ 32.5 ; 43.5 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 5418
+[END] | GAZEBO SIMULATION SECS: 5490
+[ELAPSED TIME] | SIMULATION TIME DIFF: 72
+TERMINEI VOU GRAVAR - GOAL [5] | Time elapsed = 76[s]
+[REAL TIME] | GOAL [4-> 5] | Time elapsed = 76[s]
+[SIMULATION TIME] | GOAL [4-> 5] | Time elapsed = 72[s]
+LAST_INDEX: 5 INDEX_: 6
+#############################################################################################################################
+##GOAL [5 -> 6] FOR pioneer: [ 4.25 | 2.8 ] 
+------ROBOT POSE: [ 32.4991 ; 43.3874 ] | GOAL: [ 4.25 ; 2.8 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 5491
+[END] | GAZEBO SIMULATION SECS: 5567
+[ELAPSED TIME] | SIMULATION TIME DIFF: 76
+TERMINEI VOU GRAVAR - GOAL [6] | Time elapsed = 80[s]
+[REAL TIME] | GOAL [5-> 6] | Time elapsed = 80[s]
+[SIMULATION TIME] | GOAL [5-> 6] | Time elapsed = 76[s]
+LAST_INDEX: 6 INDEX_: 7
+#############################################################################################################################
+##GOAL [6 -> 7] FOR pioneer: [ 32.95 | 28.65 ] 
+------ROBOT POSE: [ 4.21452 ; 2.84449 ] | GOAL: [ 32.95 ; 28.65 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is PATH FREE! ISSO FOI DENTRO DO DO SIM_LAP %2
+[START] | GAZEBO SIMULATION SECS: 5568
+[END] | GAZEBO SIMULATION SECS: 5626
+[ELAPSED TIME] | SIMULATION TIME DIFF: 58
+TERMINEI VOU GRAVAR - GOAL [7] | Time elapsed = 62[s]
+[REAL TIME] | GOAL [6-> 7] | Time elapsed = 62[s]
+[SIMULATION TIME] | GOAL [6-> 7] | Time elapsed = 58[s]
+LAST_INDEX: 7 INDEX_: 8
+#############################################################################################################################
+##GOAL [7 -> 8] FOR pioneer: [ 8.8 | 43.3 ] 
+------ROBOT POSE: [ 32.9503 ; 28.5483 ] | GOAL: [ 8.8 ; 43.3 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+WEST | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+EAST | The destination cell is found
+
+The Path is BETA : 734 | OMEGA : 1941 | EPSILON : 618.105 | LAMBDA : 1120.86 | EPSILON_MOD : 1854.86
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 86.1375
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 5629
+[END] | GAZEBO SIMULATION SECS: 5739
+[ELAPSED TIME] | SIMULATION TIME DIFF: 110
+TERMINEI VOU GRAVAR - GOAL [8] | Time elapsed = 119[s]
+[REAL TIME] | GOAL [7-> 8] | Time elapsed = 119[s]
+[SIMULATION TIME] | GOAL [7-> 8] | Time elapsed = 110[s]
+LAST_INDEX: 8 INDEX_: 9
+#############################################################################################################################
+##GOAL [8 -> 9] FOR pioneer: [ 32.4 | 25.55 ] 
+------ROBOT POSE: [ 8.8093 ; 43.3038 ] | GOAL: [ 32.4 ; 25.55 ]
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+NORTH | The destination cell is found
+
+The Path is PHI : 4 | THETA : 4.75 | 1 - (PHI/THETA) : 0.157895 | (PHI/THETA) - PHI : -3.15789 | GAMA : -0.157895 | PHI/THETA : 0.842105
+INSIDE A STAR SEARCH!!!!!!!!!!!!!
+SOUTH | The destination cell is found
+
+The Path is BETA : 793 | OMEGA : 1882 | EPSILON : 667.789 | LAMBDA : 1011.28 | EPSILON_MOD : 1804.28
+A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: 77.7163
+EPSILON MAIOR QUE OMEGA, REALIZANDO O FECHAMENTO DO LOCAL E UTILIZANDO O CAMINHO ALTERNATIVO!
+[ V1 , V2 , V3 , V4 ] : [ 2231 , 2820 , 2467 , 2915 ]
+[START] | GAZEBO SIMULATION SECS: 5742
+[END] | GAZEBO SIMULATION SECS: 5842
+[ELAPSED TIME] | SIMULATION TIME DIFF: 100
+TERMINEI VOU GRAVAR - GOAL [9] | Time elapsed = 107[s]
+[REAL TIME] | GOAL [8-> 9] | Time elapsed = 107[s]
+[SIMULATION TIME] | GOAL [8-> 9] | Time elapsed = 100[s]
+LAST_INDEX: 9 INDEX_: 10
