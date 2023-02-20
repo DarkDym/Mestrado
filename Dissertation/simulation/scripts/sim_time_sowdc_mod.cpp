@@ -122,6 +122,10 @@ bool isPathInBlock_y_ = false;
 int cont_omega_ = 0, cont_beta_ = 0, cont_equal_ = 0, cont_beta2omega_ = 0, cont_free_ = 0, cont_omega2beta_ = 0;
 //-----------------------------------------------------------------------------------
 
+//--------------------------ADICIONADO 19/02/23--------------------------------------
+int beta_aff = 0;
+//-----------------------------------------------------------------------------------
+
 //--------------------------ADICIONADO 24/01/23--------------------------------------
 int grid_a[4000][4000];
 bool closedList[4000][4000];
@@ -239,7 +243,25 @@ void block_path_verification_(float px, float py, int block_index){
             calc_file_ << "*************************************************************" << endl;
             calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X AND Y##!" << endl;
             calc_file_ << "PX: " << px << " | PY: " << py << endl;
+            calc_file_ << "BETA_AFF BEFORE THIS ITERATION: " << beta_aff << endl;
             calc_file_ << "*************************************************************" << endl;
+            beta_aff++;
+        }
+        //-----------------------------------------------------------------------------------
+    } else {
+        //--------------------------ADICIONADO 03/02/23--------------------------------------
+        int v1,v2,v3,v4,qnt_p;
+        float ov1,ov2,ov3,ov4;
+        tie(v1,v2,v3,v4,ov1,ov2,ov3,ov4,qnt_p) = block_vertex_[block_index];
+        
+        if (((px >= ov1) && (px <= ov3)) && ((py >= ov2) && (py <= ov4))) {
+            // isPathInBlock_ = true;
+            calc_file_ << "*************************************************************" << endl;
+            calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X AND Y##!" << endl;
+            calc_file_ << "PX: " << px << " | PY: " << py << endl;
+            calc_file_ << "BETA_AFF BEFORE THIS ITERATION: " << beta_aff << endl;
+            calc_file_ << "*************************************************************" << endl;
+            beta_aff++;
         }
         //-----------------------------------------------------------------------------------
     }
@@ -1524,7 +1546,8 @@ float calc_theta_x(int block_index){
 }
 
 float calc_threshold_path(int block_index){
-    float alpha,theta,beta,gama,theta_x,gamma_t;
+    float alpha,theta,beta,gama,theta_x,gamma_t,new_gamma_t;
+    int alpha_gamma_t = 2;
 
     theta = calc_theta(block_index);
     theta_x = calc_theta_x(block_index);
@@ -1544,15 +1567,18 @@ float calc_threshold_path(int block_index){
         */
         gama = (phi/theta) - 1;
         gamma_t = (phi / (theta*theta_x)) - 1;
+        new_gamma_t = (phi / (alpha_gamma_t*theta*theta_x));
         cout << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
-        calc_file_ << "PHI : " << phi << " | THETA_Y : " << theta << " | THETA_X : " << theta_x << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << " | GAMMA_T: " << gamma_t << endl;
+        // calc_file_ << "PHI : " << phi << " | THETA_Y : " << theta << " | THETA_X : " << theta_x << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << " | GAMMA_T: " << gamma_t << endl;
+        calc_file_ << "PHI : " << phi << " | THETA_Y : " << theta << " | THETA_X : " << theta_x << " | GAMMA_T: " << gamma_t << " | NEW_GAMMA_T: " << new_gamma_t << endl;
     // }
 
     return gama;
 }
 
 float calc_threshold_path_gamma_mod(int block_index){
-    float alpha,theta,beta,gama,theta_x,gamma_t;
+    float alpha,theta,beta,gama,theta_x,gamma_t,new_gamma_t;
+    int alpha_gamma_t = 2;
 
     theta = calc_theta(block_index);
     theta_x = calc_theta_x(block_index);
@@ -1572,11 +1598,13 @@ float calc_threshold_path_gamma_mod(int block_index){
         */
         gama = (phi/theta) - 1;
         gamma_t = (phi / (theta*theta_x)) - 1;
+        new_gamma_t = (phi / (alpha_gamma_t*theta*theta_x));
         // cout << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << endl;
         // calc_file_ << "PHI : " << phi << " | THETA : " << theta << " | 1 - (PHI/THETA) : " << alpha << " | (PHI/THETA) - PHI : " << beta << " | GAMA : " << gama << " | PHI/THETA : " << (phi/theta) << " | GAMMA_T: " << gamma_t << endl;
+        calc_file_ << "PHI : " << phi << " | THETA_Y : " << theta << " | THETA_X : " << theta_x << " | GAMMA_T: " << gamma_t << " | NEW_GAMMA_T: " << new_gamma_t << endl;
     // }
 
-    return gamma_t;
+    return new_gamma_t;
 }
 //-----------------------------------------------------------------------------------
 
@@ -1605,7 +1633,7 @@ void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr
 }
 
 int path_verification(float goal_x, float goal_y, int block_index){
-    int gcx,gcy,scx,scy;
+    int gcx,gcy,scx,scy,aux_beta_aff;
     float gamma,gamma_t;
 
     //--------------------------ADICIONADO 31/01/23--------------------------------------
@@ -1632,7 +1660,8 @@ int path_verification(float goal_x, float goal_y, int block_index){
     int beta = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
     astar_path_pub.publish(test_path_);
 
-    calc_file_ << "BETA: " << beta << endl;
+    calc_file_ << "BETA: " << beta << " | BETA_AFF: " << beta_aff << endl;
+    aux_beta_aff = beta_aff;
 
     // if (isPathInBlock_x_ && isPathInBlock_y_) {
     if (isPathInBlock_) {
@@ -1640,6 +1669,8 @@ int path_verification(float goal_x, float goal_y, int block_index){
         gamma_t = calc_threshold_path_gamma_mod(block_index);
 
         grid_block_for_astar(block_index);
+
+        beta_aff = 0;
 
         int omega = aStarSearch_MOD(scx,scy,gcx,gcy,block_index);
         astar_path_mod_pub.publish(test_path_);
@@ -1649,45 +1680,61 @@ int path_verification(float goal_x, float goal_y, int block_index){
         float lambda = abs(beta - omega) * abs(gamma_t);
         float epsilon_mod = beta + lambda;
 
-        cout << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
-        calc_file_ << "BETA : " << beta << " | OMEGA : " << omega << " | EPSILON : " << epsilon << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << endl;
-        if (epsilon_mod > omega) {
+        float new_lambda = aux_beta_aff/(1-gamma_t);
+        float new_epsilon = beta + (new_lambda - aux_beta_aff);
+
+        cout << "BETA : " << beta << " | OMEGA : " << omega << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << " | BETA_AFF: " << aux_beta_aff << " | NEW_LAMBDA: " << new_lambda << " | NEW_EPSILON: " << new_epsilon << endl;
+        calc_file_ << "BETA : " << beta << " | OMEGA : " << omega << " | LAMBDA : " << lambda << " | EPSILON_MOD : " << epsilon_mod << " | BETA_AFF: " << aux_beta_aff << " | NEW_LAMBDA: " << new_lambda << " | NEW_EPSILON: " << new_epsilon << endl;
+        // if (epsilon_mod > omega) {
+        if (new_epsilon > omega) {
             calc_file_ <<  "O CAMINHO OMEGA É MAIS VANTAJOSO!    |  BETA: " << beta << " OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
-            if (lambda > 2*beta) {
+            // if (lambda > 2*beta) {
+            if (new_lambda > 2*beta) {
                 calc_file_ << "*****************************************************************************************************************" << endl;
-                calc_file_ << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
+                // calc_file_ << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
+                calc_file_ << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << new_lambda << endl; 
                 calc_file_ << "*****************************************************************************************************************" << endl;
                 cont_omega2beta_++;
                 isPathInBlock_ = false;
                 cout << "LAMBDA É MAIOR QUE 2*BETA, ASSIM O CAMINHO OMEGA É MUITO EXTENSO E ACABA PUXANDO O VALOR DE EPSILON_MOD. LAMBDA: " << lambda << endl; 
                 return 1;
             } else {
-                calc_file_ << "LAMBDA: " << lambda << endl;
+                // calc_file_ << "LAMBDA: " << lambda << endl;
+                calc_file_ << "LAMBDA: " << new_lambda << endl;
                 cont_omega_++;
                 isPathInBlock_ = false;
                 cout <<  "O CAMINHO OMEGA É MAIS VANTAJOSO!    |  BETA: " << beta << " OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
                 return 2;
             }
-        } else if(epsilon_mod == omega){ 
-            calc_file_ <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
-            cout <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+        // } else if(epsilon_mod == omega){ 
+        } else if(new_epsilon == omega){ 
+            // calc_file_ <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+            // cout <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+            calc_file_ <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | NEW_EPSILON: " << new_epsilon << endl;
+            cout <<  "OS CAMINHOS TEM O MESMO TAMANHO!    |   BETA: " << beta << " | OMEGA: " << omega << " | NEW_EPSILON: " << new_epsilon << endl;
             cont_equal_++;
             isPathInBlock_ = false;
             return 2;
         } else {
             calc_file_ <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
-            if ((omega - epsilon_mod) < 150) {
+            // if ((omega - epsilon_mod) < 150) {
+            int alpha_diff = 350;
+            if ((omega - new_epsilon) < alpha_diff) {
                 calc_file_ << "*****************************************************************************************************************" << endl;
-                calc_file_ << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
+                // calc_file_ << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
+                calc_file_ << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 350. DIFF: " << (omega - new_epsilon) << endl;
                 calc_file_ << "*****************************************************************************************************************" << endl;
                 cont_beta2omega_++;
                 isPathInBlock_ = false;
-                cout << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
+                // cout << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 150. DIFF: " << (omega - epsilon_mod) << endl;
+                cout << "A DIFERENÇA DE PASSOS ENTRE OS CAMINHOS É MENOR QUE 350. DIFF: " << (omega - new_epsilon) << endl;
                 return 2;
             } else {
                 cont_beta_++;
                 isPathInBlock_ = false;
-                cout <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+                // cout <<  "O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | EPSILON_MOD: " << epsilon_mod << endl;
+                cout <<  "A DIFERENÇA É MENOR QUE 350 #### O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | NEW_EPSILON: " << new_epsilon << endl;
+                calc_file_ <<  "A DIFERENÇA É MENOR QUE 350 #### O CAMINHO BETA É MAIS VANTAJOSO!    |   BETA: " << beta << " | OMEGA: " << omega << " | NEW_EPSILON: " << new_epsilon << endl;
                 return 1;
             }
         }
@@ -1857,7 +1904,7 @@ int main(int argc, char **argv){
                 //-----------------------------------------------------------------------------------
 
                 if (enable_function) {
-                    if (sim_laps < 20) {
+                    if (sim_laps < 2) {
                         
                         if (enable_patrol_) {
                             for (int index = 0; index < goals.size(); index++) {

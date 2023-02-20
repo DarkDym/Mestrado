@@ -480,6 +480,7 @@ class Calc_odom_cell:
                 print("1 - ODOM_2_CELL")
                 print("2 - CELL_2_ODOM")
                 print("3 - RANDOMIZE OBJECTIVES")
+                print("4 - RANDOMIZE QNT PEOPLE")
                 mode = input(": ")
                 if int(mode) == 1:
                     ix = input("ODOM_X: ")
@@ -511,6 +512,17 @@ class Calc_odom_cell:
                         print(all_lines[goals_test[i]])
                         new_goals.append(all_lines[goals_test[i]])
                     print(new_goals)
+                elif int(mode) == 4:
+                    theta_x = input("Theta_x: ")
+                    theta_y = input("Theta_y: ")
+                    alpha = input("Alpha: ")
+                    lim_rand_phi = int(alpha) * float(theta_x) * float(theta_y)
+                    print("LIMITE: " + str(lim_rand_phi))
+                    print("LIMITE AJUSTADO: " + str(lim_rand_phi*0.7))
+                    print("CORTANDO: " + str(int(lim_rand_phi*0.7)))
+                    phi = random.sample(range(1,int(lim_rand_phi*0.7)),10)
+                    for i in range(0,len(phi)):
+                        print(phi[i])
                 else:
                     print("FECHANDO")
                     close_op = True
