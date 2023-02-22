@@ -256,11 +256,11 @@ void block_path_verification_(float px, float py, int block_index){
         
         if (((px >= ov1) && (px <= ov3)) && ((py >= ov2) && (py <= ov4))) {
             // isPathInBlock_ = true;
-            calc_file_ << "*************************************************************" << endl;
-            calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X AND Y##!" << endl;
-            calc_file_ << "PX: " << px << " | PY: " << py << endl;
-            calc_file_ << "BETA_AFF BEFORE THIS ITERATION: " << beta_aff << endl;
-            calc_file_ << "*************************************************************" << endl;
+            // calc_file_ << "*************************************************************" << endl;
+            // calc_file_ << "PATH GOES THROUGH BLOCKAGE ## X AND Y##!" << endl;
+            // calc_file_ << "PX: " << px << " | PY: " << py << endl;
+            // calc_file_ << "BETA_AFF BEFORE THIS ITERATION: " << beta_aff << endl;
+            // calc_file_ << "*************************************************************" << endl;
             beta_aff++;
         }
         //-----------------------------------------------------------------------------------

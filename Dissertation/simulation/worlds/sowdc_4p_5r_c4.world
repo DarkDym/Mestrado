@@ -203,23 +203,23 @@
           <trajectory id="0" type="walking">
             <waypoint>
                 <time>0.0</time>
-                <pose>13.5 18.55 0 0 0 0</pose>
+                <pose>13.125 18.55 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>25.0</time>
-                <pose>16 18.55 0 0 0 0</pose>
+                <pose>17.416 18.55 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>50.0</time>
-                <pose>16 18.55 0 0 0 3.14</pose>
+                <pose>17.416 18.55 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>75.0</time>
-                <pose>13.5 18.55 0 0 0 3.14</pose>
+                <pose>13.125 18.55 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>100.0</time>
-                <pose>13.5 18.55 0 0 0 0</pose>
+                <pose>13.125 18.55 0 0 0 0</pose>
             </waypoint>
           </trajectory>
         </script>
@@ -263,23 +263,23 @@
           <trajectory id="0" type="walking">
             <waypoint>
                 <time>0.0</time>
-                <pose>16.00 20.95 0 0 0 3.14</pose>
+                <pose>17.416 20.95 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>15.0</time>
-                <pose>13.50 20.95 0 0 0 3.14</pose>
+                <pose>13.125 20.95 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>25.0</time>
-                <pose>13.50 20.95 0 0 0 0</pose>
+                <pose>13.125 20.95 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>30.0</time>
-                <pose>16.00 20.95 0 0 0 0</pose>
+                <pose>17.416 20.95 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>35.0</time>
-                <pose>16.00 20.95 0 0 0 3.14</pose>
+                <pose>17.416 20.95 0 0 0 3.14</pose>
             </waypoint>
           </trajectory>
         </script>
@@ -323,23 +323,23 @@
           <trajectory id="0" type="walking">
             <waypoint>
                 <time>0.0</time>
-                <pose>16.00 24.6 0 0 0 3.14</pose>
+                <pose>17.416 24.6 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>25.0</time>
-                <pose>13.50 24.6 0 0 0 3.14</pose>
+                <pose>13.125 24.6 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>50.0</time>
-                <pose>13.50 24.6 0 0 0 0</pose>
+                <pose>13.125 24.6 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>75.0</time>
-                <pose>16.00 24.6 0 0 0 0</pose>
+                <pose>17.416 24.6 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>100.0</time>
-                <pose>16.00 24.6 0 0 0 3.14</pose>
+                <pose>17.416 24.6 0 0 0 3.14</pose>
             </waypoint>
           </trajectory>
         </script>
@@ -383,23 +383,23 @@
           <trajectory id="0" type="walking">
             <waypoint>
                 <time>0.0</time>
-                <pose>13.50 27.1 0 0 0 0</pose>
+                <pose>13.125 27.1 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>15.0</time>
-                <pose>16.00 27.1 0 0 0 0</pose>
+                <pose>17.416 27.1 0 0 0 0</pose>
             </waypoint>
             <waypoint>
                 <time>25.0</time>
-                <pose>16.00 27.1 0 0 0 3.14</pose>
+                <pose>17.416 27.1 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>30.0</time>
-                <pose>13.50 27.1 0 0 0 3.14</pose>
+                <pose>13.125 27.1 0 0 0 3.14</pose>
             </waypoint>
             <waypoint>
                 <time>35.0</time>
-                <pose>13.50 27.1 0 0 0 0</pose>
+                <pose>13.125 27.1 0 0 0 0</pose>
             </waypoint>
           </trajectory>
         </script>
