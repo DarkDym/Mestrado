@@ -1919,6 +1919,17 @@ int main(int argc, char **argv){
                                 goals_output.target_pose.pose.orientation.y = 0.0;
                                 goals_output.target_pose.pose.orientation.z = 0.70;
                                 goals_output.target_pose.pose.orientation.w = 0.70;
+                                enable_ctldraw_obstacles(index);
+                                grid_update_custom();
+                                int c = 0;
+                                while (c < 30) {
+                                    lane_map_pub.publish(lane_map_);
+                                    // map_pub.publish(lane_map_);
+                                    c++;
+                                }
+                                for (int cr = 0; cr < 11; cr++){rate.sleep();}
+                                ros::spinOnce();
+                                rate.sleep();
                                 objects_map_file_ << "------ROBOT POSE: [ " << AMCL_POSE_SIM_[0] << " ; " << AMCL_POSE_SIM_[1] << " ] | GOAL: [ " << input_goal_x << " ; " << input_goal_y << " ]" << endl;
                                 //--------------------------ADICIONADO 17/02/23--------------------------------------
                                 if (sim_laps % 2 == 0) {
