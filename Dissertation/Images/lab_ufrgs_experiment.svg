@@ -30,6 +30,17 @@
          x="-20.312483"
          y="97.082397" />
     </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath862">
+      <rect
+         style="fill:none;fill-opacity:0.51173712;stroke:#000000;stroke-width:0.32025617;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052"
+         id="rect864"
+         width="184.12193"
+         height="285.88107"
+         x="-8.0952377"
+         y="141.68288" />
+    </clipPath>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -39,15 +50,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="196.46224"
-     inkscape:cy="393.01514"
+     inkscape:cx="307.47045"
+     inkscape:cy="377.73577"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1043"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata1436">
@@ -57,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -74,172 +85,172 @@
        id="image1431"
        x="-433.91669"
        y="-263.91669"
-       clip-path="url(#clipPath2001)"
-       transform="matrix(0.83153341,0,0,0.65453495,7.8499899,-5.1483513)" />
+       clip-path="url(#clipPath862)"
+       transform="matrix(0.83153341,0,0,0.65453495,34.308325,5.434982)" />
     <ellipse
        style="fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path2005"
-       cx="36.606995"
-       cy="218.84398"
+       cx="63.065334"
+       cy="229.42732"
        rx="1.4174107"
        ry="1.4646577" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="35.057293"
-       y="216.39658"
+       x="61.515633"
+       y="226.97992"
        id="text2009"><tspan
          sodipodi:role="line"
          id="tspan2007"
-         x="35.057293"
-         y="216.39658"
+         x="61.515633"
+         y="226.97992"
          style="font-size:2.82222223px;stroke-width:0.26458332">Ob1</tspan></text>
     <ellipse
        ry="1.4646577"
        rx="1.4174107"
-       cy="182.8606"
-       cx="99.048645"
+       cy="193.44394"
+       cx="125.50697"
        id="ellipse2020"
        style="fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <text
        id="text2024"
-       y="180.41319"
-       x="97.498947"
+       y="190.99654"
+       x="123.95728"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-size:2.82222223px;stroke-width:0.26458332"
-         y="180.41319"
-         x="97.498947"
+         y="190.99654"
+         x="123.95728"
          sodipodi:role="line"
          id="tspan2026">Ob2</tspan></text>
     <ellipse
        style="fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="ellipse2030"
-       cx="113.33612"
-       cy="112.48137"
+       cx="139.79445"
+       cy="123.0647"
        rx="1.4174107"
        ry="1.4646577" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="110.7281"
-       y="110.56317"
+       x="137.18645"
+       y="121.14651"
        id="text2034"><tspan
          id="tspan2032"
          sodipodi:role="line"
-         x="110.7281"
-         y="110.56317"
+         x="137.18645"
+         y="121.14651"
          style="font-size:2.82222223px;stroke-width:0.26458332">Ob3</tspan></text>
     <ellipse
        ry="1.4646577"
        rx="1.4174107"
-       cy="256.41486"
-       cx="28.140326"
+       cy="266.99817"
+       cx="54.598663"
        id="ellipse2036"
        style="fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <text
        id="text2040"
-       y="253.96744"
-       x="25.53229"
+       y="264.55075"
+       x="51.990627"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-size:2.82222223px;stroke-width:0.26458332"
-         y="253.96744"
-         x="25.53229"
+         y="264.55075"
+         x="51.990627"
          id="tspan2038"
          sodipodi:role="line">Ob4</tspan></text>
     <ellipse
        style="fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="ellipse2042"
-       cx="78.940315"
-       cy="160.10643"
+       cx="105.39864"
+       cy="170.68977"
        rx="1.4174107"
        ry="1.4646577" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="77.390625"
-       y="157.12979"
+       x="103.84895"
+       y="167.71313"
        id="text2046"><tspan
          id="tspan2044"
          sodipodi:role="line"
-         x="77.390625"
-         y="157.12979"
+         x="103.84895"
+         y="167.71313"
          style="font-size:2.82222223px;stroke-width:0.26458332">Ob5</tspan></text>
     <rect
-       style="fill:#ff0000;fill-opacity:0.51173711;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.99530518"
+       style="fill:#ff0000;fill-opacity:0.51173712;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052"
        id="rect2048"
        width="8.9929838"
        height="12.394964"
-       x="160.13907"
-       y="163.37996"
+       x="188.1767"
+       y="161.41409"
        transform="matrix(0.90125215,0.43329501,-0.60500832,0.79621915,0,0)" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="41.388393"
-       y="207.51414"
+       x="67.846733"
+       y="218.09749"
        id="text2052"><tspan
          sodipodi:role="line"
          id="tspan2050"
-         x="41.388393"
-         y="207.51414"
-         style="font-size:2.82222222px;stroke-width:0.26458332">Bkg1</tspan></text>
+         x="67.846733"
+         y="218.09749"
+         style="font-size:2.82222223px;stroke-width:0.26458332">Bkg1</tspan></text>
     <rect
        transform="matrix(0.90125215,0.43329501,-0.60500832,0.79621915,0,0)"
-       y="130.61621"
-       x="189.81374"
+       y="128.65034"
+       x="217.85136"
        height="12.394964"
        width="8.9929838"
        id="rect2054"
-       style="fill:#0000ff;fill-opacity:0.51173711;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052" />
+       style="fill:#0000ff;fill-opacity:0.51173712;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052" />
     <text
        id="text2058"
-       y="194.285"
-       x="87.955055"
+       y="204.86835"
+       x="114.41338"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-size:2.82222223px;stroke-width:0.26458332"
-         y="194.285"
-         x="87.955055"
+         y="204.86835"
+         x="114.41338"
          id="tspan2056"
          sodipodi:role="line">Bkg2</tspan></text>
     <rect
-       style="fill:#00ff00;fill-opacity:0.51173711;stroke:#000000;stroke-width:0.22398143;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052"
+       style="fill:#00ff00;fill-opacity:0.51173712;stroke:#000000;stroke-width:0.22398143;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052"
        id="rect2060"
        width="8.5740709"
        height="11.233543"
-       x="61.102222"
-       y="-182.34271"
+       x="61.497787"
+       y="-210.92952"
        transform="matrix(-0.56804255,0.82299918,-0.93340323,-0.35882922,0,0)" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="123.93837"
-       y="118.08494"
+       x="150.39673"
+       y="128.66827"
        id="text2064"><tspan
          sodipodi:role="line"
          id="tspan2062"
-         x="123.93837"
-         y="118.08494"
+         x="150.39673"
+         y="128.66827"
          style="font-size:2.82222223px;stroke-width:0.26458332">Bkg3</tspan></text>
     <rect
        transform="matrix(0.90125215,0.43329501,-0.60500832,0.79621915,0,0)"
-       y="135.19386"
-       x="159.41934"
+       y="133.228"
+       x="187.45697"
        height="12.394964"
        width="8.9929838"
        id="rect2066"
-       style="fill:#ff8100;fill-opacity:0.51173711;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052" />
+       style="fill:#ff8100;fill-opacity:0.51173712;stroke:#000000;stroke-width:0.24095428;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.9953052" />
     <text
        id="text2070"
-       y="184.23082"
-       x="58.321732"
+       y="194.81416"
+       x="84.78006"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-size:2.82222223px;stroke-width:0.26458332"
-         y="184.23082"
-         x="58.321732"
+         y="194.81416"
+         x="84.78006"
          id="tspan2068"
          sodipodi:role="line">Bkg4</tspan></text>
     <rect
@@ -247,54 +258,54 @@
        id="rect2072"
        width="8.9929838"
        height="12.394964"
-       x="160.97905"
-       y="193.49445"
+       x="189.01668"
+       y="191.52858"
        transform="matrix(0.90125215,0.43329501,-0.60500832,0.79621915,0,0)" />
     <text
        id="text2076"
-       y="231.32655"
-       x="24.455059"
+       y="241.9099"
+       x="50.913395"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:0;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-size:2.82222223px;stroke-width:0.26458332"
-         y="231.32655"
-         x="24.455059"
+         y="241.9099"
+         x="50.913395"
          id="tspan2074"
          sodipodi:role="line">Bkg5</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.93888855px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="82.209824"
-       y="239.54762"
+       x="108.66814"
+       y="250.13097"
        id="text2080"><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="239.54762"
+         x="108.66814"
+         y="250.13097"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2086">Blockage's List:</tspan><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="244.48651"
+         x="108.66814"
+         y="255.06985"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2090">1- [1750;1733;1847;1786]</tspan><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="249.4254"
+         x="108.66814"
+         y="260.00873"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2092">2- [1978;1830;2060;1874]</tspan><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="254.36429"
+         x="108.66814"
+         y="264.94763"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2094">3- [2140;2293;2231;2298]</tspan><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="259.30319"
+         x="108.66814"
+         y="269.88654"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2096">4- [1843;1889;1930;1935]</tspan><tspan
          sodipodi:role="line"
-         x="82.209824"
-         y="264.24207"
+         x="108.66814"
+         y="274.82541"
          style="line-height:1;stroke-width:0.26458332"
          id="tspan2098">5- [1690;1622;1779;1662]</tspan></text>
   </g>
