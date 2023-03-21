@@ -2,6 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="297mm"
    height="210mm"
    viewBox="0 0 297 210"
@@ -10,12 +17,19 @@
    inkscape:export-filename="planning_paths_page.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
-   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
-   sodipodi:docname="planning_paths.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="planning_paths.svg">
+  <metadata
+     id="metadata31">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
   <sodipodi:namedview
      id="namedview50222"
      pagecolor="#ffffff"
@@ -28,12 +42,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.1253621"
-     inkscape:cx="662.89773"
-     inkscape:cy="417.19904"
-     inkscape:window-width="2400"
-     inkscape:window-height="1261"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
+     inkscape:cx="519.83267"
+     inkscape:cy="428.3018"
+     inkscape:window-width="1872"
+     inkscape:window-height="1016"
+     inkscape:window-x="48"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
@@ -70,7 +84,7 @@
        inkscape:collect="always"
        preserveAspectRatio="xMidYMid">
       <path
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:#ab00ae;stroke-opacity:1"
          d="m 1,0 -3,3 h -2 l 3,-3 -3,-3 h 2 z"
          id="path62112" />
     </marker>
@@ -108,12 +122,15 @@
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <rect
-       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
        id="rect52108"
        width="90.987381"
        height="84.045334"
        x="102.97797"
-       y="64.246841" />
+       y="63.188507"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <path
        sodipodi:type="star"
        style="fill:#ffff8b;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.504465;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
@@ -131,92 +148,132 @@
        d="m 149.52964,48.197449 -3.76023,-1.974575 -3.75833,1.978167 0.71595,-4.186363 -3.04273,-2.963103 4.20271,-0.61274 1.87782,-3.809465 1.88146,3.807669 4.20329,0.608724 -3.0399,2.966009 z"
        inkscape:transform-center-x="0.00076378504"
        inkscape:transform-center-y="-0.4750857"
-       transform="matrix(0.80704412,0,0,0.77904015,48.011368,12.731674)" />
+       transform="matrix(0.80704412,0,0,0.77904015,48.011368,12.731674)"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <ellipse
        style="fill:#ff192f;fill-opacity:0.528302;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
        id="path52268"
        cx="150.05913"
        cy="166.61647"
        rx="4.4886827"
-       ry="4.4055591" />
+       ry="4.4055591"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <rect
        style="fill:#ff192f;fill-opacity:0.528302;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
        id="rect61994"
        width="31.684414"
        height="31.919523"
        x="194.07971"
-       y="83.290009" />
+       y="83.290009"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <path
        style="fill:none;fill-opacity:0.528302;fill-rule:evenodd;stroke:#000000;stroke-width:0.8;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000;marker-end:url(#Arrow4)"
        d="m 154.77644,164.25255 48.71053,-0.16624 -0.3325,-115.043292 -28.42832,-0.166246"
-       id="path62050" />
+       id="path62050"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <path
-       style="fill:none;fill-opacity:0.528302;fill-rule:evenodd;stroke:#ab00ae;stroke-width:0.799999;stroke-dasharray:0.799999, 2.4;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker62114);stop-color:#000000"
-       d="m 153.76279,170.40371 62.03052,-0.3325 -0.51408,-128.675576 -40.61113,-0.166249"
-       id="path62110" />
+       style="fill:none;fill-opacity:0.528302;fill-rule:evenodd;stroke:#ab00ae;stroke-width:0.73725575;stroke-dasharray:0.73725579, 2.21177012;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker62114)"
+       d="m 156.36725,168.68841 54.26766,-0.32279 -0.44975,-124.915945 -35.52881,-0.161392"
+       id="path62110"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       inkscape:connector-curvature="0" />
     <path
        style="fill:none;fill-opacity:0.528302;fill-rule:evenodd;stroke:#00b800;stroke-width:0.8;stroke-dasharray:3.20000005, 1.60000002, 0.80000001, 1.60000002;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;marker-end:url(#marker62158)"
        d="M 143.97035,166.74626 85.949969,166.41377 86.282465,46.050565 h 70.488945"
-       id="path62154" />
+       id="path62154"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <text
        xml:space="preserve"
-       style="font-size:9.87778px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#ab00ae;fill-opacity:1;fill-rule:evenodd;stroke:#ab00ae;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
-       x="217.88966"
-       y="39.871159"
-       id="text64320"><tspan
+       style="font-size:9.87777996px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#ab00ae;fill-opacity:1;fill-rule:evenodd;stroke:#ab00ae;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="212.59807"
+       y="39.341991"
+       id="text64320"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan64318"
-         style="font-size:9.87778px;fill:#ab00ae;fill-opacity:1;stroke:#ab00ae;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-         x="217.88966"
-         y="39.871159">ε</tspan></text>
+         style="font-size:9.87777805px;fill:#ab00ae;fill-opacity:1;stroke:#ab00ae;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         x="212.59807"
+         y="39.341991">P<tspan
+   style="font-size:9.87777805px;baseline-shift:sub"
+   id="tspan876">blk</tspan></tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:9.87777px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#00b800;fill-opacity:1;fill-rule:evenodd;stroke:#00b800;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
-       x="87.612442"
-       y="40.398148"
-       id="text65658"><tspan
+       style="font-size:9.87777042px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#00b800;fill-opacity:1;fill-rule:evenodd;stroke:#00b800;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="85.966675"
+       y="41.103477"
+       id="text65658"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan65656"
-         style="stroke-width:0;stroke:#00b800;stroke-opacity:1;fill:#00b800;fill-opacity:1"
-         x="87.612442"
-         y="40.398148">Ω</tspan></text>
+         style="font-size:9.87777805px;fill:#00b800;fill-opacity:1;stroke:#00b800;stroke-width:0;stroke-opacity:1"
+         x="85.966675"
+         y="41.103477">P<tspan
+   style="font-size:9.87777805px;baseline-shift:sub"
+   id="tspan878">alt</tspan></tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:9.87777px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
-       x="197.62373"
-       y="59.291695"
-       id="text66478"><tspan
+       style="font-size:9.87777042px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="189.68634"
+       y="58.762527"
+       id="text66478"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan66476"
-         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-opacity:1"
-         x="197.62373"
-         y="59.291695">β</tspan></text>
+         style="font-size:9.87777805px;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-opacity:1"
+         x="189.68634"
+         y="58.762527">P<tspan
+   style="font-size:9.87777805px;baseline-shift:sub"
+   id="tspan874">orig</tspan></tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:5.64444px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
+       style="font-size:5.64444017px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        x="150.19861"
-       y="153.98979"
-       id="text67106"><tspan
+       y="152.93147"
+       id="text67106"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan67104"
-         style="font-size:5.64444px;stroke-width:0"
+         style="font-size:6.3499999px;stroke-width:0"
          x="150.19861"
-         y="153.98979">Robot's</tspan><tspan
+         y="152.93147">Robot's</tspan><tspan
          sodipodi:role="line"
-         style="font-size:5.64444px;stroke-width:0"
+         style="font-size:6.3499999px;stroke-width:0"
          x="150.19861"
-         y="161.04535"
+         y="160.86897"
          id="tspan67108">Pose</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:5.64444px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
-       x="165.75087"
-       y="58.02039"
-       id="text67121"><tspan
+       style="font-size:5.64444017px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="162.92955"
+       y="39.211628"
+       id="text67121"
+       inkscape:export-filename="planning_paths_select.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
-         style="stroke-width:0"
-         x="165.75087"
-         y="58.02039"
+         style="font-size:8.46666622px;stroke-width:0"
+         x="162.92955"
+         y="39.211628"
          id="tspan67123">Goal</tspan></text>
   </g>
 </svg>

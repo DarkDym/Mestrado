@@ -119,15 +119,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="574.92267"
-     inkscape:cy="412.86504"
+     inkscape:cx="469.16917"
+     inkscape:cy="330.53728"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      showguides="false"
-     inkscape:window-width="1920"
+     inkscape:window-width="1872"
      inkscape:window-height="1016"
-     inkscape:window-x="0"
+     inkscape:window-x="48"
      inkscape:window-y="27"
      inkscape:window-maximized="1" />
   <metadata
@@ -138,7 +138,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -367,57 +367,57 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.89602757px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.1224007"
-       x="82.134193"
-       y="229.27191"
+       x="15.501201"
+       y="221.27747"
        id="text5595"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        transform="scale(0.98070637,1.0196732)"><tspan
          sodipodi:role="line"
          id="tspan5593"
-         x="82.134193"
-         y="229.27191"
-         style="font-size:2.93761659px;stroke-width:0.1224007">Grid Map</tspan></text>
+         x="15.501201"
+         y="221.27747"
+         style="font-size:6.3499999px;stroke-width:0.1224007">Grid Map</tspan></text>
     <text
        id="text5599"
-       y="203.03372"
-       x="80.526245"
+       y="196.4809"
+       x="11.576769"
        style="font-style:normal;font-weight:normal;font-size:4.89602757px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.1224007"
        xml:space="preserve"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        transform="scale(0.98070637,1.0196732)"><tspan
-         style="font-size:2.93761659px;stroke-width:0.1224007"
-         y="203.03372"
-         x="80.526245"
+         style="font-size:6.3499999px;stroke-width:0.1224007"
+         y="196.4809"
+         x="11.576769"
          id="tspan5597"
          sodipodi:role="line">Lane Layer</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.89602757px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.1224007"
-       x="77.237198"
-       y="178.44295"
+       x="11.421789"
+       y="172.02118"
        id="text5603"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        transform="scale(0.98070637,1.0196732)"><tspan
          sodipodi:role="line"
          id="tspan5601"
-         x="77.237198"
-         y="178.44295"
-         style="font-size:2.93761659px;stroke-width:0.1224007">Semantic Layer</tspan></text>
+         x="11.421789"
+         y="172.02118"
+         style="font-size:6.3499999px;stroke-width:0.1224007">Semantic Layer</tspan></text>
     <text
        id="text5607"
-       y="147.59798"
-       x="79.968994"
+       y="142.09361"
+       x="10.883255"
        style="font-style:normal;font-weight:normal;font-size:4.89602757px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.1224007"
        xml:space="preserve"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        transform="scale(0.98070637,1.0196732)"><tspan
-         style="font-size:2.93761659px;stroke-width:0.1224007"
-         y="147.59798"
-         x="79.968994"
+         style="font-size:6.3499999px;stroke-width:0.1224007"
+         y="142.09361"
+         x="10.883255"
          sodipodi:role="line"
          id="tspan1756">CBDB Layer</tspan></text>
     <image
@@ -449,16 +449,16 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="125.82767"
+       x="133.49129"
        y="155.10773"
        id="text1726"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan1724"
-         x="125.82767"
+         x="133.49129"
          y="155.10773"
-         style="font-size:8.46666622px;stroke-width:0.26458332">Semantic map</tspan></text>
+         style="font-size:6.3499999px;stroke-width:0.26458332">Semantic map</tspan></text>
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.43734467;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect1728"
@@ -487,19 +487,19 @@
            height="85.714287"
            x="589.28571"
            y="45.843662" /></flowRegion><flowPara
-         id="flowPara1750"></flowPara></flowRoot>    <text
+         id="flowPara1750" /></flowRoot>    <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="221.68341"
+       x="227.74033"
        y="154.69194"
        id="text1754"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan1752"
-         x="221.68341"
+         x="227.74033"
          y="154.69194"
-         style="font-size:8.46666622px;stroke-width:0.26458332">CBDB layer</tspan></text>
+         style="font-size:6.3499999px;stroke-width:0.26458332">CBDB layer</tspan></text>
     <rect
        style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:0.42820215;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect1760"
